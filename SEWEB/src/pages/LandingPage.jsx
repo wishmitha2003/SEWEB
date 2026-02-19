@@ -55,7 +55,7 @@ export function LandingPage() {
                 <Link to="/register">
                   <Button
                     size="lg"
-                    className="bg-white !text-blue-700 hover:bg-blue-50 shadow-lg shadow-blue-900/30">
+                    className="bg-white !text-blue-600 hover:!bg-blue-800 hover:!text-white shadow-lg shadow-blue-900/30 font-bold transition-all duration-200">
 
                     Get Started Free
                     <ArrowRightIcon className="w-4 h-4 ml-1" />
@@ -531,7 +531,7 @@ export function LandingPage() {
             <Link to="/register">
               <Button
                 size="lg"
-                className="bg-white text-blue-700 hover:bg-blue-50 shadow-lg shadow-blue-900/30">
+                className="bg-white !text-blue-600 hover:!bg-blue-800 hover:!text-white shadow-lg shadow-blue-900/30 font-bold transition-all duration-200">
 
                 Register Now
                 <ArrowRightIcon className="w-4 h-4 ml-1" />
