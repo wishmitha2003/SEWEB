@@ -12,6 +12,7 @@ import { ClassesPage } from './pages/ClassesPage';
 import { MaterialsPage } from './pages/MaterialsPage';
 import { GamificationPage } from './pages/GamificationPage';
 import { MapSection } from './pages/MapSection';
+import { ContactPage } from './pages/ContactPage';
 export function App() {
   return (
     <BrowserRouter>
@@ -28,6 +29,7 @@ export function App() {
         <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/gamification" element={<GamificationPage />} />
         <Route path="/map" element={<MapSection />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </BrowserRouter>);
 

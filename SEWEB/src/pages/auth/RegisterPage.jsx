@@ -32,7 +32,7 @@ export function RegisterPage() {
           <div className="absolute bottom-20 left-10 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl" />
         </div>
         <div className="relative flex flex-col justify-center px-16">
-          <Link to="/" className="flex items-center gap-2.5 mb-12">
+          <Link to="/" className="flex items-center gap-2.5 mb-8">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <BookOpenIcon className="w-5 h-5 text-white" />
             </div>
@@ -40,10 +40,10 @@ export function RegisterPage() {
               Ezy English
             </span>
           </Link>
-          <h2 className="text-4xl font-extrabold text-white leading-tight mb-4">
+          <h2 className="text-3xl font-extrabold text-white leading-tight mb-3">
             Begin your English mastery today
           </h2>
-          <p className="text-blue-200/70 text-lg leading-relaxed">
+          <p className="text-blue-200/70 text-base leading-relaxed">
             Create your account and get instant access to classes, materials,
             and a community of learners across Sri Lanka.
           </p>
@@ -52,9 +52,9 @@ export function RegisterPage() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white py-12">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white py-6">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+          <div className="lg:hidden flex items-center gap-2.5 mb-6">
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
               <BookOpenIcon className="w-5 h-5 text-white" />
             </div>
@@ -63,14 +63,14 @@ export function RegisterPage() {
             </span>
           </div>
 
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">
+          <h1 className="text-xl font-extrabold text-slate-900 mb-1">
             Create your account
           </h1>
-          <p className="text-slate-500 mb-8">
+          <p className="text-slate-500 text-sm mb-5">
             Fill in your details to get started
           </p>
 
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
             <FormInput
               label="Full Name"
               placeholder="Enter your full name"
@@ -96,13 +96,13 @@ export function RegisterPage() {
 
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Role
               </label>
               <select
                 value={form.role}
                 onChange={(e) => update('role', e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
 
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -127,12 +127,12 @@ export function RegisterPage() {
               icon={<LockIcon className="w-4 h-4" />} />
 
 
-            <Button className="w-full" size="lg">
+            <Button className="w-full" size="md">
               Create Account
             </Button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-8">
+          <p className="text-center text-sm text-slate-500 mt-4">
             Already have an account?{' '}
             <Link
               to="/login"
