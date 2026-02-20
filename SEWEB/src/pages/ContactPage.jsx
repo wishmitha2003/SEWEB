@@ -9,6 +9,8 @@ import {
   HelpCircleIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  UserIcon,
+  CheckIcon,
 } from 'lucide-react'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
@@ -47,355 +49,259 @@ export function ContactPage() {
     name: '',
     email: '',
     phone: '',
-    subject: 'general',
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
-  const [openFaq, setOpenFaq] = useState(null)
+
   const update = (field, value) =>
     setForm({
       ...form,
       [field]: value,
     })
+
   const handleSubmit = (e) => {
     e.preventDefault()
     setSubmitted(true)
+    setTimeout(() => setSubmitted(false), 3000)
   }
+
+  const branches = [
+    { name: 'Colombo Main', address: '42 Galle Road, Colombo 03', flag: '🇱🇰' },
+    { name: 'Kandy', address: '1/5 Peradeniya Road, Kandy', flag: '🇱🇰' },
+    { name: 'Galle', address: '78 Main Street, Galle Fort', flag: '🇱🇰' },
+    { name: 'Galle', flag: '🇱🇰' }
+  ]
+
   return (
-    <div className="w-full min-h-screen bg-white">
-      <Navbar />
+    <div className="w-full min-h-screen bg-[#f8fbff]">
+      <Navbar transparent={false} />
 
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-blue-700 pt-28 pb-20">
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-20 w-80 h-80 bg-sky-400/15 rounded-full blur-3xl" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm text-blue-200 mb-6">
-            <MessageSquareIcon className="w-4 h-4" />
-            We'd love to hear from you
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
-            Get in Touch
-          </h1>
-          <p className="text-lg text-blue-100/80 max-w-2xl mx-auto">
-            Have a question about our classes, need help with enrollment, or
-            want to visit a branch? Reach out and we'll get back to you within
-            24 hours.
-          </p>
-        </div>
-      </section>
+      <main className="pt-28 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto bg-white rounded-[40px] shadow-2xl shadow-blue-100 overflow-hidden border border-slate-100/50 p-8 sm:p-12 relative">
+          {/* Subtle Background Pattern */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -mr-32 -mt-32" />
+          
+          <div className="relative">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row justify-between gap-12 mb-12">
+              <div className="max-w-xl">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-[#1e293b] mb-4">
+                  Get in Touch
+                </h1>
+                <p className="text-lg font-semibold text-slate-800 mb-4">
+                  We'd love to hear from you!
+                </p>
+                <p className="text-slate-500 leading-relaxed text-sm lg:text-base">
+                  If you have any questions or just want to say hi,
+                  please use the contact form to reach out to us.
+                </p>
+              </div>
 
-      {/* Contact Info Cards */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10 mb-16">
-        <div className="grid sm:grid-cols-3 gap-5">
-          <Card className="text-center">
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4">
-              <MailIcon className="w-6 h-6 text-blue-600" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">
-              Email Us
-            </h3>
-            <p className="text-sm text-slate-500 mb-2">
-              We reply within 24 hours
-            </p>
-            <a
-              href="mailto:info@ezyenglish.lk"
-              className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              info@ezyenglish.lk
-            </a>
-          </Card>
-
-          <Card className="text-center">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-              <PhoneIcon className="w-6 h-6 text-emerald-600" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">Call Us</h3>
-            <p className="text-sm text-slate-500 mb-2">Mon–Sat, 8 AM – 8 PM</p>
-            <a
-              href="tel:+94112345678"
-              className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              +94 11 234 5678
-            </a>
-          </Card>
-
-          <Card className="text-center">
-            <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
-              <MapPinIcon className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">
-              Visit Us
-            </h3>
-            <p className="text-sm text-slate-500 mb-2">Main branch, Colombo</p>
-            <p className="text-sm font-semibold text-blue-600">
-              42 Galle Road, Colombo 03
-            </p>
-          </Card>
-        </div>
-      </section>
-
-      {/* Contact Form + Map */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="grid lg:grid-cols-5 gap-8">
-          {/* Form */}
-          <div className="lg:col-span-3">
-            <Card>
-              <h2 className="text-xl font-extrabold text-slate-900 mb-1">
-                Send Us a Message
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Fill in the form below and we'll get back to you as soon as
-                possible.
-              </p>
-
-              {submitted ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-                    <SendIcon className="w-8 h-8 text-emerald-600" />
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <MailIcon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">
-                    Message Sent!
-                  </h3>
-                  <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-                    Thank you for reaching out. Our team will review your
-                    message and respond within 24 hours.
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSubmitted(false)
-                      setForm({
-                        name: '',
-                        email: '',
-                        phone: '',
-                        subject: 'general',
-                        message: '',
-                      })
-                    }}
-                  >
-                    Send Another Message
-                  </Button>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Contact Information</h4>
+                    <a href="mailto:info@ezyenglish.lk" className="text-sm text-slate-500 hover:text-blue-600 transition-colors">info@ezyenglish.lk</a>
+                  </div>
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Full Name"
-                      placeholder="Your name"
-                      value={form.name}
-                      onChange={(e) => update('name', e.target.value)}
-                      required
-                    />
-                    <FormInput
-                      label="Email Address"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={form.email}
-                      onChange={(e) => update('email', e.target.value)}
-                      required
-                    />
+
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <PhoneIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <a href="tel:+94112345678" className="text-sm text-slate-500 hover:text-blue-600 transition-colors">+94 11 234 5678</a>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <MapPinIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">42 Gale Road, Colombo 03</h4>
+                    <p className="text-xs text-slate-400">Colombo Main Branch</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Content Grid */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+              
+              {/* Left Column: Form */}
+              <div className="bg-[#fcfdff] rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-800 mb-2">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <UserIcon className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Full name"
+                        value={form.name}
+                        onChange={(e) => update('name', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Phone Number"
-                      type="tel"
-                      placeholder="+94 7X XXX XXXX"
-                      value={form.phone}
-                      onChange={(e) => update('phone', e.target.value)}
-                    />
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Subject
-                      </label>
-                      <select
-                        value={form.subject}
-                        onChange={(e) => update('subject', e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                      >
-                        <option value="general">General Inquiry</option>
-                        <option value="enrollment">Class Enrollment</option>
-                        <option value="payment">Payment & Billing</option>
-                        <option value="technical">Technical Support</option>
-                        <option value="partnership">Partnership</option>
-                        <option value="feedback">Feedback</option>
-                      </select>
+                      <label className="block text-sm font-bold text-slate-800 mb-2">Email Address</label>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <MailIcon className="w-5 h-5" />
+                        </div>
+                        <input
+                          type="email"
+                          placeholder="Email address"
+                          value={form.email}
+                          onChange={(e) => update('email', e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-800 mb-2">Phone Number</label>
+                      <div className="relative">
+                        <input
+                          type="tel"
+                          placeholder="+94 77 XXX XXXX"
+                          value={form.phone}
+                          onChange={(e) => update('phone', e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                      Message
-                    </label>
+                    <label className="block text-sm font-bold text-slate-800 mb-2">Message</label>
                     <textarea
-                      rows={5}
+                      rows={4}
+                      placeholder="How can we help you?"
                       value={form.message}
                       onChange={(e) => update('message', e.target.value)}
-                      placeholder="How can we help you?"
+                      className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400 resize-none"
                       required
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
                     />
                   </div>
 
-                  <Button
+                  <button
                     type="submit"
-                    size="lg"
-                    className="w-full sm:w-auto"
-                    icon={<SendIcon className="w-4 h-4" />}
+                    className="flex items-center justify-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-4 px-8 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
                   >
+                    <SendIcon className="w-5 h-5 rotate-45" />
                     Send Message
-                  </Button>
+                  </button>
                 </form>
-              )}
-            </Card>
-          </div>
-
-          {/* Sidebar Info */}
-          <div className="lg:col-span-2 space-y-5">
-            <Card>
-              <h3 className="text-base font-bold text-slate-900 mb-4">
-                Office Hours
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600 flex items-center gap-2">
-                    <ClockIcon className="w-4 h-4 text-slate-400" /> Monday –
-                    Friday
-                  </span>
-                  <span className="text-sm font-semibold text-slate-900">
-                    8:00 AM – 8:00 PM
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600 flex items-center gap-2">
-                    <ClockIcon className="w-4 h-4 text-slate-400" /> Saturday
-                  </span>
-                  <span className="text-sm font-semibold text-slate-900">
-                    9:00 AM – 5:00 PM
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600 flex items-center gap-2">
-                    <ClockIcon className="w-4 h-4 text-slate-400" /> Sunday
-                  </span>
-                  <span className="text-sm font-semibold text-slate-900">
-                    Closed
-                  </span>
-                </div>
               </div>
-            </Card>
 
-            <Card>
-              <h3 className="text-base font-bold text-slate-900 mb-4">
-                Our Branches
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <MapPinIcon className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Colombo Main
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      42 Galle Road, Colombo 03
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <MapPinIcon className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Kandy
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      15 Peradeniya Road, Kandy
-                    </p>
+              {/* Right Column: Hours, Map, Branches */}
+              <div className="bg-[#fcfdff] rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm flex flex-col h-full">
+                <div className="mb-6">
+                  <h3 className="text-base font-bold text-slate-900 mb-4">Office Hours</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <ClockIcon className="w-4 h-4 text-blue-500" />
+                        Monday - Friday
+                      </div>
+                      <span className="font-bold text-slate-800">8:00 AM - 8:00 PM</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <ClockIcon className="w-4 h-4 text-blue-500" />
+                        Saturday
+                      </div>
+                      <span className="font-bold text-slate-800">9:00 AM - 5:00 PM</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <ClockIcon className="w-4 h-4 text-blue-500" />
+                        Sunday
+                      </div>
+                      <span className="font-bold text-slate-400 underline decoration-slate-200 underline-offset-4 decoration-2">Closed</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <MapPinIcon className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Galle
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      78 Main Street, Galle Fort
-                    </p>
+
+                <div className="flex-1 min-h-[180px] rounded-2xl overflow-hidden mb-6 shadow-card border border-slate-100">
+                  <iframe
+                    title="Colombo Main Branch Map"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.8988647713437!2d79.8517243!3d6.9027002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae259410940428d%3A0x6b77209930fca683!2s42%20Galle%20Rd%2C%20Colombo%2003!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
+                    className="w-full h-full grayscale-[0.2] contrast-[1.1]"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Our Branches</h3>
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+                    <div className="flex items-start gap-2">
+                       <span className="text-lg">🇱🇰</span>
+                       <div>
+                         <p className="text-xs font-bold text-slate-800">Colombo Main</p>
+                       </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                       <span className="text-lg">🇱🇰</span>
+                       <div>
+                         <p className="text-xs font-bold text-slate-800">Galle <span className="text-slate-400 font-normal ml-1">78 Main Street, Galle Fort</span></p>
+                       </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px]">
+                         <MapPinIcon className="w-3 h-3" />
+                       </div>
+                       <div>
+                         <p className="text-xs font-bold text-slate-800">Kandy <span className="text-slate-400 font-normal ml-1 text-[10px] block">1/5 Peradenya Road, Kandy</span></p>
+                       </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px]">
+                         <MapPinIcon className="w-3 h-3" />
+                       </div>
+                       <div>
+                         <p className="text-xs font-bold text-slate-800">Galle</p>
+                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </Card>
 
-            {/* Map placeholder */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-              <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-50 flex flex-col items-center justify-center">
-                <MapPinIcon className="w-8 h-8 text-blue-300 mb-2" />
-                <p className="text-sm font-medium text-slate-400">
-                  Map Preview
-                </p>
-              </div>
             </div>
           </div>
         </div>
-      </section>
+      </main>
 
-      {/* FAQ Section */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
-              <HelpCircleIcon className="w-3.5 h-3.5" /> FAQ
-            </div>
-            <h2 className="text-3xl font-extrabold text-slate-900 mb-3">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-slate-500">
-              Can't find what you're looking for? Send us a message above.
-            </p>
+      {submitted && (
+        <div className="fixed bottom-8 right-8 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl animate-bounce-in flex items-center gap-3 z-50">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <CheckIcon className="w-5 h-5" />
           </div>
-
-          <div className="space-y-3">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl border border-slate-100 overflow-hidden transition-shadow duration-200"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left"
-                >
-                  <span className="text-sm font-semibold text-slate-900 pr-4">
-                    {faq.question}
-                  </span>
-                  {openFaq === idx ? (
-                    <ChevronUpIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  ) : (
-                    <ChevronDownIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                  )}
-                </button>
-                {openFaq === idx && (
-                  <div className="px-6 pb-4 animate-fade-in">
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
+          <div>
+            <p className="font-bold">Message Sent!</p>
+            <p className="text-xs opacity-90">We'll get back to you soon.</p>
           </div>
         </div>
-      </section>
+      )}
 
       <Footer />
     </div>
   )
 }
+
