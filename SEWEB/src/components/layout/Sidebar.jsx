@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MenuIcon, XIcon, LogOutIcon } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
 export function Sidebar({
   items,
-  userName = 'User',
-  userRole = 'Student'
 }) {
+  const { user } = useAuth();
+  const userName = user?.fullName || 'User';
+  const userRole = user?.role || 'Student';
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -13,10 +16,14 @@ export function Sidebar({
   <div className="flex flex-col h-full">
       <div className="p-3 border-b border-slate-100 flex items-center justify-between">
         <div className={`flex items-center gap-3 ${collapsed ? '' : 'min-w-0 flex-1'}`}>
-          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-sm font-bold">
-              {userName.charAt(0)}
-            </span>
+          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {user?.profileImage ? (
+              <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white text-sm font-bold">
+                {userName.charAt(0)}
+              </span>
+            )}
           </div>
           {!collapsed && (
             <div className="min-w-0">

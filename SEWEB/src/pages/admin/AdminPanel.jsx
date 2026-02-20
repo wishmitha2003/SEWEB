@@ -24,6 +24,7 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
+import { useAuth } from '../../context/AuthContext';
 const sidebarItems = [
 {
   icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -331,11 +332,10 @@ const leaderboardColumns = [
 }];
 
 export function AdminPanel() {
+  const { user } = useAuth();
   return (
     <DashboardLayout
-      sidebarItems={sidebarItems}
-      userName="Admin"
-      userRole="Administrator">
+      sidebarItems={sidebarItems}>
 
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-slate-900">Admin Panel</h1>

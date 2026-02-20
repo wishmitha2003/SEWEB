@@ -29,6 +29,7 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
+import { useAuth } from '../../context/AuthContext';
 const sidebarItems = [
 {
   icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -96,15 +97,14 @@ const chartData = [
 }];
 
 export function StudentDashboard() {
+  const { user } = useAuth();
   return (
     <DashboardLayout
-      sidebarItems={sidebarItems}
-      userName="Kasun Silva"
-      userRole="Student">
+      sidebarItems={sidebarItems}>
 
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-slate-900">
-          Welcome back, Kasun! 👋
+          Welcome back, {user?.fullName?.split(' ')[0] || 'Student'}! 👋
         </h1>
         <p className="text-slate-500 mt-1">
           Here's your learning overview for this week.

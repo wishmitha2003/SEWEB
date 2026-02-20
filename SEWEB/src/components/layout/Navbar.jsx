@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, SettingsIcon, PencilIcon, MailIcon, PhoneIcon, SaveIcon, MapPinIcon, HashIcon, GlobeIcon, Trash2Icon, CheckIcon, AtSignIcon } from 'lucide-react'
+import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, SettingsIcon, PencilIcon, MailIcon, PhoneIcon, SaveIcon, MapPinIcon, HashIcon, GlobeIcon, Trash2Icon, CheckIcon, AtSignIcon, CameraIcon } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
 
@@ -11,9 +11,22 @@ export function Navbar({ transparent = false }) {
   const [profileEditOpen, setProfileEditOpen] = useState(false)
   const [editForm, setEditForm] = useState({ fullName: '', username: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Sri Lanka' })
   const profileRef = useRef(null)
+  const fileInputRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, isLoggedIn, logout, updateUser } = useAuth()
+  const [profileImage, setProfileImage] = useState(user?.profileImage || null)
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setProfileImage(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -129,8 +142,12 @@ export function Navbar({ transparent = false }) {
                       : 'hover:bg-white/10'}
                   `}
                 >
-                  <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0`}>
-                    <span className="text-xs font-bold text-white">{getInitials(user?.fullName)}</span>
+                  <div className={`w-9 h-9 rounded-full ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0 overflow-hidden`}>
+                    {user?.profileImage ? (
+                      <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs font-bold text-white">{getInitials(user?.fullName)}</span>
+                    )}
                   </div>
                 </button>
                 {/* Hover tooltip - name & role */}
@@ -154,8 +171,12 @@ export function Navbar({ transparent = false }) {
                         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-60" />
                       </div>
                       <div className="px-5 -mt-8">
-                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-xl ring-4 ring-white`}>
-                          <span className="text-lg font-bold text-white">{getInitials(user?.fullName)}</span>
+                        <div className={`w-16 h-16 rounded-2xl ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-xl ring-4 ring-white overflow-hidden`}>
+                          {user?.profileImage ? (
+                            <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-lg font-bold text-white">{getInitials(user?.fullName)}</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -291,8 +312,12 @@ export function Navbar({ transparent = false }) {
                 /* Mobile Profile Section */
                 <div className="mt-2 pt-3 border-t border-slate-100">
                   <div className="flex items-center gap-3 px-3.5 py-2.5">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-lg ring-2 ring-white`}>
-                      <span className="text-sm font-bold text-white">{getInitials(user?.fullName)}</span>
+                    <div className={`w-10 h-10 rounded-full ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg ring-2 ring-white overflow-hidden`}>
+                      {user?.profileImage ? (
+                        <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-sm font-bold text-white">{getInitials(user?.fullName)}</span>
+                      )}
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{user?.fullName}</p>
@@ -355,8 +380,25 @@ export function Navbar({ transparent = false }) {
             <div className={`relative bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 px-6 py-5`}>
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA4KSIvPjwvc3ZnPg==')] opacity-60" />
               <div className="relative flex items-center gap-4">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-lg ring-2 ring-white/30`}>
-                  <span className="text-xl font-bold text-white">{getInitials(editForm.fullName || user?.fullName)}</span>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-lg ring-2 ring-white/30 cursor-pointer group overflow-hidden`}
+                >
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xl font-bold text-white">{getInitials(editForm.fullName || user?.fullName)}</span>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <CameraIcon className="w-5 h-5 text-white" />
+                  </div>
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">{editForm.fullName || user?.fullName || 'Edit Profile'}</h2>
@@ -375,7 +417,7 @@ export function Navbar({ transparent = false }) {
             <form
               onSubmit={(e) => {
                 e.preventDefault()
-                updateUser(editForm)
+                updateUser({ ...editForm, profileImage })
                 setProfileEditOpen(false)
               }}
               className="px-6 py-6"

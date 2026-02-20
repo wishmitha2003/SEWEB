@@ -23,6 +23,7 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
+import { useAuth } from '../../context/AuthContext';
 const sidebarItems = [
 {
   icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -203,15 +204,14 @@ const studentColumns = [
 }];
 
 export function TeacherDashboard() {
+  const { user } = useAuth();
   return (
     <DashboardLayout
-      sidebarItems={sidebarItems}
-      userName="Ms. Dilani"
-      userRole="Teacher">
+      sidebarItems={sidebarItems}>
 
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-slate-900">
-          Teacher Dashboard
+          Teacher Dashboard - {user?.fullName || 'Ms. Dilani'}
         </h1>
         <p className="text-slate-500 mt-1">
           Manage your classes, students, and assignments.
