@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, SettingsIcon, PencilIcon, MailIcon, PhoneIcon, SaveIcon } from 'lucide-react'
+import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, SettingsIcon, PencilIcon, MailIcon, PhoneIcon, SaveIcon, MapPinIcon, HashIcon, GlobeIcon, Trash2Icon, CheckIcon, AtSignIcon } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
 
@@ -9,7 +9,7 @@ export function Navbar({ transparent = false }) {
   const [scrolled, setScrolled] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [profileEditOpen, setProfileEditOpen] = useState(false)
-  const [editForm, setEditForm] = useState({ fullName: '', email: '', phone: '' })
+  const [editForm, setEditForm] = useState({ fullName: '', username: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Sri Lanka' })
   const profileRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
@@ -190,8 +190,13 @@ export function Navbar({ transparent = false }) {
                           setProfileOpen(false)
                           setEditForm({
                             fullName: user?.fullName || '',
+                            username: user?.username || '',
                             email: user?.email || '',
                             phone: user?.phone || '',
+                            address: user?.address || '',
+                            city: user?.city || 'Colombo',
+                            postalCode: user?.postalCode || '',
+                            country: user?.country || 'Sri Lanka',
                           })
                           setProfileEditOpen(true)
                         }}
@@ -336,7 +341,6 @@ export function Navbar({ transparent = false }) {
       </nav>
     </header>
 
-      {/* Edit Profile Modal */}
       {profileEditOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
@@ -346,23 +350,25 @@ export function Navbar({ transparent = false }) {
           />
 
           {/* Modal */}
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-            {/* Header with gradient */}
-            <div className={`relative h-24 bg-gradient-to-br ${getRoleColor(user?.role)}`}>
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-60" />
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+            {/* Header with gradient + avatar + title */}
+            <div className={`relative bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 px-6 py-5`}>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA4KSIvPjwvc3ZnPg==')] opacity-60" />
+              <div className="relative flex items-center gap-4">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-lg ring-2 ring-white/30`}>
+                  <span className="text-xl font-bold text-white">{getInitials(editForm.fullName || user?.fullName)}</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">{editForm.fullName || user?.fullName || 'Edit Profile'}</h2>
+                  <p className="text-sm text-blue-100">@{editForm.username || user?.username || 'username'}</p>
+                </div>
+              </div>
               <button
                 onClick={() => setProfileEditOpen(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
               >
                 <XIcon className="w-4 h-4 text-white" />
               </button>
-            </div>
-
-            {/* Avatar */}
-            <div className="px-6 -mt-10">
-              <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-xl ring-4 ring-white`}>
-                <span className="text-2xl font-bold text-white">{getInitials(editForm.fullName || user?.fullName)}</span>
-              </div>
             </div>
 
             {/* Form */}
@@ -372,88 +378,180 @@ export function Navbar({ transparent = false }) {
                 updateUser(editForm)
                 setProfileEditOpen(false)
               }}
-              className="px-6 pt-4 pb-6"
+              className="px-6 py-6"
             >
-              <h2 className="text-lg font-bold text-slate-900 mb-1">Edit Profile</h2>
-              <p className="text-sm text-slate-500 mb-5">Update your personal information</p>
+              <div className="space-y-5">
+                {/* Row 1: Full Name + Username */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <UserIcon className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={editForm.fullName}
+                        onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="Kasun Perera"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Username</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <AtSignIcon className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={editForm.username}
+                        onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="kasun_perera"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-              <div className="space-y-4">
-                {/* Full Name */}
+                {/* Address (full width) */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">Address</label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                      <UserIcon className="w-4 h-4" />
+                      <MapPinIcon className="w-4 h-4" />
                     </div>
                     <input
                       type="text"
-                      value={editForm.fullName}
-                      onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                      value={editForm.address}
+                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
-                      placeholder="Enter your full name"
+                      placeholder="123 Main Street"
                     />
                   </div>
                 </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                      <MailIcon className="w-4 h-4" />
+                {/* Row 2: Email + City + Postal Code */}
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_0.7fr_0.5fr] gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Email Address</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <MailIcon className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="email"
+                        value={editForm.email}
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="kasun@ezy.com"
+                      />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">City</label>
                     <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
-                      placeholder="you@example.com"
+                      type="text"
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                      placeholder="Colombo"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Postal Code</label>
+                    <input
+                      type="text"
+                      value={editForm.postalCode}
+                      onChange={(e) => setEditForm({ ...editForm, postalCode: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                      placeholder="00500"
                     />
                   </div>
                 </div>
 
-                {/* Phone */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone Number</label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                      <PhoneIcon className="w-4 h-4" />
+                {/* Row 3: Phone + Country */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Phone Number</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <PhoneIcon className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="tel"
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="+94 77 123 4567"
+                      />
                     </div>
-                    <input
-                      type="tel"
-                      value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
-                      placeholder="+94 7X XXX XXXX"
-                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Country</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">
+                        🇱🇰
+                      </div>
+                      <select
+                        value={editForm.country}
+                        onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300 cursor-pointer"
+                      >
+                        <option>Sri Lanka</option>
+                        <option>India</option>
+                        <option>United Kingdom</option>
+                        <option>Australia</option>
+                        <option>Canada</option>
+                        <option>United States</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Role (read-only) */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Role</label>
-                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-100 bg-slate-50">
+                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">Role</label>
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-100 bg-slate-50">
                     <div className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${getRoleColor(user?.role)}`} />
-                    <span className="text-sm font-medium text-slate-600 capitalize">{user?.role}</span>
+                    <span className="text-sm font-medium text-slate-700 capitalize">{user?.role}</span>
                     <span className="text-xs text-slate-400 ml-auto">Cannot be changed</span>
                   </div>
                 </div>
               </div>
 
               {/* Buttons */}
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-7 pt-5 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setProfileEditOpen(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  className={`flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r ${getRoleColor(user?.role)} text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2`}
+                  type="button"
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                      logout()
+                      setProfileEditOpen(false)
+                      navigate('/')
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
                 >
-                  <SaveIcon className="w-4 h-4" />
+                  <Trash2Icon className="w-4 h-4" />
+                  Delete Account
+                </button>
+                <button
+                  type="submit"
+                  className="ml-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-sm font-semibold text-white shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center gap-2"
+                >
+                  <CheckIcon className="w-4 h-4" />
                   Save Changes
                 </button>
               </div>

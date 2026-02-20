@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { MapPinIcon, PhoneIcon, NavigationIcon, ClockIcon, ChevronDownIcon } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
-import { Footer } from '../components/layout/Footer';
+import { FooterBar } from '../components/layout/FooterBar';
+
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 
@@ -204,7 +205,7 @@ export function MapSection() {
           </div>
         </div>
       </main>
-      <Footer />
+      <FooterBar />
     </div>
   );
 }

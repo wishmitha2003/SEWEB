@@ -13,9 +13,20 @@ import { MaterialsPage } from './pages/MaterialsPage';
 import { GamificationPage } from './pages/GamificationPage';
 import { MapSection } from './pages/MapSection';
 import { ContactPage } from './pages/ContactPage';
+import { useLocation } from 'react-router-dom';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />

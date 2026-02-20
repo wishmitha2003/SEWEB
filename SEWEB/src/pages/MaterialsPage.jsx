@@ -6,7 +6,7 @@ import {
   FilterIcon } from
 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
-import { Footer } from '../components/layout/Footer';
+import { FooterBar } from '../components/layout/FooterBar';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -174,7 +174,7 @@ export function MaterialsPage() {
           </div>
         }
       </main>
-      <Footer />
+      <FooterBar />
     </div>);
 
 }
