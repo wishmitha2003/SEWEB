@@ -46,6 +46,7 @@ export function Navbar({ transparent = false }) {
   }, [])
 
   const showBg = !transparent || scrolled
+  const isTransparent = transparent && !scrolled
 
   const navLinks = [
     { label: 'Home', path: '/' },
@@ -95,7 +96,7 @@ export function Navbar({ transparent = false }) {
     <header
       className={`
         fixed top-0 left-0 right-0 z-40 transition-all duration-300
-        ${showBg ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100' : 'bg-transparent'}
+        ${showBg ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100' : (isOpen ? 'bg-slate-950/80 backdrop-blur-xl border-b border-white/10' : 'bg-transparent')}
       `}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,36 +165,7 @@ export function Navbar({ transparent = false }) {
 
                 {/* Profile Dropdown */}
                 {profileOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fade-in z-50">
-                    {/* Profile Header */}
-                    <div className="relative">
-                      <div className={`h-20 bg-gradient-to-br ${getRoleColor(user?.role)}`}>
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-60" />
-                      </div>
-                      <div className="px-5 -mt-8">
-                        <div className={`w-16 h-16 rounded-2xl ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-xl ring-4 ring-white overflow-hidden`}>
-                          {user?.profileImage ? (
-                            <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-lg font-bold text-white">{getInitials(user?.fullName)}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Profile Info */}
-                    <div className="px-5 pt-3 pb-4">
-                      <h3 className="text-base font-bold text-slate-900">{user?.fullName}</h3>
-                      <p className="text-sm text-slate-500 mt-0.5">{user?.email}</p>
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100">
-                        <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${getRoleColor(user?.role)}`} />
-                        <span className="text-xs font-semibold text-slate-600 capitalize">{user?.role}</span>
-                      </div>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="h-px bg-slate-100 mx-4" />
-
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fade-in z-50">
                     {/* Menu Items */}
                     <div className="p-2">
                       <Link
@@ -300,8 +272,10 @@ export function Navbar({ transparent = false }) {
                   to={link.path}
                   onClick={() => setIsOpen(false)}
                   className={`
-                    px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors
-                    ${location.pathname === link.path ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/20') : showBg ? 'text-slate-600 hover:bg-slate-50' : 'text-white/80 hover:bg-white/10'}
+                    px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                    ${location.pathname === link.path 
+                      ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-blue-600/20') 
+                      : (showBg ? 'text-slate-600 hover:bg-slate-50' : 'text-white/80 hover:text-white hover:bg-white/10')}
                   `}
                 >
                   {link.label}
@@ -310,42 +284,63 @@ export function Navbar({ transparent = false }) {
 
               {isLoggedIn ? (
                 /* Mobile Profile Section */
-                <div className="mt-2 pt-3 border-t border-slate-100">
-                  <div className="flex items-center gap-3 px-3.5 py-2.5">
-                    <div className={`w-10 h-10 rounded-full ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg ring-2 ring-white overflow-hidden`}>
+                <div className={`mt-2 pt-3 border-t ${showBg ? 'border-slate-100' : 'border-white/10'}`}>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      setEditForm({
+                        fullName: user?.fullName || '',
+                        username: user?.username || '',
+                        email: user?.email || '',
+                        phone: user?.phone || '',
+                        address: user?.address || '',
+                        city: user?.city || 'Colombo',
+                        postalCode: user?.postalCode || '',
+                        country: user?.country || 'Sri Lanka',
+                      })
+                      setProfileEditOpen(true)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 group/mbprofile ${showBg ? 'hover:bg-slate-50' : 'hover:bg-white/5'}`}
+                  >
+                    <div className={`w-10 h-10 rounded-full ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg ring-2 ${showBg ? 'ring-white' : 'ring-white/20'} overflow-hidden transition-transform group-hover/mbprofile:scale-105`}>
                       {user?.profileImage ? (
                         <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-sm font-bold text-white">{getInitials(user?.fullName)}</span>
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{user?.fullName}</p>
-                      <p className="text-xs text-slate-500 capitalize">{user?.role}</p>
+                    <div className="flex-1 text-left">
+                      <p className={`text-sm font-semibold ${showBg ? 'text-slate-900' : 'text-white'}`}>{user?.fullName}</p>
+                      <p className={`text-xs capitalize ${showBg ? 'text-slate-500' : 'text-white/60'}`}>{user?.role}</p>
                     </div>
-                  </div>
+                    <PencilIcon className={`w-4 h-4 ${showBg ? 'text-slate-400' : 'text-white/40'} opacity-0 group-hover/mbprofile:opacity-100 transition-opacity`} />
+                  </button>
                   <Link
                     to={getRoleDashboard(user?.role)}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg mt-1"
+                    className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg mt-1 transition-colors ${showBg ? 'text-slate-600 hover:bg-slate-50' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
                   >
                     <UserIcon className="w-4 h-4" /> Dashboard
                   </Link>
                   <button
                     onClick={() => { setIsOpen(false); handleLogout(); }}
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg w-full"
+                    className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg w-full transition-colors ${!showBg ? 'hover:bg-red-500/10' : ''}`}
                   >
                     <LogOutIcon className="w-4 h-4" /> Sign Out
                   </button>
                 </div>
               ) : (
-                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+                <div className={`flex gap-2 mt-2 pt-3 border-t ${showBg ? 'border-slate-100' : 'border-white/10'}`}>
                   <Link
                     to="/login"
                     className="flex-1"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant={showBg ? 'outline' : 'outline'} 
+                      size="sm" 
+                      className={`w-full ${!showBg ? 'border-white/20 text-white hover:bg-white/10' : ''}`}
+                    >
                       Log In
                     </Button>
                   </Link>
@@ -375,41 +370,18 @@ export function Navbar({ transparent = false }) {
           />
 
           {/* Modal */}
-          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-            {/* Header with gradient + avatar + title */}
-            <div className={`relative bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 px-6 py-5`}>
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA4KSIvPjwvc3ZnPg==')] opacity-60" />
-              <div className="relative flex items-center gap-4">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${getRoleColor(user?.role)} flex items-center justify-center shadow-lg ring-2 ring-white/30 cursor-pointer group overflow-hidden`}
-                >
-                  {profileImage ? (
-                    <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-bold text-white">{getInitials(editForm.fullName || user?.fullName)}</span>
-                  )}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <CameraIcon className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{editForm.fullName || user?.fullName || 'Edit Profile'}</h2>
-                  <p className="text-sm text-blue-100">@{editForm.username || user?.username || 'username'}</p>
-                </div>
+          <div className="relative w-full max-w-4xl bg-white rounded-[32px] shadow-2xl overflow-hidden animate-scale-in">
+            {/* Simple Modal Header */}
+            <div className={`px-6 py-5 border-b border-slate-100 flex items-center justify-between`}>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
+                <p className="text-sm text-slate-500">Update your personal information</p>
               </div>
               <button
                 onClick={() => setProfileEditOpen(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors"
               >
-                <XIcon className="w-4 h-4 text-white" />
+                <XIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
 
@@ -418,13 +390,18 @@ export function Navbar({ transparent = false }) {
               onSubmit={(e) => {
                 e.preventDefault()
                 updateUser({ ...editForm, profileImage })
-                setProfileEditOpen(false)
-              }}
-              className="px-6 py-6"
-            >
-              <div className="space-y-5">
-                {/* Row 1: Full Name + Username */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              setProfileEditOpen(false)
+            }}
+            className="px-8 py-8"
+          >
+              <div className="grid lg:grid-cols-2 gap-x-12 gap-y-6">
+                {/* Column 1: Personal Info */}
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1 h-4 bg-blue-600 rounded-full" />
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Personal Info</h3>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-semibold text-slate-800 mb-1.5">Full Name</label>
                     <div className="relative">
@@ -440,6 +417,7 @@ export function Navbar({ transparent = false }) {
                       />
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-sm font-semibold text-slate-800 mb-1.5">Username</label>
                     <div className="relative">
@@ -455,27 +433,7 @@ export function Navbar({ transparent = false }) {
                       />
                     </div>
                   </div>
-                </div>
 
-                {/* Address (full width) */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">Address</label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                      <MapPinIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      value={editForm.address}
-                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
-                      placeholder="123 Main Street"
-                    />
-                  </div>
-                </div>
-
-                {/* Row 2: Email + City + Postal Code */}
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_0.7fr_0.5fr] gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-800 mb-1.5">Email Address</label>
                     <div className="relative">
@@ -491,30 +449,7 @@ export function Navbar({ transparent = false }) {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">City</label>
-                    <input
-                      type="text"
-                      value={editForm.city}
-                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
-                      placeholder="Colombo"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Postal Code</label>
-                    <input
-                      type="text"
-                      value={editForm.postalCode}
-                      onChange={(e) => setEditForm({ ...editForm, postalCode: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
-                      placeholder="00500"
-                    />
-                  </div>
-                </div>
 
-                {/* Row 3: Phone + Country */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-800 mb-1.5">Phone Number</label>
                     <div className="relative">
@@ -530,6 +465,54 @@ export function Navbar({ transparent = false }) {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Column 2: Location & Role */}
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1 h-4 bg-blue-600 rounded-full" />
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Location & Status</h3>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Address</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <MapPinIcon className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={editForm.address}
+                        onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="123 Main Street"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-800 mb-1.5">City</label>
+                      <input
+                        type="text"
+                        value={editForm.city}
+                        onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="Colombo"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-800 mb-1.5">Postal Code</label>
+                      <input
+                        type="text"
+                        value={editForm.postalCode}
+                        onChange={(e) => setEditForm({ ...editForm, postalCode: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-slate-300"
+                        placeholder="00500"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-semibold text-slate-800 mb-1.5">Country</label>
                     <div className="relative">
@@ -553,25 +536,24 @@ export function Navbar({ transparent = false }) {
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Role (read-only) */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">Role</label>
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-100 bg-slate-50">
-                    <div className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${getRoleColor(user?.role)}`} />
-                    <span className="text-sm font-medium text-slate-700 capitalize">{user?.role}</span>
-                    <span className="text-xs text-slate-400 ml-auto">Cannot be changed</span>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1.5">Account Type</label>
+                    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-100 bg-slate-50/50">
+                      <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${getRoleColor(user?.role)}`} />
+                      <span className="text-sm font-bold text-slate-600 capitalize">{user?.role}</span>
+                      <span className="text-[10px] text-slate-400 ml-auto font-medium uppercase tracking-tighter">Verified Account</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Buttons */}
-              <div className="flex gap-3 mt-7 pt-5 border-t border-slate-100">
+              <div className="flex flex-wrap gap-3 mt-7 pt-5 border-t border-slate-100 items-center">
                 <button
                   type="button"
                   onClick={() => setProfileEditOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex-1 sm:flex-none order-2 sm:order-1"
                 >
                   Cancel
                 </button>
@@ -584,14 +566,14 @@ export function Navbar({ transparent = false }) {
                       navigate('/')
                     }
                   }}
-                  className="px-5 py-2.5 rounded-xl border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none order-3 sm:order-2"
                 >
                   <Trash2Icon className="w-4 h-4" />
-                  Delete Account
+                  Delete
                 </button>
                 <button
                   type="submit"
-                  className="ml-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-sm font-semibold text-white shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center gap-2"
+                  className="ml-0 sm:ml-auto w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-sm font-semibold text-white shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center justify-center gap-2 order-1 sm:order-3"
                 >
                   <CheckIcon className="w-4 h-4" />
                   Save Changes

@@ -250,33 +250,33 @@ export function ContactPage() {
 
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Our Branches</h3>
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                     <div className="flex items-start gap-2">
                        <span className="text-lg">🇱🇰</span>
                        <div>
                          <p className="text-xs font-bold text-slate-800">Colombo Main</p>
+                         <p className="text-[10px] text-slate-500">42 Galle Road, Colombo 03</p>
                        </div>
                     </div>
                     <div className="flex items-start gap-2">
                        <span className="text-lg">🇱🇰</span>
                        <div>
-                         <p className="text-xs font-bold text-slate-800">Galle <span className="text-slate-400 font-normal ml-1">78 Main Street, Galle Fort</span></p>
+                         <p className="text-xs font-bold text-slate-800">Kandy</p>
+                         <p className="text-[10px] text-slate-500">1/5 Peradeniya Road, Kandy</p>
                        </div>
                     </div>
                     <div className="flex items-start gap-2">
-                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px]">
-                         <MapPinIcon className="w-3 h-3" />
-                       </div>
+                       <span className="text-lg">🇱🇰</span>
                        <div>
-                         <p className="text-xs font-bold text-slate-800">Kandy <span className="text-slate-400 font-normal ml-1 text-[10px] block">1/5 Peradenya Road, Kandy</span></p>
+                         <p className="text-xs font-bold text-slate-800">Galle Branch A</p>
+                         <p className="text-[10px] text-slate-500">78 Main Street, Galle Fort</p>
                        </div>
                     </div>
                     <div className="flex items-start gap-2">
-                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px]">
-                         <MapPinIcon className="w-3 h-3" />
-                       </div>
+                       <span className="text-lg">🇱🇰</span>
                        <div>
-                         <p className="text-xs font-bold text-slate-800">Galle</p>
+                         <p className="text-xs font-bold text-slate-800">Galle Branch B</p>
+                         <p className="text-[10px] text-slate-500">Matara Road, Galle</p>
                        </div>
                     </div>
                   </div>
