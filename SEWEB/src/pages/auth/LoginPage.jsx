@@ -1,19 +1,34 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpenIcon,
   MailIcon,
   LockIcon,
   EyeIcon,
-  EyeOffIcon } from
-'lucide-react';
+  EyeOffIcon
+} from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { FormInput } from '../../components/ui/FormInput';
+import { useAuth } from '../../context/AuthContext';
+
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    login({
+      fullName: email.split('@')[0]?.replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Student',
+      email,
+      role: 'student',
+    });
+    navigate('/student');
+  };
+
   return (
     <div className="min-h-screen w-full flex">
       {/* Left panel - decorative */}
@@ -38,7 +53,6 @@ export function LoginPage() {
             Continue where you left off. Your classes, materials, and progress
             are waiting for you.
           </p>
-
         </div>
       </div>
 
@@ -61,15 +75,15 @@ export function LoginPage() {
             Enter your credentials to access your dashboard
           </p>
 
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <FormInput
               label="Email Address"
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              icon={<MailIcon className="w-4 h-4" />} />
-
+              icon={<MailIcon className="w-4 h-4" />}
+            />
 
             <div className="relative">
               <FormInput
@@ -78,18 +92,17 @@ export function LoginPage() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                icon={<LockIcon className="w-4 h-4" />} />
-
+                icon={<LockIcon className="w-4 h-4" />}
+              />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-[38px] text-slate-400 hover:text-slate-600 transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}>
-
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
                 {showPassword ?
-                <EyeOffIcon className="w-4 h-4" /> :
-
-                <EyeIcon className="w-4 h-4" />
+                  <EyeOffIcon className="w-4 h-4" /> :
+                  <EyeIcon className="w-4 h-4" />
                 }
               </button>
             </div>
@@ -100,14 +113,14 @@ export function LoginPage() {
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
                 <span className="text-sm text-slate-600">Remember me</span>
               </label>
               <a
                 href="#"
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+              >
                 Forgot password?
               </a>
             </div>
@@ -121,13 +134,13 @@ export function LoginPage() {
             Don't have an account?{' '}
             <Link
               to="/register"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-
+              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+            >
               Create new account
             </Link>
           </p>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }

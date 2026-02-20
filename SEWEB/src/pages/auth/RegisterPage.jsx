@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpenIcon,
   UserIcon,
   MailIcon,
   PhoneIcon,
-  LockIcon } from
-'lucide-react';
+  LockIcon
+} from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { FormInput } from '../../components/ui/FormInput';
+import { useAuth } from '../../context/AuthContext';
+
 export function RegisterPage() {
   const [form, setForm] = useState({
     fullName: '',
@@ -18,11 +20,35 @@ export function RegisterPage() {
     confirmPassword: '',
     role: 'student'
   });
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const update = (field, value) =>
-  setForm({
-    ...form,
-    [field]: value
-  });
+    setForm({
+      ...form,
+      [field]: value
+    });
+
+  const getRoleDashboard = (role) => {
+    switch (role) {
+      case 'teacher': return '/teacher';
+      case 'admin': return '/admin';
+      case 'courier': return '/courier';
+      default: return '/student';
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    login({
+      fullName: form.fullName || 'Student',
+      email: form.email,
+      phone: form.phone,
+      role: form.role,
+    });
+    navigate(getRoleDashboard(form.role));
+  };
+
   return (
     <div className="min-h-screen w-full flex">
       {/* Left panel */}
@@ -47,7 +73,6 @@ export function RegisterPage() {
             Create your account and get instant access to classes, materials,
             and a community of learners across Sri Lanka.
           </p>
-
         </div>
       </div>
 
@@ -70,30 +95,30 @@ export function RegisterPage() {
             Fill in your details to get started
           </p>
 
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <FormInput
               label="Full Name"
               placeholder="Enter your full name"
               value={form.fullName}
               onChange={(e) => update('fullName', e.target.value)}
-              icon={<UserIcon className="w-4 h-4" />} />
-
+              icon={<UserIcon className="w-4 h-4" />}
+            />
             <FormInput
               label="Email Address"
               type="email"
               placeholder="you@example.com"
               value={form.email}
               onChange={(e) => update('email', e.target.value)}
-              icon={<MailIcon className="w-4 h-4" />} />
-
+              icon={<MailIcon className="w-4 h-4" />}
+            />
             <FormInput
               label="Phone Number"
               type="tel"
               placeholder="+94 7X XXX XXXX"
               value={form.phone}
               onChange={(e) => update('phone', e.target.value)}
-              icon={<PhoneIcon className="w-4 h-4" />} />
-
+              icon={<PhoneIcon className="w-4 h-4" />}
+            />
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -102,8 +127,8 @@ export function RegisterPage() {
               <select
                 value={form.role}
                 onChange={(e) => update('role', e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              >
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
                 <option value="parent">Parent</option>
@@ -116,16 +141,16 @@ export function RegisterPage() {
               placeholder="Create a password"
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
-              icon={<LockIcon className="w-4 h-4" />} />
-
+              icon={<LockIcon className="w-4 h-4" />}
+            />
             <FormInput
               label="Confirm Password"
               type="password"
               placeholder="Confirm your password"
               value={form.confirmPassword}
               onChange={(e) => update('confirmPassword', e.target.value)}
-              icon={<LockIcon className="w-4 h-4" />} />
-
+              icon={<LockIcon className="w-4 h-4" />}
+            />
 
             <Button className="w-full" size="md">
               Create Account
@@ -136,13 +161,13 @@ export function RegisterPage() {
             Already have an account?{' '}
             <Link
               to="/login"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-
+              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+            >
               Sign in
             </Link>
           </p>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
