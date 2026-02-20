@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpenIcon, MenuIcon, XIcon, LogOutIcon } from 'lucide-react';
+import { MenuIcon, XIcon, LogOutIcon } from 'lucide-react';
 export function Sidebar({
   items,
   userName = 'User',
@@ -11,44 +11,27 @@ export function Sidebar({
   const location = useLocation();
   const sidebarContent =
   <div className="flex flex-col h-full">
-      <div className="p-5 flex items-center justify-between border-b border-slate-100">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <BookOpenIcon className="w-5 h-5 text-white" />
-          </div>
-          {!collapsed &&
-        <span className="text-lg font-extrabold text-slate-900 tracking-tight">
-              Ezy English
-            </span>
-        }
-        </Link>
-        <button
-        className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-        onClick={() => setCollapsed(!collapsed)}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-
-          <MenuIcon className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="p-3 border-b border-slate-100">
-        <div
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 ${collapsed ? 'justify-center' : ''}`}>
-
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+      <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+        <div className={`flex items-center gap-3 ${collapsed ? '' : 'min-w-0 flex-1'}`}>
+          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
             <span className="text-white text-sm font-bold">
               {userName.charAt(0)}
             </span>
           </div>
-          {!collapsed &&
-        <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">
-                {userName}
-              </p>
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">{userName}</p>
               <p className="text-xs text-slate-500">{userRole}</p>
             </div>
-        }
+          )}
         </div>
+        <button
+          className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0"
+          onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <MenuIcon className="w-5 h-5" />
+        </button>
       </div>
 
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
@@ -67,7 +50,7 @@ export function Sidebar({
               `}
             title={collapsed ? item.label : undefined}>
 
-              <span className="flex-shrink-0">{item.icon}</span>
+              <span className={`flex-shrink-0 transition-transform duration-200 ${collapsed ? 'scale-125' : ''}`}>{item.icon}</span>
               {!collapsed && <span>{item.label}</span>}
             </Link>);
 
@@ -83,7 +66,7 @@ export function Sidebar({
             ${collapsed ? 'justify-center' : ''}
           `}>
 
-          <LogOutIcon className="w-4 h-4" />
+          <LogOutIcon className={`transition-transform duration-200 ${collapsed ? 'w-5 h-5 scale-110' : 'w-4 h-4'}`} />
           {!collapsed && <span>Log Out</span>}
         </Link>
       </div>
