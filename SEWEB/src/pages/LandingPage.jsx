@@ -27,22 +27,42 @@ export function LandingPage() {
       <Navbar transparent />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-blue-700 min-h-[90vh] flex items-center">
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-blue-900 min-h-[90vh] flex items-center">
+        {/* Animated Background Blobs */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-600/20 rounded-full blur-[100px] animate-blob" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/10 rounded-full blur-[120px] animate-blob animation-delay-4000" />
         </div>
+
+        {/* Stars */}
+        <div className="stars-container opacity-50">
+          {Array.from({ length: 40 }).map((_, i) => (
+            <div
+              key={i}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `${Math.random() * 2 + 1}px`,
+                height: `${Math.random() * 2 + 1}px`,
+                '--duration': `${Math.random() * 3 + 2}s`,
+                animationDelay: `${Math.random() * 5}s`,
+              }}
+            />
+          ))}
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-40">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm text-blue-200 mb-6">
-                <SparklesIcon className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm text-blue-200 mb-6 transition-all hover:bg-white/20 cursor-default group">
+                <SparklesIcon className="w-4 h-4 group-hover:animate-spin" />
                 Sri Lanka's #1 English Learning Platform
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
                 Master English
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-blue-300">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-400">
                   with Ezy English
                 </span>
               </h1>
@@ -55,8 +75,7 @@ export function LandingPage() {
                 <Link to="/register">
                   <Button
                     size="lg"
-                    className="bg-white !text-blue-600 hover:!bg-blue-800 hover:!text-white shadow-lg shadow-blue-900/30 font-bold transition-all duration-200">
-
+                    className="bg-white !text-blue-600 hover:!scale-105 shadow-xl shadow-blue-900/40 font-bold transition-all duration-300">
                     Get Started Free
                     <ArrowRightIcon className="w-4 h-4 ml-1" />
                   </Button>
@@ -65,8 +84,7 @@ export function LandingPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-white/30 text-white hover:bg-white/10">
-
+                    className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm">
                     <PlayCircleIcon className="w-4 h-4" />
                     Explore Classes
                   </Button>
@@ -90,13 +108,13 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="hidden lg:flex justify-center animate-slide-up">
-              <div className="relative w-full max-w-md">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-sky-400/30 rounded-3xl blur-2xl" />
-                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8">
+            <div className="hidden lg:flex justify-center">
+              <div className="relative w-full max-w-md animate-floating">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-sky-400/20 rounded-[40px] blur-3xl animate-pulse" />
+                <div className="relative glass-morphism rounded-[40px] p-8 border border-white/20 shadow-2xl">
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shadow-inner">
                         <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div>
@@ -108,8 +126,8 @@ export function LandingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center shadow-inner">
                         <BookOpenIcon className="w-5 h-5 text-blue-400" />
                       </div>
                       <div>
@@ -121,8 +139,8 @@ export function LandingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4">
-                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shadow-inner">
                         <AwardIcon className="w-5 h-5 text-amber-400" />
                       </div>
                       <div>
@@ -134,8 +152,8 @@ export function LandingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4">
-                      <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
+                      <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center shadow-inner">
                         <GlobeIcon className="w-5 h-5 text-purple-400" />
                       </div>
                       <div>
