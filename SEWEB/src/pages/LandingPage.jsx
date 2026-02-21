@@ -23,552 +23,363 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 export function LandingPage() {
   return (
-    <div className="w-full min-h-screen bg-white">
+    <div className="w-full min-h-screen bg-[#020617] text-white">
       <Navbar transparent />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-blue-900 min-h-[90vh] flex items-center">
-        {/* Animated Background Blobs */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-600/20 rounded-full blur-[100px] animate-blob" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/10 rounded-full blur-[120px] animate-blob animation-delay-4000" />
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/10 rounded-full blur-[120px] animate-pulse decoration-delay-2000" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03)_0%,transparent_70%)]" />
         </div>
 
-        {/* Stars */}
-        <div className="stars-container opacity-50">
-          {Array.from({ length: 40 }).map((_, i) => (
+        {/* Stars/Particles Background */}
+        <div className="absolute inset-0 pointer-events-none opacity-40">
+          {Array.from({ length: 50 }).map((_, i) => (
             <div
               key={i}
-              className="star"
+              className="absolute bg-white rounded-full animate-twinkle"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 width: `${Math.random() * 2 + 1}px`,
                 height: `${Math.random() * 2 + 1}px`,
-                '--duration': `${Math.random() * 3 + 2}s`,
+                animationDuration: `${Math.random() * 3 + 2}s`,
                 animationDelay: `${Math.random() * 5}s`,
               }}
             />
           ))}
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-40">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm text-blue-200 mb-6 transition-all hover:bg-white/20 cursor-default group">
-                <SparklesIcon className="w-4 h-4 group-hover:animate-spin" />
-                Sri Lanka's #1 English Learning Platform
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* Content Left */}
+            <div className="space-y-8 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest animate-fade-in">
+                <SparklesIcon className="w-3.5 h-3.5" />
+                <span>Sri Lanka's #1 Learning Hub</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-                Master English
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-400">
-                  with Ezy English
+              
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight animate-slide-up">
+                Master English <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-300">
+                  Online & Offline
                 </span>
               </h1>
-              <p className="text-lg text-blue-100/80 max-w-lg mb-8 leading-relaxed">
-                Join thousands of students across Sri Lanka learning English
-                through our interactive online and physical classes. From school
-                students to working professionals.
+
+              <p className="text-lg sm:text-xl text-slate-400 max-w-xl leading-relaxed animate-slide-up animation-delay-500">
+                Join 5,000+ students mastering English with Ezy English. 
+                Premium courses designed for students, professionals, and future leaders.
               </p>
-              <div className="flex flex-wrap gap-4">
+
+              <div className="flex flex-wrap gap-4 pt-4 animate-slide-up animation-delay-1000">
                 <Link to="/register">
-                  <Button
-                    size="lg"
-                    className="bg-white !text-blue-600 hover:!scale-105 shadow-xl shadow-blue-900/40 font-bold transition-all duration-300">
-                    Get Started Free
-                    <ArrowRightIcon className="w-4 h-4 ml-1" />
+                  <Button size="xl" className="bg-blue-600 hover:bg-blue-500 text-white border-none shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all duration-300 group">
+                    Start Learning Free
+                    <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
                 <Link to="/classes">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm">
-                    <PlayCircleIcon className="w-4 h-4" />
+                  <Button variant="outline" size="xl" className="border-slate-700 bg-white/5 backdrop-blur-md text-white hover:bg-white/10">
                     Explore Classes
                   </Button>
                 </Link>
               </div>
-              <div className="flex items-center gap-6 mt-10 pt-8 border-t border-white/10">
-                <div>
-                  <p className="text-2xl font-bold text-white">5,000+</p>
-                  <p className="text-sm text-blue-200/70">Active Students</p>
+
+              {/* Stats Bar (Like the badges in the image) */}
+              <div className="flex flex-wrap gap-3 pt-8 animate-fade-in animation-delay-1500">
+                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 text-sm font-medium">
+                  Free Trial
                 </div>
-                <div className="w-px h-10 bg-white/20" />
-                <div>
-                  <p className="text-2xl font-bold text-white">50+</p>
-                  <p className="text-sm text-blue-200/70">Expert Teachers</p>
+                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 text-sm font-medium">
+                  Desktop & Mobile
                 </div>
-                <div className="w-px h-10 bg-white/20" />
-                <div>
-                  <p className="text-2xl font-bold text-white">98%</p>
-                  <p className="text-sm text-blue-200/70">Satisfaction</p>
+                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 text-sm font-medium">
+                  Certified
+                </div>
+                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-amber-500/20 text-amber-500 text-sm font-bold border-amber-500/20">
+                  Premium UI
                 </div>
               </div>
             </div>
 
-            <div className="hidden lg:flex justify-center">
-              <div className="relative w-full max-w-md animate-floating">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-sky-400/20 rounded-[40px] blur-3xl animate-pulse" />
-                <div className="relative glass-morphism rounded-[40px] p-8 border border-white/20 shadow-2xl">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shadow-inner">
-                        <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+            {/* Visual Right (Mockup Style) */}
+            <div className="relative group perspective-1000 lg:block hidden">
+              <div className="relative z-10 transition-transform duration-700 group-hover:rotate-y-[-5deg] group-hover:rotate-x-[5deg]">
+                {/* Desktop Mockup */}
+                <div className="bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden aspect-video relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent" />
+                  <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-slate-700" />
+                      <div className="w-3 h-3 rounded-full bg-slate-700" />
+                      <div className="w-3 h-3 rounded-full bg-slate-700" />
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div className="h-4 w-3/4 bg-slate-800 rounded animate-pulse" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-32 bg-slate-800 rounded-xl relative overflow-hidden group/card">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-transparent group-hover/card:scale-110 transition-transform" />
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">
-                          Grammar Basics
-                        </p>
-                        <p className="text-xs text-blue-200/70">
-                          Completed • 100%
-                        </p>
+                      <div className="h-32 bg-slate-800 rounded-xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-transparent" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center shadow-inner">
-                        <BookOpenIcon className="w-5 h-5 text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">
-                          Speaking Practice
-                        </p>
-                        <p className="text-xs text-blue-200/70">
-                          In Progress • 65%
-                        </p>
-                      </div>
+                    <div className="h-4 w-1/2 bg-slate-800 rounded animate-pulse animation-delay-1000" />
+                  </div>
+                  {/* Glowing Effect inside mockup */}
+                  <div className="absolute bottom-[-20%] left-[-20%] w-full h-full bg-blue-500/10 blur-[100px]" />
+                </div>
+
+                {/* Mobile Mockup Floating */}
+                <div className="absolute -right-10 bottom-[-40px] w-48 h-96 bg-slate-900 rounded-[2.5rem] border-[6px] border-slate-800 shadow-2xl z-20 overflow-hidden hidden xl:block animate-floating">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-6 bg-slate-800 rounded-b-2xl" />
+                  <div className="p-6 pt-10 space-y-4">
+                    <div className="h-32 bg-slate-800 rounded-xl" />
+                    <div className="h-4 w-full bg-slate-800 rounded" />
+                    <div className="h-4 w-2/3 bg-slate-800 rounded" />
+                    <div className="h-10 w-full bg-blue-600 rounded-lg mt-auto opacity-50" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Background Glow behind mockup */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
+            </div>
+          </div>
+
+          {/* Quick Stats at bottom of Hero */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 mt-20 border-t border-slate-800/50">
+            <div>
+              <div className="text-3xl font-black text-white">5,000+</div>
+              <div className="text-sm text-slate-500 uppercase tracking-widest font-bold">Active Students</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white">50+</div>
+              <div className="text-sm text-slate-500 uppercase tracking-widest font-bold">Expert Teachers</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white">10+</div>
+              <div className="text-sm text-slate-500 uppercase tracking-widest font-bold">Island Branches</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white">98%</div>
+              <div className="text-sm text-slate-500 uppercase tracking-widest font-bold">Success Rate</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bento Feature Section */}
+      <section className="py-24 relative overflow-hidden bg-slate-950/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-sm font-black text-blue-500 uppercase tracking-[0.3em]">Our Ecosystem</h2>
+            <p className="text-4xl sm:text-5xl font-black">Designed for Excellence.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-6 md:grid-rows-2 gap-4 h-full md:h-[600px]">
+            {/* Main Feature - Online Classes */}
+            <div className="md:col-span-3 md:row-span-2 group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-slate-800 p-8 flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px] group-hover:bg-blue-600/20 transition-all duration-700" />
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
+                  <MonitorIcon className="w-7 h-7 text-blue-400" />
+                </div>
+                <h3 className="text-3xl font-black mb-4">Elite Online <br /> Learning</h3>
+                <p className="text-slate-400 leading-relaxed max-w-md">
+                  Experience university-grade English education from the comfort of your home. 
+                  Live sessions, interactive whiteboards, and real-time feedback.
+                </p>
+              </div>
+              <div className="mt-8 pt-8 border-t border-slate-800/50">
+                <div className="flex -space-x-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-12 h-12 rounded-full border-4 border-slate-900 bg-slate-800 overflow-hidden">
+                      <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800" />
                     </div>
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
-                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shadow-inner">
-                        <AwardIcon className="w-5 h-5 text-amber-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">
-                          Gold Level Achieved!
-                        </p>
-                        <p className="text-xs text-blue-200/70">
-                          2,450 XP earned
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4 transition-all hover:bg-white/20">
-                      <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center shadow-inner">
-                        <GlobeIcon className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">
-                          IELTS Preparation
-                        </p>
-                        <p className="text-xs text-blue-200/70">
-                          Starting Soon
-                        </p>
-                      </div>
-                    </div>
+                  ))}
+                  <div className="w-12 h-12 rounded-full border-4 border-slate-900 bg-blue-600 flex items-center justify-center text-xs font-bold">
+                    +5k
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 mt-3 font-bold uppercase tracking-widest">Trusted by students island-wide</p>
+              </div>
+            </div>
+
+            {/* Gamification */}
+            <div className="md:col-span-3 md:row-span-1 group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-slate-800 p-8">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-start justify-between">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                    <GamepadIcon className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <h3 className="text-xl font-black">Gamified XP System</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Earn badges, climb leaderboards, and unlock rewards as you master English.
+                  </p>
+                </div>
+                <div className="hidden lg:block">
+                  <div className="w-24 h-24 rounded-full border border-purple-500/20 flex items-center justify-center animate-pulse">
+                    <AwardIcon className="w-10 h-10 text-purple-400 opacity-50" />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* About */}
-      <section className="py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <span className="text-sm font-bold text-blue-600 uppercase tracking-wider">
-                About Us
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-6 leading-tight">
-                Empowering Sri Lanka Through English Education
-              </h2>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                Founded in 2018, Ezy English has grown to become one of Sri
-                Lanka's most trusted English learning platforms. We combine the
-                best of online and physical learning to deliver results that
-                matter.
-              </p>
-              <p className="text-slate-600 leading-relaxed mb-8">
-                Our expert teachers use proven methodologies to help school
-                students, university students, and working professionals achieve
-                their English language goals — from basic communication to IELTS
-                preparation.
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 rounded-2xl p-5 text-center">
-                  <p className="text-3xl font-extrabold text-blue-600">
-                    5,000+
-                  </p>
-                  <p className="text-sm text-slate-600 mt-1">Students</p>
+            {/* Physical Branches */}
+            <div className="md:col-span-2 md:row-span-1 group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-slate-800 p-8">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <BuildingIcon className="w-6 h-6 text-emerald-400" />
                 </div>
-                <div className="bg-blue-50 rounded-2xl p-5 text-center">
-                  <p className="text-3xl font-extrabold text-blue-600">50+</p>
-                  <p className="text-sm text-slate-600 mt-1">Teachers</p>
-                </div>
-                <div className="bg-blue-50 rounded-2xl p-5 text-center">
-                  <p className="text-3xl font-extrabold text-blue-600">10+</p>
-                  <p className="text-sm text-slate-600 mt-1">Branches</p>
-                </div>
-                <div className="bg-blue-50 rounded-2xl p-5 text-center">
-                  <p className="text-3xl font-extrabold text-blue-600">98%</p>
-                  <p className="text-sm text-slate-600 mt-1">Satisfaction</p>
-                </div>
+                <h3 className="text-xl font-black">Global <br />Presence</h3>
+                <p className="text-slate-400 text-sm">Join us at any of our 10+ island-wide branches.</p>
               </div>
             </div>
-            <div className="relative">
-              <div className="bg-gradient-to-br from-blue-100 to-sky-50 rounded-3xl aspect-[4/3] flex items-center justify-center">
-                <div className="text-center">
-                  <BookOpenIcon className="w-16 h-16 text-blue-300 mx-auto mb-3" />
-                  <p className="text-sm text-blue-400 font-medium">
-                    Institute Image
-                  </p>
-                </div>
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-lg p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">Certified</p>
-                  <p className="text-xs text-slate-500">Ministry Approved</p>
-                </div>
-              </div>
+
+            {/* Certification */}
+            <div className="md:col-span-1 md:row-span-1 group relative overflow-hidden rounded-[2rem] bg-blue-600 border border-blue-500 p-8 flex flex-col justify-center items-center text-center">
+              <AwardIcon className="w-10 h-10 text-white mb-4 animate-bounce" />
+              <h3 className="text-sm font-black uppercase tracking-widest">Certified Results</h3>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 lg:py-28 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-sm font-bold text-blue-600 uppercase tracking-wider">
-              Features
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-4">
-              Everything You Need to Learn English
-            </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
-              Our comprehensive platform provides all the tools and resources
-              for effective English learning.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card hover className="group">
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-5 group-hover:bg-blue-600 transition-colors duration-300">
-                <MonitorIcon className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Online Classes
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Live interactive sessions from anywhere. Join classes on your
-                schedule with our flexible online platform.
-              </p>
-            </Card>
-
-            <Card hover className="group">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mb-5 group-hover:bg-emerald-600 transition-colors duration-300">
-                <BuildingIcon className="w-6 h-6 text-emerald-600 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Physical Classes
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Visit any of our 10+ branches across Sri Lanka for in-person
-                learning with expert instructors.
-              </p>
-            </Card>
-
-            <Card hover className="group">
-              <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center mb-5 group-hover:bg-purple-600 transition-colors duration-300">
-                <UsersIcon className="w-6 h-6 text-purple-600 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Expert Teachers
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Learn from 50+ qualified and experienced English language
-                teachers with proven track records.
-              </p>
-            </Card>
-
-            <Card hover className="group">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center mb-5 group-hover:bg-amber-600 transition-colors duration-300">
-                <GamepadIcon className="w-6 h-6 text-amber-600 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Gamified Learning
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Earn XP points, unlock achievements, and compete on leaderboards
-                while mastering English.
-              </p>
-            </Card>
-
-            <Card hover className="group">
-              <div className="w-12 h-12 rounded-2xl bg-sky-100 flex items-center justify-center mb-5 group-hover:bg-sky-600 transition-colors duration-300">
-                <BarChart3Icon className="w-6 h-6 text-sky-600 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Progress Tracking
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Monitor your learning journey with detailed analytics, charts,
-                and performance insights.
-              </p>
-            </Card>
-
-            <Card hover className="group">
-              <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center mb-5 group-hover:bg-rose-600 transition-colors duration-300">
-                <AwardIcon className="w-6 h-6 text-rose-600 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Certificate Programs
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Earn recognized certificates upon completing courses to boost
-                your career prospects.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Branch Locations */}
-      <section className="py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-sm font-bold text-blue-600 uppercase tracking-wider">
-              Locations
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-4">
-              Our Branches Across Sri Lanka
-            </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
-              Visit any of our conveniently located branches for in-person
-              classes and support.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card hover>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <MapPinIcon className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 mb-1">
-                    Colombo Main Branch
-                  </h3>
-                  <p className="text-sm text-slate-500 mb-2">
-                    42 Galle Road, Colombo 03
-                  </p>
-                  <p className="text-sm text-slate-500 flex items-center gap-1.5 mb-3">
-                    <PhoneIcon className="w-3.5 h-3.5" /> +94 11 234 5678
-                  </p>
-                  <Link
-                    to="/map"
-                    className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-1">
-
-                    View on Map <ArrowRightIcon className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            </Card>
-
-            <Card hover>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <MapPinIcon className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 mb-1">
-                    Kandy Branch
-                  </h3>
-                  <p className="text-sm text-slate-500 mb-2">
-                    15 Peradeniya Road, Kandy
-                  </p>
-                  <p className="text-sm text-slate-500 flex items-center gap-1.5 mb-3">
-                    <PhoneIcon className="w-3.5 h-3.5" /> +94 81 234 5678
-                  </p>
-                  <Link
-                    to="/map"
-                    className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-1">
-
-                    View on Map <ArrowRightIcon className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            </Card>
-
-            <Card hover>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <MapPinIcon className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 mb-1">
-                    Galle Branch
-                  </h3>
-                  <p className="text-sm text-slate-500 mb-2">
-                    78 Main Street, Galle Fort
-                  </p>
-                  <p className="text-sm text-slate-500 flex items-center gap-1.5 mb-3">
-                    <PhoneIcon className="w-3.5 h-3.5" /> +94 91 234 5678
-                  </p>
-                  <Link
-                    to="/map"
-                    className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-1">
-
-                    View on Map <ArrowRightIcon className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 lg:py-28 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-sm font-bold text-blue-600 uppercase tracking-wider">
-              Testimonials
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-4">
-              What Our Students Say
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <div className="flex gap-1 mb-4">
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed mb-5">
-                "Ezy English transformed my confidence in speaking English. The
-                online classes fit perfectly with my university schedule. I went
-                from barely speaking to presenting in English!"
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-sm font-bold text-blue-600">SK</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Saman Kumara
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    University Student, Colombo
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card>
-              <div className="flex gap-1 mb-4">
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed mb-5">
-                "The gamification features keep my daughter motivated. She
-                actually looks forward to her English lessons now! The XP system
-                and badges make learning fun for kids."
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-sm font-bold text-emerald-600">NF</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Nisha Fernando
-                  </p>
-                  <p className="text-xs text-slate-500">Parent, Kandy</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card>
-              <div className="flex gap-1 mb-4">
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed mb-5">
-                "I needed English for my career in IT. The professional English
-                course at Ezy English helped me ace my interviews and
-                communicate confidently with international clients."
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                  <span className="text-sm font-bold text-purple-600">RP</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Ravindu Perera
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Software Engineer, Galle
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 py-20 lg:py-28">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-sky-400/10 rounded-full blur-3xl" />
-        </div>
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight">
-            Ready to Start Your English Journey?
-          </h2>
-          <p className="text-lg text-blue-100/80 max-w-2xl mx-auto mb-10">
-            Join 5,000+ students who are already improving their English with
-            Ezy English. Start your free trial today.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/register">
-              <Button
-                size="lg"
-                className="bg-white !text-blue-600 hover:!bg-blue-800 hover:!text-white shadow-lg shadow-blue-900/30 font-bold transition-all duration-200">
-
-                Register Now
-                <ArrowRightIcon className="w-4 h-4 ml-1" />
-              </Button>
+      {/* Mentor/Teachers Section */}
+      <section className="py-24 bg-[#020617]">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div className="space-y-4">
+              <h2 className="text-sm font-black text-amber-500 uppercase tracking-[0.3em]">Our Faculty</h2>
+              <p className="text-4xl sm:text-5xl font-black">Learn from the Best.</p>
+            </div>
+            <Link to="/classes" className="text-blue-400 font-bold flex items-center gap-2 hover:text-blue-300 transition-colors">
+              Meet all mentors <ArrowRightIcon className="w-5 h-5" />
             </Link>
-            <Link to="/classes">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white/30 text-white hover:bg-white/10">
+          </div>
 
-                Browse Classes
-              </Button>
-            </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { name: "Dr. Sarah Perera", role: "IELTS Specialist", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400" },
+              { name: "Mr. Amal Silva", role: "Senior Grammar Instructor", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400" },
+              { name: "Ms. Dinithi Jay", role: "Spoken English Coach", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400" },
+              { name: "Mr. Rajitha Karu", role: "Business English Expert", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400" }
+            ].map((mentor, i) => (
+              <div key={i} className="group cursor-pointer">
+                <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 border border-slate-800">
+                  <img src={mentor.image} alt={mentor.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-60" />
+                </div>
+                <h4 className="text-xl font-bold group-hover:text-blue-400 transition-colors">{mentor.name}</h4>
+                <p className="text-slate-500 text-sm font-medium">{mentor.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Branch Locations - Dark Theme */}
+      <section className="py-24 bg-slate-950/30 border-y border-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16 space-y-4">
+             <h2 className="text-sm font-black text-blue-500 uppercase tracking-[0.3em]">Island Wide</h2>
+            <p className="text-4xl font-black">Find us anywhere.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { name: "Colombo Main", addr: "42 Galle Road, Colombo 03", phone: "+94 11 234 5678" },
+              { name: "Kandy Center", addr: "15 Peradeniya Road, Kandy", phone: "+94 81 234 5678" },
+              { name: "Galle Branch", addr: "78 Main Street, Galle Fort", phone: "+94 91 234 5678" }
+            ].map((branch, i) => (
+              <div key={i} className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 transition-all group">
+                <MapPinIcon className="w-8 h-8 text-blue-500 mb-6 group-hover:scale-110 transition-transform" />
+                <h3 className="text-xl font-bold mb-2">{branch.name}</h3>
+                <p className="text-slate-500 text-sm mb-4">{branch.addr}</p>
+                <div className="flex items-center gap-2 text-slate-400 text-sm font-medium mb-6">
+                  <PhoneIcon className="w-4 h-4" /> {branch.phone}
+                </div>
+                <Link to="/map" className="inline-flex items-center gap-2 text-blue-400 font-bold text-sm hover:underline">
+                  View Direction <ArrowRightIcon className="w-4 h-4" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials - Matching Style */}
+      <section className="py-24 bg-[#020617]">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-sm font-black text-purple-500 uppercase tracking-[0.3em]">Testimonials</h2>
+            <p className="text-4xl font-black">Success Stories.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { name: "Saman Kumara", role: "University Student", text: "Ezy English transformed my confidence in speaking English. The online classes fit perfectly with my university schedule." },
+              { name: "Nisha Fernando", role: "Parent", text: "The gamification features keep my daughter motivated. She actually looks forward to her English lessons now!" },
+              { name: "Ravindu Perera", role: "Software Engineer", text: "I needed English for my career in IT. The professional English course helped me ace my interviews." }
+            ].map((t, i) => (
+              <div key={i} className="p-8 rounded-[2rem] bg-slate-900 border border-slate-800 relative">
+                <div className="flex gap-1 mb-6">
+                  {[1, 2, 3, 4, 5].map(s => <StarIcon key={s} className="w-4 h-4 fill-amber-500 text-amber-500" />)}
+                </div>
+                <p className="text-slate-400 leading-relaxed mb-8 italic">"{t.text}"</p>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center font-black text-blue-400">
+                    {t.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h4 className="font-bold">{t.name}</h4>
+                    <p className="text-xs text-slate-500">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Ultra Modern */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px]" />
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-blue-600 to-indigo-700 p-12 md:p-20 text-center shadow-2xl overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[60px] group-hover:scale-150 transition-transform duration-1000" />
+            
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight">
+              Ready to redefine your <br /> English journey?
+            </h2>
+            <p className="text-xl text-blue-100/80 mb-12 max-w-2xl mx-auto">
+              Join 5,000+ students and start learning today with our premium online and physical platforms.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6">
+              <Link to="/register">
+                <Button size="xl" className="bg-white text-blue-600 hover:bg-blue-50 border-none shadow-xl font-black px-10">
+                  Register Now
+                </Button>
+              </Link>
+              <Link to="/classes">
+                <Button variant="outline" size="xl" className="border-white/30 text-white hover:bg-white/10 px-10">
+                  Browse Classes
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       <Footer />
-    </div>);
-
+    </div>
+  );
 }
