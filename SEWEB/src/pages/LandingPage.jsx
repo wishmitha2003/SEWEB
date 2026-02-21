@@ -60,7 +60,7 @@ export function LandingPage() {
       <Navbar transparent />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-24 pb-12 sm:pt-28 sm:pb-20 overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
@@ -95,27 +95,27 @@ export function LandingPage() {
                 <span>Sri Lanka's #1 Learning Hub</span>
               </div>
               
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight animate-slide-up">
+              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black leading-[1.2] sm:leading-[1.1] tracking-tight animate-slide-up">
                 Master English <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-300">
                   Online & Offline
                 </span>
               </h1>
 
-              <p className="text-xl sm:text-2xl text-slate-400 max-w-2xl leading-relaxed animate-slide-up animation-delay-500">
+              <p className="text-base sm:text-lg lg:text-2xl text-slate-400 max-w-2xl leading-relaxed animate-slide-up animation-delay-500">
                 Join 5,000+ students mastering English with Ezy English. 
                 Premium courses designed for students, professionals, and future leaders.
               </p>
 
-              <div className="flex flex-row items-center gap-4 pt-4 animate-slide-up animation-delay-1000">
-                <Link to="/register">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white border-none shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all duration-300 group whitespace-nowrap">
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 animate-slide-up animation-delay-1000 w-full sm:w-auto">
+                <Link to="/register" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white border-none shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all duration-300 group whitespace-nowrap">
                     Start Learning Free
                     <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link to="/classes">
-                  <Button variant="outline" size="lg" className="border-slate-700 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 whitespace-nowrap">
+                <Link to="/classes" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-slate-700 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 whitespace-nowrap">
                     Explore Classes
                   </Button>
                 </Link>
@@ -317,35 +317,64 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Mentor/Teachers Section */}
-      <section className="py-12 bg-[#020617]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-            <div className="space-y-2">
-              <h2 className="text-sm font-black text-amber-500 uppercase tracking-[0.3em]">Our Faculty</h2>
-              <p className="text-2xl sm:text-3xl font-black">Learn from the Best.</p>
-            </div>
-            <Link to="/classes" className="text-blue-400 font-bold flex items-center gap-2 hover:text-blue-300 transition-colors">
-              Meet all mentors <ArrowRightIcon className="w-5 h-5" />
-            </Link>
-          </div>
+      {/* Founder's Section */}
+      <section className="py-20 lg:py-28 relative overflow-hidden bg-[#020617]">
+        {/* Background Accents */}
+        <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-blue-600/5 blur-[150px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-indigo-600/5 blur-[150px] rounded-full" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { name: "Dr. Sarah Perera", role: "IELTS Specialist", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400" },
-              { name: "Mr. Amal Silva", role: "Senior Grammar Instructor", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400" },
-              { name: "Ms. Dinithi Jay", role: "Spoken English Coach", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400" },
-              { name: "Mr. Rajitha Karu", role: "Business English Expert", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400" }
-            ].map((mentor, i) => (
-              <div key={i} className="group cursor-pointer">
-                <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 border border-slate-800">
-                  <img src={mentor.image} alt={mentor.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-60" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center max-w-7xl mx-auto">
+            {/* Image Side */}
+            <div className="relative group max-w-lg mx-auto lg:ml-auto lg:mr-0">
+              <div className="absolute -inset-6 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop" 
+                  alt="Mr. Wishmitha Devinda" 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80" />
+                
+                {/* Floating Info Box on Image */}
+                <div className="absolute bottom-8 left-8 right-8 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 animate-slide-up">
+                  <h4 className="text-xl font-black text-white">Mr. Wishmitha Devinda</h4>
+                  <p className="text-blue-400 text-xs font-black uppercase tracking-[0.2em] mt-1">Founder & CEO</p>
                 </div>
-                <h4 className="text-xl font-bold group-hover:text-blue-400 transition-colors">{mentor.name}</h4>
-                <p className="text-slate-500 text-sm font-medium">{mentor.role}</p>
               </div>
-            ))}
+            </div>
+
+            {/* Content Side */}
+            <div className="space-y-10">
+              <div className="space-y-3">
+                <h2 className="text-xs font-black text-blue-500 uppercase tracking-[0.5em]">Meet Our Founder</h2>
+                <h3 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
+                  Visionary Behind <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-400">Ezy English</span>
+                </h3>
+              </div>
+
+              <div className="space-y-6 text-slate-400 text-lg sm:text-xl leading-relaxed font-medium">
+                <p>
+                  "Ezy English was born from a simple yet powerful mission: to make premium English education accessible to every Sri Lankan student."
+                </p>
+                <p>
+                  <span className="text-white">Mr. Wishmitha Devinda</span> has pioneered a new era of learning that combines gamified experiences with university-grade curriculum, leading Sri Lanka's digital education shift.
+                </p>
+              </div>
+
+              <div className="pt-6 flex items-center gap-10">
+                <div className="flex flex-col">
+                  <span className="text-4xl font-signature text-blue-400 mb-1">W. Devinda</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Official Signature</span>
+                </div>
+                <div className="h-16 w-px bg-slate-800" />
+                <div className="flex flex-col">
+                  <span className="text-3xl font-black text-white">5K+</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Students</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

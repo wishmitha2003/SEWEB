@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MenuIcon, XIcon, LogOutIcon, HomeIcon } from 'lucide-react';
+import { Menu, X, LogOut, Home } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export function Sidebar({
-  items,
+  items = [],
 }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const userName = user?.fullName || 'User';
   const userRole = user?.role || 'Student';
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+
+  const handleLogout = () => {
+    if(confirm('Are you sure you want to log out?')) {
+      logout();
+    }
+  };
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -22,7 +28,7 @@ export function Sidebar({
             to="/"
             className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-blue-600 bg-blue-50 font-bold hover:bg-blue-100 transition-colors"
           >
-            <HomeIcon className="w-5 h-5" />
+            <Home className="w-5 h-5" />
             <span>Home</span>
           </Link>
         )}
@@ -31,11 +37,11 @@ export function Sidebar({
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <MenuIcon className="w-5 h-5" />
+          <Menu className="w-5 h-5" />
         </button>
       </div>
 
-      {/* User Profile - Only shown on Mobile Sidebar or when very necessary, otherwise hidden here to be on the Top Right */}
+      {/* User Profile - Only shown on Mobile Sidebar or when very necessary */}
       <div className={`p-3 border-b border-slate-100 lg:hidden flex items-center gap-3`}>
         <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {user?.profileImage ? (
@@ -76,17 +82,17 @@ export function Sidebar({
       </nav>
 
       <div className="p-3 border-t border-slate-100">
-        <Link
-          to="/"
+        <button
+          onClick={handleLogout}
           className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+            w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
             text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors
             ${collapsed ? 'justify-center' : ''}
           `}
         >
-          <LogOutIcon className={`transition-transform duration-200 ${collapsed ? 'w-5 h-5 scale-110' : 'w-4 h-4'}`} />
+          <LogOut className={`transition-transform duration-200 ${collapsed ? 'w-5 h-5 scale-110' : 'w-4 h-4'}`} />
           {!collapsed && <span>Log Out</span>}
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -99,7 +105,7 @@ export function Sidebar({
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label="Toggle sidebar"
       >
-        {mobileOpen ? <XIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
+        {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       {/* Mobile overlay */}

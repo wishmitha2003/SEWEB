@@ -124,18 +124,22 @@ export function Navbar({ transparent = false }) {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1 ml-auto">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={(e) => handleNavClick(e, link.path)}
                 className={`
-                  px-4 py-2 rounded-full text-[12px] font-black uppercase tracking-widest transition-all duration-300
+                  px-4 py-2 rounded-full text-[12px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2
                   ${location.pathname === link.path ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/20') : showBg ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' : 'text-white/60 hover:text-white hover:bg-white/10'}
                 `}
               >
-                {link.label}
+                {link.label === 'Contact' ? (
+                  <PhoneIcon className="w-4 h-4" />
+                ) : (
+                  link.label
+                )}
               </Link>
             ))}
           </div>
@@ -285,13 +289,20 @@ export function Navbar({ transparent = false }) {
                   to={link.path}
                   onClick={(e) => handleNavClick(e, link.path)}
                   className={`
-                    px-4 py-3 rounded-xl text-base font-black uppercase tracking-widest transition-all duration-300
+                    px-4 py-3 rounded-xl text-base font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-3
                     ${location.pathname === link.path 
                       ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-blue-600/20') 
                       : (showBg ? 'text-slate-500 hover:bg-slate-50' : 'text-white/60 hover:text-white hover:bg-white/10')}
                   `}
                 >
-                  {link.label}
+                  {link.label === 'Contact' ? (
+                    <>
+                      <PhoneIcon className="w-5 h-5" />
+                      <span>Contact</span>
+                    </>
+                  ) : (
+                    link.label
+                  )}
                 </Link>
               ))}
 
