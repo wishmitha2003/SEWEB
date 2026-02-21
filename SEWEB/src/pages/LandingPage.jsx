@@ -123,7 +123,7 @@ export function LandingPage() {
             </div>
 
             {/* Visual Right (Mockup Style) */}
-            <div className="relative group perspective-1000 block mt-12 lg:mt-0">
+            <div className="relative group perspective-1000 block mt-6 lg:mt-0 max-w-[320px] sm:max-w-none mx-auto lg:mx-0 scale-[0.7] xs:scale-[0.8] sm:scale-90 lg:scale-100 origin-center lg:origin-right transition-transform duration-700">
               <div className="relative z-10 transition-transform duration-1000 group-hover:rotate-y-[-10deg] group-hover:rotate-x-[4deg]">
                 {/* Laptop Display (The Lid) */}
                 <div className="relative p-[6px] bg-gradient-to-b from-[#475569] to-[#1e293b] rounded-t-2xl border-x-2 border-t-2 border-white/10 shadow-2xl">
@@ -205,7 +205,7 @@ export function LandingPage() {
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[90%] h-10 bg-blue-600/10 blur-[40px] rounded-full -z-10" />
 
                 {/* Mobile Mockup Floating (Repositioned precisely) */}
-                <div className="absolute -right-4 sm:-right-12 -bottom-6 sm:bottom-0 w-32 sm:w-44 h-[240px] sm:h-[340px] bg-slate-950 rounded-[2rem] sm:rounded-[3rem] p-2 sm:p-3 border-[6px] sm:border-[8px] border-[#1e293b] shadow-2xl z-30 animate-floating">
+                <div className="absolute -right-2 sm:-right-12 -bottom-4 sm:bottom-0 w-28 sm:w-44 h-[210px] sm:h-[340px] bg-slate-950 rounded-[1.8rem] sm:rounded-[3rem] p-1.5 sm:p-3 border-[4px] sm:border-[8px] border-[#1e293b] shadow-2xl z-30 animate-floating">
                   {/* Mobile Hardware Details */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 sm:w-24 h-4 sm:h-6 bg-[#1e293b] rounded-b-xl sm:rounded-b-2xl z-40">
                     <div className="absolute top-1 sm:top-2 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-0.5 sm:h-1 bg-slate-800 rounded-full" />
