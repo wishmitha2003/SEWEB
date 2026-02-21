@@ -60,7 +60,7 @@ export function LandingPage() {
       <Navbar transparent />
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center pt-20 pb-8 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
@@ -95,14 +95,14 @@ export function LandingPage() {
                 <span>Sri Lanka's #1 Learning Hub</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight animate-slide-up">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight animate-slide-up">
                 Master English <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-300">
                   Online & Offline
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-400 max-w-xl leading-relaxed animate-slide-up animation-delay-500">
+              <p className="text-xl sm:text-2xl text-slate-400 max-w-2xl leading-relaxed animate-slide-up animation-delay-500">
                 Join 5,000+ students mastering English with Ezy English. 
                 Premium courses designed for students, professionals, and future leaders.
               </p>
