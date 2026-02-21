@@ -90,16 +90,16 @@ export function LandingPage() {
 
               {/* Stats Bar (Like the badges in the image) */}
               <div className="flex flex-wrap gap-3 pt-8 animate-fade-in animation-delay-1500">
-                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 text-sm font-medium">
+                <div className="px-6 py-2 rounded-full bg-slate-900 border border-white/5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                   Free Trial
                 </div>
-                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 text-sm font-medium">
+                <div className="px-6 py-2 rounded-full bg-slate-900 border border-white/5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                   Desktop & Mobile
                 </div>
-                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 text-sm font-medium">
+                <div className="px-6 py-2 rounded-full bg-slate-900 border border-white/5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                   Certified
                 </div>
-                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-amber-500/20 text-amber-500 text-sm font-bold border-amber-500/20">
+                <div className="px-6 py-2 rounded-full bg-blue-600/10 border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-widest">
                   Premium UI
                 </div>
               </div>
@@ -173,79 +173,108 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Bento Feature Section */}
-      <section className="py-24 relative overflow-hidden bg-slate-950/50">
+      {/* Bento Feature Section - Ecosystem */}
+      <section className="py-24 relative overflow-hidden bg-[#020617]">
+        {/* Stars Background specifically for this section */}
+        <div className="absolute inset-0 pointer-events-none opacity-30">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute bg-blue-400 rounded-full animate-twinkle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `2px`,
+                height: `2px`,
+                animationDuration: `${Math.random() * 3 + 2}s`,
+              }}
+            />
+          ))}
+        </div>
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-sm font-black text-blue-500 uppercase tracking-[0.3em]">Our Ecosystem</h2>
-            <p className="text-4xl sm:text-5xl font-black">Designed for Excellence.</p>
+            <h2 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Our Ecosystem</h2>
+            <p className="text-4xl sm:text-5xl font-black tracking-tight">Designed for Excellence.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-6 md:grid-rows-2 gap-4 h-full md:h-[600px]">
-            {/* Main Feature - Online Classes */}
-            <div className="md:col-span-3 md:row-span-2 group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-slate-800 p-8 flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px] group-hover:bg-blue-600/20 transition-all duration-700" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Left Card: Elite Online Learning */}
+            <div className="group relative overflow-hidden rounded-[2.5rem] bg-slate-900/40 border border-blue-500/20 p-10 flex flex-col justify-between min-h-[580px] transition-all duration-500 hover:border-blue-500/40 hover:shadow-[0_0_50px_rgba(37,99,235,0.1)]">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 blur-[100px] group-hover:bg-blue-600/20 transition-all duration-700" />
+              
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-blue-900/50 border border-blue-500/30 flex items-center justify-center mb-8 shadow-inner ring-1 ring-blue-400/20">
                   <MonitorIcon className="w-7 h-7 text-blue-400" />
                 </div>
-                <h3 className="text-3xl font-black mb-4">Elite Online <br /> Learning</h3>
-                <p className="text-slate-400 leading-relaxed max-w-md">
+                <h3 className="text-3xl font-black mb-6 text-white leading-[1.1]">Elite Online <br /> Learning</h3>
+                <p className="text-slate-400 leading-relaxed font-medium">
                   Experience university-grade English education from the comfort of your home. 
                   Live sessions, interactive whiteboards, and real-time feedback.
                 </p>
               </div>
-              <div className="mt-8 pt-8 border-t border-slate-800/50">
-                <div className="flex -space-x-3">
+
+              <div className="mt-8 pt-8 border-t border-white/5">
+                <div className="flex -space-x-2.5 mb-5">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-12 h-12 rounded-full border-4 border-slate-900 bg-slate-800 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800" />
+                    <div key={i} className="w-11 h-11 rounded-full border-[3px] border-[#020617] bg-slate-800 overflow-hidden ring-1 ring-white/10">
+                      <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900" />
                     </div>
                   ))}
-                  <div className="w-12 h-12 rounded-full border-4 border-slate-900 bg-blue-600 flex items-center justify-center text-xs font-bold">
+                  <div className="w-11 h-11 rounded-full border-[3px] border-[#020617] bg-blue-600 flex items-center justify-center text-[10px] font-black ring-1 ring-white/10 text-white">
                     +5k
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-3 font-bold uppercase tracking-widest">Trusted by students island-wide</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Trusted by 5k+ students island-wide</p>
               </div>
             </div>
 
-            {/* Gamification */}
-            <div className="md:col-span-3 md:row-span-1 group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-slate-800 p-8">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                    <GamepadIcon className="w-6 h-6 text-purple-400" />
+            {/* Right Column Stack */}
+            <div className="flex flex-col gap-8">
+              {/* Top: Gamified XP System */}
+              <div className="flex-1 group relative overflow-hidden rounded-[2.5rem] bg-slate-900/40 border border-indigo-500/10 p-10 transition-all duration-500 hover:border-indigo-400/30">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className="flex items-start justify-between relative z-10 h-full">
+                  <div className="space-y-6">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-900/30 border border-indigo-500/20 flex items-center justify-center shadow-inner ring-1 ring-indigo-400/20">
+                      <SparklesIcon className="w-7 h-7 text-indigo-400" />
+                    </div>
+                    <h3 className="text-2xl font-black text-white">Gamified XP System</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed font-medium max-w-xs">
+                      Earn badges, climb leaderboards, and unlock rewards as you master English.
+                    </p>
                   </div>
-                  <h3 className="text-xl font-black">Gamified XP System</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    Earn badges, climb leaderboards, and unlock rewards as you master English.
-                  </p>
-                </div>
-                <div className="hidden lg:block">
-                  <div className="w-24 h-24 rounded-full border border-purple-500/20 flex items-center justify-center animate-pulse">
-                    <AwardIcon className="w-10 h-10 text-purple-400 opacity-50" />
+                  
+                  <div className="relative pt-4 hidden sm:block">
+                    <div className="w-28 h-28 rounded-full border border-indigo-500/10 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full bg-indigo-500/5 blur-2xl animate-pulse" />
+                      <AwardIcon className="w-10 h-10 text-indigo-400 opacity-20 group-hover:opacity-60 transition-all duration-500" />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Physical Branches */}
-            <div className="md:col-span-2 md:row-span-1 group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-slate-800 p-8">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <BuildingIcon className="w-6 h-6 text-emerald-400" />
+              {/* Bottom Row */}
+              <div className="flex gap-8 h-48">
+                {/* Global Presence */}
+                <div className="flex-1 group relative overflow-hidden rounded-[2.5rem] bg-slate-900/40 border border-sky-500/10 p-8 transition-all duration-500 hover:border-sky-400/30">
+                  <div className="w-11 h-11 rounded-xl bg-sky-900/30 border border-sky-500/20 flex items-center justify-center mb-5 ring-1 ring-sky-400/10">
+                    <MapPinIcon className="w-5 h-5 text-sky-400" />
+                  </div>
+                  <h3 className="text-lg font-black text-white mb-2">Global Presence</h3>
+                  <p className="text-slate-500 text-xs font-semibold leading-relaxed">Join us at any of our 10+ island-wide branches.</p>
                 </div>
-                <h3 className="text-xl font-black">Global <br />Presence</h3>
-                <p className="text-slate-400 text-sm">Join us at any of our 10+ island-wide branches.</p>
-              </div>
-            </div>
 
-            {/* Certification */}
-            <div className="md:col-span-1 md:row-span-1 group relative overflow-hidden rounded-[2rem] bg-blue-600 border border-blue-500 p-8 flex flex-col justify-center items-center text-center">
-              <AwardIcon className="w-10 h-10 text-white mb-4 animate-bounce" />
-              <h3 className="text-sm font-black uppercase tracking-widest">Certified Results</h3>
+                {/* Certified Results */}
+                <div className="w-48 group relative overflow-hidden rounded-[2.5rem] bg-blue-600 p-8 flex flex-col justify-center items-center text-center shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_25px_50px_-5px_rgba(37,99,235,0.6)] transition-all duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                  <div className="relative z-10">
+                    <AwardIcon className="w-9 h-9 text-white mb-5 animate-bounce" />
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white leading-tight">Certified <br /> Results</h3>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

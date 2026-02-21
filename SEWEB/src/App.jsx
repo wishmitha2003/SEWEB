@@ -15,6 +15,8 @@ import { MapSection } from './pages/MapSection';
 import { ContactPage } from './pages/ContactPage';
 import { useLocation } from 'react-router-dom';
 
+import { LoadingProvider } from './context/LoadingContext';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   React.useEffect(() => {
@@ -26,8 +28,9 @@ function ScrollToTop() {
 export function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
+      <LoadingProvider>
+        <ScrollToTop />
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -42,6 +45,6 @@ export function App() {
         <Route path="/map" element={<MapSection />} />
         <Route path="/contact" element={<ContactPage />} />
       </Routes>
-    </BrowserRouter>);
-
+    </LoadingProvider>
+  </BrowserRouter>);
 }

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, SettingsIcon, PencilIcon, MailIcon, PhoneIcon, SaveIcon, MapPinIcon, HashIcon, GlobeIcon, Trash2Icon, CheckIcon, AtSignIcon, CameraIcon } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
+import { useLoading } from '../../context/LoadingContext'
 
 export function Navbar({ transparent = false }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -15,7 +16,16 @@ export function Navbar({ transparent = false }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, isLoggedIn, logout, updateUser } = useAuth()
+  const { startLoading } = useLoading()
   const [profileImage, setProfileImage] = useState(user?.profileImage || null)
+
+  const handleNavClick = (e, path) => {
+    e.preventDefault()
+    setIsOpen(false)
+    startLoading(() => {
+      navigate(path)
+    })
+  }
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -101,7 +111,7 @@ export function Navbar({ transparent = false }) {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2.5 group">
+          <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2.5 group">
             <div
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${showBg ? 'bg-blue-600' : 'bg-white/20'}`}
             >
@@ -119,9 +129,10 @@ export function Navbar({ transparent = false }) {
               <Link
                 key={link.path}
                 to={link.path}
+                onClick={(e) => handleNavClick(e, link.path)}
                 className={`
-                  px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${location.pathname === link.path ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/20') : showBg ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' : 'text-white/80 hover:text-white hover:bg-white/10'}
+                  px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300
+                  ${location.pathname === link.path ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/20') : showBg ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' : 'text-white/60 hover:text-white hover:bg-white/10'}
                 `}
               >
                 {link.label}
@@ -270,12 +281,12 @@ export function Navbar({ transparent = false }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => handleNavClick(e, link.path)}
                   className={`
-                    px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                    px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300
                     ${location.pathname === link.path 
                       ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-blue-600/20') 
-                      : (showBg ? 'text-slate-600 hover:bg-slate-50' : 'text-white/80 hover:text-white hover:bg-white/10')}
+                      : (showBg ? 'text-slate-500 hover:bg-slate-50' : 'text-white/60 hover:text-white hover:bg-white/10')}
                   `}
                 >
                   {link.label}
