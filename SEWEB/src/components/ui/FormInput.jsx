@@ -6,15 +6,16 @@ export function FormInput({
   helperText,
   id,
   className = '',
+  labelClassName = '',
   ...props
 }) {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  const inputId = id || (typeof label === 'string' ? label.toLowerCase().replace(/\s+/g, '-') : Math.random().toString(36).substring(2, 11));
   return (
     <div className={`w-full ${className}`}>
       {label &&
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-slate-700 mb-1.5">
+        className={`block text-sm font-medium text-slate-700 mb-1.5 ${labelClassName}`}>
 
           {label}
         </label>
