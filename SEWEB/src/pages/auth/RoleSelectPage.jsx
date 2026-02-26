@@ -1,93 +1,78 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpenIcon, GraduationCapIcon, UsersIcon } from 'lucide-react';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import { BookOpenIcon, GraduationCapIcon, UsersIcon, ArrowLeftIcon } from 'lucide-react';
+
 export function RoleSelectPage() {
   return (
-    <div className="min-h-screen w-full bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
-      <Link to="/" className="flex items-center gap-2.5 mb-12">
-        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
-          <BookOpenIcon className="w-5 h-5 text-white" />
+    <div className="lp-root">
+      {/* ── Background ── */}
+      <img
+        src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1800&q=85"
+        alt=""
+        className="lp-bg-img"
+      />
+      <div className="lp-glow" />
+
+      {/* ── Inner ── */}
+      <div className="lp-inner" style={{ maxWidth: '1000px', flexDirection: 'column', gap: '2.5rem' }}>
+        
+        <div style={{ textAlign: 'center' }}>
+          <Link to="/" className="lp-badge" style={{ margin: '0 auto 1.5rem' }}>
+            <BookOpenIcon style={{ width: '1rem', height: '1rem', color: 'white' }} />
+            <span>Ezy English</span>
+          </Link>
+          <h1 className="lp-headline" style={{ fontSize: '3rem', textAlign: 'center' }}>Choose Your Path.</h1>
+          <p className="lp-sub" style={{ textAlign: 'center', marginTop: '0.5rem' }}>Select how you'd like to use Ezy English to get started.</p>
         </div>
-        <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Ezy English
-        </span>
-      </Link>
 
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-3 text-center">
-        Choose Your Role
-      </h1>
-      <p className="text-slate-500 mb-10 text-center max-w-md">
-        Select how you'd like to use Ezy English. You can always change this
-        later.
-      </p>
-
-      <div className="grid sm:grid-cols-3 gap-6 max-w-3xl w-full">
-        <Card hover className="text-center group">
-          <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-5 group-hover:bg-blue-600 transition-colors duration-300">
-            <BookOpenIcon className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors duration-300" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Student</h3>
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-            Access classes, track progress, earn XP, and download learning
-            materials.
-          </p>
-          <Link to="/register">
-            <Button variant="primary" className="w-full">
-              Select Student
-            </Button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', width: '100%' }}>
+          
+          {/* Student */}
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <div className="lp-card" style={{ width: '100%', textAlign: 'center', height: '100%', transition: 'transform 0.3s', cursor: 'pointer' }} 
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-10px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+              <div style={{ width: '4rem', height: '4rem', background: '#e0f2fe', color: '#0ea5e9', borderRadius: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <BookOpenIcon size={32} />
+              </div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.75rem' }}>Student</h3>
+              <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6 }}>Access classes, track progress, earn XP, and download learning materials.</p>
+            </div>
           </Link>
-        </Card>
 
-        <Card hover className="text-center group">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-5 group-hover:bg-emerald-600 transition-colors duration-300">
-            <GraduationCapIcon className="w-8 h-8 text-emerald-600 group-hover:text-white transition-colors duration-300" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Teacher</h3>
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-            Manage classes, upload assignments, track student performance and
-            attendance.
-          </p>
-          <Link to="/register">
-            <Button
-              variant="primary"
-              className="w-full bg-emerald-600 hover:bg-emerald-700">
-
-              Select Teacher
-            </Button>
+          {/* Teacher */}
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <div className="lp-card" style={{ width: '100%', textAlign: 'center', height: '100%', transition: 'transform 0.3s', cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-10px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+              <div style={{ width: '4rem', height: '4rem', background: '#ecfdf5', color: '#10b981', borderRadius: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <GraduationCapIcon size={32} />
+              </div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.75rem' }}>Teacher</h3>
+              <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6 }}>Manage classes, upload assignments, track student performance and attendance.</p>
+            </div>
           </Link>
-        </Card>
 
-        <Card hover className="text-center group">
-          <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-5 group-hover:bg-purple-600 transition-colors duration-300">
-            <UsersIcon className="w-8 h-8 text-purple-600 group-hover:text-white transition-colors duration-300" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Parent</h3>
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-            Monitor your child's progress, view grades, manage payments and
-            schedules.
-          </p>
-          <Link to="/register">
-            <Button
-              variant="primary"
-              className="w-full bg-purple-600 hover:bg-purple-700">
-
-              Select Parent
-            </Button>
+          {/* Parent */}
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <div className="lp-card" style={{ width: '100%', textAlign: 'center', height: '100%', transition: 'transform 0.3s', cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-10px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+              <div style={{ width: '4rem', height: '4rem', background: '#f5f3ff', color: '#8b5cf6', borderRadius: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <UsersIcon size={32} />
+              </div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.75rem' }}>Parent</h3>
+              <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6 }}>Monitor your child's progress, view grades, manage payments and schedules.</p>
+            </div>
           </Link>
-        </Card>
-      </div>
 
-      <p className="text-sm text-slate-400 mt-10">
-        Already have an account?{' '}
-        <Link
-          to="/login"
-          className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+        </div>
 
-          Sign in
+        <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', color: 'rgba(255,255,255,0.8)', fontSize: '1rem', textDecoration: 'none', fontWeight: 700 }}>
+          <ArrowLeftIcon size={18} />
+          Already have an account? Sign In
         </Link>
-      </p>
-    </div>);
-
+      </div>
+    </div>
+  );
 }

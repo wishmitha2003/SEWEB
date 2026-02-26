@@ -26,28 +26,65 @@ export function LandingPage() {
   
   const slides = [
     {
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200",
-      title: "Interactive Collaboration",
-      subtitle: "Learn Together"
+      image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=900&q=95",
+      title: "Classroom Learning",
+      subtitle: "English Classes",
+      description: "Our structured classroom sessions create an immersive English environment. Students practice listening, speaking, reading and writing under expert teacher guidance with real-time feedback."
     },
     {
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200",
-      title: "Engage While Learning",
-      subtitle: "Smart Education"
+      image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=900&q=95",
+      title: "Student Reading",
+      subtitle: "English Literacy",
+      description: "Reading comprehension is the foundation of English fluency. We guide students through curated texts — from news articles to literature — building vocabulary, inference and critical thinking."
     },
     {
-      image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200",
-      title: "Diverse Community",
-      subtitle: "Global Reach"
+      image: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?auto=format&fit=crop&w=900&q=95",
+      title: "Study Focus",
+      subtitle: "Deep Learning",
+      description: "Focused individual study time is essential for mastery. Our self-study resources — flashcards, grammar workbooks and audio exercises — help students reinforce lessons at their own pace."
     },
     {
-      image: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=1200",
-      title: "Focused Excellence",
-      subtitle: "Personalized Support"
-    }
+      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=95",
+      title: "Group Discussion",
+      subtitle: "Speaking Skills",
+      description: "Speaking confidently is our priority. Group discussions, debates and role-plays build fluency, improve pronunciation and reduce the fear of speaking English in public or professional settings."
+    },
+    {
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=900&q=95",
+      title: "Note Taking",
+      subtitle: "Writing Skills",
+      description: "Strong writing is a career superpower. We teach essay structure, formal & informal writing, grammar rules and style — preparing students for O/L, A/L exams and professional emails."
+    },
+    {
+      image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=900&q=95",
+      title: "Library Study",
+      subtitle: "Academic Excellence",
+      description: "Academic English opens doors to universities worldwide. We train students in research skills, academic writing and citation formats — giving them an edge in higher education."
+    },
+    {
+      image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=900&q=95",
+      title: "Teacher & Student",
+      subtitle: "Expert Guidance",
+      description: "One-on-one sessions with our certified teachers accelerate learning dramatically. Personalised lesson plans target each student's weak areas, turning struggles into strengths quickly."
+    },
+    {
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&h=600&q=95",
+      fullImage: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=95",
+      title: "Online Class",
+      subtitle: "Digital Learning",
+      description: "Learn from anywhere with our live online classes. Interactive whiteboards, breakout rooms and recorded sessions mean you never miss a lesson — perfect for busy students across Sri Lanka."
+    },
   ];
 
 
+  const [selectedCard, setSelectedCard] = useState(null);
 
   return (
     <div className="w-full min-h-screen bg-[#020617] text-white">
@@ -116,29 +153,60 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Visual Right (Premium Hero Visual) */}
-            <div className="flex justify-center items-center lg:justify-end">
-              <div className="relative group perspective-2000">
-                {/* Floating Glass Box */}
-                <div className="relative w-full max-w-[500px] aspect-square bg-gradient-to-br from-blue-500/10 to-transparent rounded-[2rem] border border-blue-500/20 backdrop-blur-xl p-6 shadow-2xl animate-float">
-                  {/* Silver Bold Frame & Accents */}
-                  <div className="absolute -inset-4 border-[6px] border-slate-300/20 rounded-[2.5rem] z-0" />
-                  <div className="absolute -inset-2 border-[2px] border-white/30 rounded-[2.2rem] z-0" />
-                  
-                  {/* Diagonal Silver Line Accents */}
-                  <div className="absolute -top-6 -left-10 w-48 silver-line-accent rotate-[-45deg] z-0" />
-                  <div className="absolute -bottom-6 -right-10 w-48 silver-line-accent rotate-[-45deg] z-0" />
-                  
-                  <div className="relative w-full h-full rounded-[1.5rem] overflow-hidden border border-white/10 shadow-inner group-hover:scale-[1.02] transition-transform duration-700 z-10">
-                    <img src={slides[0].image} alt="Learning Platform" className="w-full h-full object-cover" />
+            {/* Visual Right — 4 Portrait Cards Auto-Rolling */}
+            <div className="flex justify-center items-center lg:justify-end overflow-hidden">
+              <div className="hero-cards-frame">
+                {/* Dark outer frame like reference */}
+                <div className="hero-cards-track-wrap">
+                  <div className="hero-cards-track">
+                    {/* Duplicate set for seamless loop */}
+                    {[...slides, ...slides].map((slide, i) => (
+                      <div
+                        key={i}
+                        className="hero-card-item"
+                        onClick={() => setSelectedCard(slides[i % slides.length])}
+                      >
+                        <img src={slide.image} alt={slide.title} className="hero-card-img" />
+                        <div className="hero-card-overlay">
+                          <span className="hero-card-label">{slide.subtitle}</span>
+                          <p className="hero-card-title">{slide.title}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  {/* Static Image Box */}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* ── Image Lightbox Modal ── */}
+      {selectedCard && (
+        <div className="card-lightbox-backdrop" onClick={() => setSelectedCard(null)}>
+          <div className="card-lightbox-modal" onClick={e => e.stopPropagation()}>
+
+            {/* Close */}
+            <button className="card-lightbox-close" onClick={() => setSelectedCard(null)} aria-label="Close">✕</button>
+
+            {/* Left: full image */}
+            <div className="card-lightbox-img-wrap">
+              <img src={selectedCard.fullImage} alt={selectedCard.title} className="card-lightbox-img" />
+            </div>
+
+            {/* Right: info */}
+            <div className="card-lightbox-info">
+              <span className="card-lightbox-badge">{selectedCard.subtitle}</span>
+              <h3 className="card-lightbox-title">{selectedCard.title}</h3>
+              <p className="card-lightbox-desc">{selectedCard.description}</p>
+              <Link to="/register">
+                <button className="card-lightbox-btn">Start Learning →</button>
+              </Link>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* Bento Feature Section - Ecosystem */}
       <section className="py-12 relative overflow-hidden bg-[#020617]">
