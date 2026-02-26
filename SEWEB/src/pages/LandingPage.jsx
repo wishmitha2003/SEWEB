@@ -23,7 +23,6 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 
 export function LandingPage() {
-  const [currentSlide, setCurrentSlide] = useState(0);
   
   const slides = [
     {
@@ -48,12 +47,7 @@ export function LandingPage() {
     }
   ];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [slides.length]);
+
 
   return (
     <div className="w-full min-h-screen bg-[#020617] text-white">
@@ -122,108 +116,25 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Visual Right (Mockup Style) */}
-            <div className="relative group perspective-1000 block mt-6 lg:mt-0 max-w-[320px] sm:max-w-none mx-auto lg:mx-0 scale-[0.7] xs:scale-[0.8] sm:scale-90 lg:scale-100 origin-center lg:origin-right transition-transform duration-700">
-              <div className="relative z-10 transition-transform duration-1000 group-hover:rotate-y-[-10deg] group-hover:rotate-x-[4deg]">
-                {/* Laptop Display (The Lid) */}
-                <div className="relative p-[6px] bg-gradient-to-b from-[#475569] to-[#1e293b] rounded-t-2xl border-x-2 border-t-2 border-white/10 shadow-2xl">
-                  {/* Screen Outer Bezel */}
-                  <div className="bg-[#020617] p-2 rounded-xl border border-white/5 relative shadow-inner aspect-[16/10] overflow-hidden">
-                    {/* Hardware Details: Webcam & Mic */}
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-30 opacity-60">
-                      <div className="w-0.5 h-0.5 rounded-full bg-blue-500/40" />
-                      <div className="w-2 h-2 rounded-full bg-[#1e293b] border border-white/5 flex items-center justify-center">
-                        <div className="w-1 h-1 rounded-full bg-slate-900" />
-                      </div>
-                      <div className="w-0.5 h-0.5 rounded-full bg-blue-500/40" />
-                    </div>
-                    
-                    {/* Actual Screen Panel */}
-                    <div className="w-full h-full rounded-md overflow-hidden relative group/screen">
-                      {slides.map((slide, idx) => (
-                        <div 
-                          key={idx}
-                          className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                            idx === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
-                          }`}
-                        >
-                          <img 
-                            src={slide.image} 
-                            alt={slide.title} 
-                            className="w-full h-full object-cover"
-                          />
-                          
-                          {/* Premium Screen Overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 text-left z-10">
-                            <div className={`space-y-1.5 transition-all duration-700 delay-300 ${
-                              idx === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-                            }`}>
-                              <p className="text-[9px] font-black text-blue-400 uppercase tracking-[0.3em]">{slide.subtitle}</p>
-                              <h4 className="text-2xl font-black text-white tracking-tight">{slide.title}.</h4>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {/* Realistic Screen Glare */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-60 pointer-events-none z-10" />
-                      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/5 to-transparent skew-x-[-20deg] translate-x-1/2 z-10" />
-                      
-                      {/* Slide Indicators */}
-                      <div className="absolute bottom-4 right-4 flex gap-1.5 z-20">
-                        {slides.map((_, i) => (
-                          <div 
-                            key={i} 
-                            className={`h-1 rounded-full transition-all duration-500 ${
-                              i === currentSlide ? 'w-4 bg-blue-500' : 'w-1 bg-white/30'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* 3D Hinge / Neck */}
-                <div className="h-2 bg-[#1e293b] border-x-2 border-slate-700 relative z-20">
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
-                </div>
-
-                {/* Laptop Base (Hardware) */}
-                <div className="relative group/base h-5 bg-gradient-to-b from-[#334155] to-[#0f172a] rounded-b-2xl border-b-[8px] border-[#1e293b] w-[110%] -ml-[5%] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  {/* The opening lip/notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-2 bg-[#1e293b] rounded-b-xl border-x border-b border-white/5" />
+            {/* Visual Right (Premium Hero Visual) */}
+            <div className="flex justify-center items-center lg:justify-end">
+              <div className="relative group perspective-2000">
+                {/* Floating Glass Box */}
+                <div className="relative w-full max-w-[500px] aspect-square bg-gradient-to-br from-blue-500/10 to-transparent rounded-[2rem] border border-blue-500/20 backdrop-blur-xl p-6 shadow-2xl animate-float">
+                  {/* Silver Bold Frame & Accents */}
+                  <div className="absolute -inset-4 border-[6px] border-slate-300/20 rounded-[2.5rem] z-0" />
+                  <div className="absolute -inset-2 border-[2px] border-white/30 rounded-[2.2rem] z-0" />
                   
-                  {/* Subtle keyboard reflection */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent opacity-50" />
+                  {/* Diagonal Silver Line Accents */}
+                  <div className="absolute -top-6 -left-10 w-48 silver-line-accent rotate-[-45deg] z-0" />
+                  <div className="absolute -bottom-6 -right-10 w-48 silver-line-accent rotate-[-45deg] z-0" />
                   
-                  {/* Hardware Edge highlight */}
-                  <div className="absolute top-0 inset-x-0 h-px bg-white/10" />
-                </div>
-
-                {/* Deep Hardware Shadow */}
-                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[90%] h-10 bg-blue-600/10 blur-[40px] rounded-full -z-10" />
-
-                {/* Mobile Mockup Floating (Repositioned precisely) */}
-                <div className="absolute -right-2 sm:-right-12 -bottom-4 sm:bottom-0 w-28 sm:w-44 h-[210px] sm:h-[340px] bg-slate-950 rounded-[1.8rem] sm:rounded-[3rem] p-1.5 sm:p-3 border-[4px] sm:border-[8px] border-[#1e293b] shadow-2xl z-30 animate-floating">
-                  {/* Mobile Hardware Details */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 sm:w-24 h-4 sm:h-6 bg-[#1e293b] rounded-b-xl sm:rounded-b-2xl z-40">
-                    <div className="absolute top-1 sm:top-2 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-0.5 sm:h-1 bg-slate-800 rounded-full" />
+                  <div className="relative w-full h-full rounded-[1.5rem] overflow-hidden border border-white/10 shadow-inner group-hover:scale-[1.02] transition-transform duration-700 z-10">
+                    <img src={slides[0].image} alt="Learning Platform" className="w-full h-full object-cover" />
                   </div>
-                  
-                  <div className="w-full h-full rounded-[1.5rem] sm:rounded-[2.2rem] overflow-hidden relative">
-                    <img 
-                      src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?auto=format&fit=crop&q=80&w=400" 
-                      alt="Mobile Learning" 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                  </div>
+                  {/* Static Image Box */}
                 </div>
               </div>
-
-              {/* Background Glow behind mockup */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
             </div>
           </div>
         </div>
