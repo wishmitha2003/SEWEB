@@ -65,7 +65,7 @@ export function LoginPage() {
         phone: account.phone,
         role: account.role,
       });
-      navigate('/');
+      navigate(getRoleDashboard(account.role));
     } else {
       setError('Invalid email or password. Try one of the demo accounts below.');
     }
@@ -83,7 +83,7 @@ export function LoginPage() {
       role: account.role,
     });
     setShowGoogleModal(false);
-    navigate('/');
+    navigate(getRoleDashboard(account.role));
   };
 
   return (

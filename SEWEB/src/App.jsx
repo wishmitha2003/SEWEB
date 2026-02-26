@@ -39,7 +39,7 @@ export function App() {
         <Route path="/role-select" element={<RoleSelectPage />} />
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/teacher" element={<TeacherDashboard />} />
-        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin/*" element={<AdminPanel />} />
         <Route path="/courier" element={<CourierDashboard />} />
         <Route path="/classes" element={<ClassesPage />} />
         <Route path="/materials" element={<MaterialsPage />} />

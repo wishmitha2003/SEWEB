@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   LayoutDashboardIcon,
   UsersIcon,
@@ -333,191 +334,287 @@ const leaderboardColumns = [
 
 export function AdminPanel() {
   const { user } = useAuth();
-  return (
-    <DashboardLayout
-      sidebarItems={sidebarItems}>
+  const location = useLocation();
+  const path = location.pathname;
 
+  const renderStats = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <Card>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <UsersIcon className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold text-slate-900">5,234</p>
+            <p className="text-sm text-slate-500">Total Users</p>
+          </div>
+        </div>
+      </Card>
+      <Card>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <BookOpenIcon className="w-6 h-6 text-emerald-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold text-slate-900">45</p>
+            <p className="text-sm text-slate-500">Active Classes</p>
+          </div>
+        </div>
+      </Card>
+      <Card>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <DollarSignIcon className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold text-slate-900">LKR 2.5M</p>
+            <p className="text-sm text-slate-500">Revenue</p>
+          </div>
+        </div>
+      </Card>
+      <Card>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <BuildingIcon className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold text-slate-900">10</p>
+            <p className="text-sm text-slate-500">Branches</p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+
+  const renderDashboard = () => (
+    <>
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-slate-900">Admin Panel</h1>
-        <p className="text-slate-500 mt-1">
-          Overview of the entire Ezy English platform.
-        </p>
+        <h1 className="text-2xl font-extrabold text-slate-900">Admin Dashboard</h1>
+        <p className="text-slate-500 mt-1">Welcome back, {user?.fullName}. Here's what's happening today.</p>
       </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {renderStats()}
+      <div className="grid lg:grid-cols-2 gap-6">
         <Card>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <UsersIcon className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-slate-900">5,234</p>
-              <p className="text-sm text-slate-500">Total Users</p>
-            </div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Recent Users</h2>
+            <Button size="sm" variant="ghost">View All</Button>
           </div>
+          <Table columns={userColumns.slice(0, 3)} data={userData.slice(0, 5)} />
         </Card>
         <Card>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-              <BookOpenIcon className="w-6 h-6 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-slate-900">45</p>
-              <p className="text-sm text-slate-500">Active Classes</p>
-            </div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Active Classes</h2>
+            <Button size="sm" variant="ghost">View All</Button>
           </div>
-        </Card>
-        <Card>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <DollarSignIcon className="w-6 h-6 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-slate-900">LKR 2.5M</p>
-              <p className="text-sm text-slate-500">Revenue</p>
-            </div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center flex-shrink-0">
-              <BuildingIcon className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-slate-900">10</p>
-              <p className="text-sm text-slate-500">Branches</p>
-            </div>
-          </div>
+          <Table columns={classAdminColumns.slice(0, 3)} data={classAdminData.slice(0, 5)} />
         </Card>
       </div>
+    </>
+  );
 
-      {/* User Management */}
-      <Card className="mb-6">
+  const renderUsers = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">User Management</h1>
+        <p className="text-slate-500 mt-1">Manage all students, teachers, and parents on the platform.</p>
+      </div>
+      <Card>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-slate-900">User Management</h2>
-          <Button size="sm">Add User</Button>
+          <div className="flex gap-4 items-center">
+            <h2 className="text-lg font-bold text-slate-900">All Users</h2>
+            <Badge variant="info">5,234 Total</Badge>
+          </div>
+          <Button size="sm">Add New User</Button>
         </div>
         <Table columns={userColumns} data={userData} />
       </Card>
+    </>
+  );
 
-      {/* Revenue Chart + Class Management */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-1">
-            Revenue Overview
-          </h2>
-          <p className="text-sm text-slate-500 mb-6">
-            Monthly revenue over the past 12 months
-          </p>
-          <div className="h-64">
+  const renderClasses = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Class Management</h1>
+        <p className="text-slate-500 mt-1">Monitor and organize all active language classes.</p>
+      </div>
+      <Card>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-slate-900">Active Classes</h2>
+          <Button size="sm">Create New Class</Button>
+        </div>
+        <Table columns={classAdminColumns} data={classAdminData} />
+      </Card>
+    </>
+  );
+
+  const renderBranches = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Branch Management</h1>
+        <p className="text-slate-500 mt-1">Manage physical locations and branch managers.</p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { name: 'Colombo Main', address: '42 Galle Road, Colombo 03', manager: 'Mr. Perera', students: '1,200', colors: { bg: 'bg-blue-100', text: 'text-blue-600' } },
+          { name: 'Kandy Branch', address: '15 Peradeniya Road, Kandy', manager: 'Ms. Silva', students: '850', colors: { bg: 'bg-emerald-100', text: 'text-emerald-600' } },
+          { name: 'Galle Branch', address: '78 Main Street, Galle Fort', manager: 'Mr. Fernando', students: '620', colors: { bg: 'bg-amber-100', text: 'text-amber-600' } },
+        ].map((branch) => (
+          <Card key={branch.name} className="hover:shadow-lg transition-shadow">
+            <div className={`w-12 h-12 rounded-2xl ${branch.colors.bg} flex items-center justify-center mb-4`}>
+              <BuildingIcon className={`w-6 h-6 ${branch.colors.text}`} />
+            </div>
+            <h3 className="font-bold text-slate-900 text-lg mb-1">{branch.name}</h3>
+            <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+            <div className="space-y-2 mb-6">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-400">Manager</span>
+                <span className="font-bold text-slate-700">{branch.manager}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-400">Students</span>
+                <span className="font-bold text-slate-700">{branch.students}</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="flex-1">Edit</Button>
+              <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50">Delete</Button>
+            </div>
+          </Card>
+        ))}
+        <button className="border-2 border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50/50 transition-all group">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+            <BuildingIcon className="w-6 h-6" />
+          </div>
+          <span className="font-bold">Add New Branch</span>
+        </button>
+      </div>
+    </>
+  );
+
+  const renderRevenue = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Revenue Analytics</h1>
+        <p className="text-slate-500 mt-1">Track payments, subscriptions, and financial growth.</p>
+      </div>
+      <div className="grid lg:grid-cols-3 gap-6 mb-8">
+        <Card className="lg:col-span-2">
+          <h2 className="text-lg font-bold text-slate-900 mb-1">Revenue Overview</h2>
+          <p className="text-sm text-slate-500 mb-6">Monthly revenue trends</p>
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis
-                  dataKey="month"
-                  tick={{
-                    fontSize: 12,
-                    fill: '#94a3b8'
-                  }}
-                  axisLine={false}
-                  tickLine={false} />
-
-                <YAxis
-                  tick={{
-                    fontSize: 11,
-                    fill: '#94a3b8'
-                  }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} />
-
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                  }}
-                  formatter={(value) => [
-                  `LKR ${value.toLocaleString()}`,
-                  'Revenue']
-                  } />
-
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#2563eb"
-                  strokeWidth={2.5}
-                  dot={{
-                    r: 4,
-                    fill: '#2563eb'
-                  }} />
-
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} />
+                <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+                <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, fill: '#2563eb', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </Card>
-
-        <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-5">
-            Class Management
-          </h2>
-          <Table columns={classAdminColumns} data={classAdminData} />
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Total Revenue</p>
+            <h3 className="text-3xl font-black text-slate-900">LKR 28.4M</h3>
+            <p className="text-xs text-emerald-500 font-bold mt-2">↑ 12.5% from last year</p>
+          </Card>
+          <Card>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Avg. Ticket Size</p>
+            <h3 className="text-3xl font-black text-slate-900">LKR 12.5K</h3>
+            <p className="text-xs text-blue-500 font-bold mt-2">Steady growth</p>
+          </Card>
+          <Card>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Active Subscriptions</p>
+            <h3 className="text-3xl font-black text-slate-900">2,450</h3>
+            <p className="text-xs text-amber-500 font-bold mt-2">Focus on retention</p>
+          </Card>
+        </div>
       </div>
+    </>
+  );
 
-      {/* Branch Management */}
-      <Card className="mb-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-slate-900">
-            Branch Management
-          </h2>
-          <Button size="sm">Add Branch</Button>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-            <h3 className="font-bold text-slate-900 mb-1">Colombo Main</h3>
-            <p className="text-xs text-slate-500 mb-1">
-              42 Galle Road, Colombo 03
-            </p>
-            <p className="text-xs text-slate-500 mb-1">Manager: Mr. Perera</p>
-            <p className="text-xs text-slate-500 mb-3">1,200 students</p>
-            <Button size="sm" variant="outline">
-              Edit
-            </Button>
-          </div>
-          <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-            <h3 className="font-bold text-slate-900 mb-1">Kandy Branch</h3>
-            <p className="text-xs text-slate-500 mb-1">
-              15 Peradeniya Road, Kandy
-            </p>
-            <p className="text-xs text-slate-500 mb-1">Manager: Ms. Silva</p>
-            <p className="text-xs text-slate-500 mb-3">850 students</p>
-            <Button size="sm" variant="outline">
-              Edit
-            </Button>
-          </div>
-          <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-            <h3 className="font-bold text-slate-900 mb-1">Galle Branch</h3>
-            <p className="text-xs text-slate-500 mb-1">
-              78 Main Street, Galle Fort
-            </p>
-            <p className="text-xs text-slate-500 mb-1">Manager: Mr. Fernando</p>
-            <p className="text-xs text-slate-500 mb-3">620 students</p>
-            <Button size="sm" variant="outline">
-              Edit
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Leaderboard */}
+  const renderLeaderboard = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Gamification Leaderboard</h1>
+        <p className="text-slate-500 mt-1">Top performing students across all branches.</p>
+      </div>
       <Card>
-        <h2 className="text-lg font-bold text-slate-900 mb-5">
-          Gamification Leaderboard
-        </h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-slate-900">Top Students</h2>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline">This Month</Button>
+            <Button size="sm" variant="ghost">All Time</Button>
+          </div>
+        </div>
         <Table columns={leaderboardColumns} data={leaderboardData} />
       </Card>
-    </DashboardLayout>);
+    </>
+  );
 
+  const renderSettings = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Platform Settings</h1>
+        <p className="text-slate-500 mt-1">Configure global application parameters and security.</p>
+      </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <h3 className="font-bold text-slate-900 mb-4">General Settings</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+              <div>
+                <p className="text-sm font-bold text-slate-700">Maintenance Mode</p>
+                <p className="text-xs text-slate-500">Disable platform access for students</p>
+              </div>
+              <div className="w-10 h-5 bg-slate-300 rounded-full relative">
+                <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+              <div>
+                <p className="text-sm font-bold text-slate-700">Public Registration</p>
+                <p className="text-xs text-slate-500">Allow new students to sign up</p>
+              </div>
+              <div className="w-10 h-5 bg-blue-600 rounded-full relative">
+                <div className="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full transition-all" />
+              </div>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <h3 className="font-bold text-slate-900 mb-4">Security & Access</h3>
+          <div className="space-y-4">
+            <Button variant="outline" className="w-full justify-start gap-3">
+              <PencilIcon className="w-4 h-4" />
+              Change Admin Credentials
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3">
+              <TrashIcon className="w-4 h-4" />
+              Purge System Logs (30+ days)
+            </Button>
+          </div>
+        </Card>
+      </div>
+    </>
+  );
+
+  const getContent = () => {
+    switch (path) {
+      case '/admin/users': return renderUsers();
+      case '/admin/classes': return renderClasses();
+      case '/admin/branches': return renderBranches();
+      case '/admin/revenue': return renderRevenue();
+      case '/admin/leaderboard': return renderLeaderboard();
+      case '/admin/settings': return renderSettings();
+      default: return renderDashboard();
+    }
+  };
+
+  return (
+    <DashboardLayout sidebarItems={sidebarItems}>
+      {getContent()}
+    </DashboardLayout>
+  );
 }
