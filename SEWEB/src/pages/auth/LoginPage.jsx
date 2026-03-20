@@ -161,7 +161,7 @@ export function LoginPage() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {/* Username */}
             <div>
-              <label className="lp-label">Username/Email Address</label>
+              <label className="lp-label">Username or Email</label>
               <div className="lp-field-wrap">
                 <UserIcon className="lp-field-icon" />
                 <input
