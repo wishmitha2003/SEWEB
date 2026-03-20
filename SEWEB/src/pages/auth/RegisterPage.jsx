@@ -21,6 +21,9 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [step, setStep] = useState('register');
+  const [otp, setOtp] = useState('');
+  const [savedEmail, setSavedEmail] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -74,11 +77,28 @@ export function RegisterPage() {
 
       setSuccess(response.message);
       setError('');
-
-      // Redirect to login page after successful registration
-      setTimeout(() => navigate('/login'), 2000);
+      setSavedEmail(form.email);
+      setStep('verify');
     } catch (err) {
       const message = err?.message || 'Registration failed. Check server status and CORS.';
+      setError(message);
+      setSuccess('');
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      const payload = { email: savedEmail, otp };
+      console.log('Verify OTP payload:', payload);
+      const response = await api.post('/api/auth/verify-registration-otp', payload);
+      console.log('Verify OTP response status:', response?.status ?? 200);
+      console.log('Verify OTP response data:', response);
+
+      setSuccess('Registration completed successfully! Redirecting to login...');
+      setError('');
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err) {
+      const message = err?.message || 'OTP verification failed.';
       setError(message);
       setSuccess('');
     }
@@ -142,8 +162,8 @@ export function RegisterPage() {
             </div>
           )}
 
+          {step === 'register' && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {/* Username */}
             <div>
               <label className="lp-label">Username</label>
               <div className="lp-field-wrap">
@@ -228,6 +248,20 @@ export function RegisterPage() {
 
             <button type="submit" className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>CREATE ACCOUNT</button>
           </form>
+          )}
+
+          {step === 'verify' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label className="lp-label">Enter OTP sent to {savedEmail}</label>
+                <div className="lp-field-wrap">
+                  <input className="lp-input" type="text" placeholder="Enter 6-digit OTP" 
+                    value={otp} onChange={e => setOtp(e.target.value)} style={{ paddingLeft: '1rem' }} />
+                </div>
+              </div>
+              <button type="button" onClick={handleVerifyOtp} className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>VERIFY OTP</button>
+            </div>
+          )}
 
           <div className="lp-divider" style={{ margin: '0.8rem 0' }}><span>OR</span></div>
 
