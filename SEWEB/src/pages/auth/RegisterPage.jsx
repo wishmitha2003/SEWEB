@@ -3,12 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, UserIcon, LockIcon, ArrowLeftIcon, AlertCircleIcon, PhoneIcon, MailIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/apiClient';
 
 const FLOAT_CHARS = ['A','B','C','文','学','英','語','أ','ب','த','क','Z','E','G','W','英','语'];
 
 export function RegisterPage() {
   const [form, setForm] = useState({
-    fullName: '',
+    username: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     password: '',
@@ -16,13 +19,17 @@ export function RegisterPage() {
     role: 'student',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [step, setStep] = useState('register');
+  const [otp, setOtp] = useState('');
+  const [savedEmail, setSavedEmail] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const GOOGLE_ACCOUNTS = [
-    { username: 'wishmitha', fullName: 'Wishmitha Devinda', email: 'wishmitha@gmail.com', role: 'student', phone: '+94 77 999 8888' },
-    { username: 'student',   fullName: 'Kasun Perera',      email: 'kasun@ezy.com',        role: 'student' },
+    { username: 'wishmitha', firstName: 'Wishmitha', lastName: 'Devinda', email: 'wishmitha@gmail.com', role: 'student', phone: '+94 77 999 8888' },
+    { username: 'student',   firstName: 'Kasun', lastName: 'Perera',      email: 'kasun@ezy.com',        role: 'student' },
   ];
 
   const update = (field, value) => {
@@ -38,9 +45,9 @@ export function RegisterPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.fullName || !form.email || !form.password) {
+    if (!form.firstName || !form.lastName || !form.email || !form.password) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -48,12 +55,57 @@ export function RegisterPage() {
       setError('Passwords do not match.');
       return;
     }
-    login({ fullName: form.fullName, email: form.email, phone: form.phone, role: form.role });
-    navigate(getRoleDashboard(form.role));
+
+    try {
+      const payload = {
+        username: form.username,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        roles: [form.role],
+      };
+      console.log(payload);
+      const response = await api.post('/api/auth/register', payload);
+      console.log('Register response status:', response?.status ?? 200); // if wrapped response object has status
+      console.log('Register response data:', response);
+
+      if (!response || !response.message) {
+        throw new Error('Invalid register response from server.');
+      }
+
+      setSuccess(response.message);
+      setError('');
+      setSavedEmail(form.email);
+      setStep('verify');
+    } catch (err) {
+      const message = err?.message || 'Registration failed. Check server status and CORS.';
+      setError(message);
+      setSuccess('');
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      const payload = { email: savedEmail, otp };
+      console.log('Verify OTP payload:', payload);
+      const response = await api.post('/api/auth/verify-registration-otp', payload);
+      console.log('Verify OTP response status:', response?.status ?? 200);
+      console.log('Verify OTP response data:', response);
+
+      setSuccess('Registration completed successfully! Redirecting to login...');
+      setError('');
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err) {
+      const message = err?.message || 'OTP verification failed.';
+      setError(message);
+      setSuccess('');
+    }
   };
 
   const handleSelectAccount = (account) => {
-    login({ fullName: account.fullName, email: account.email, phone: account.phone || '+94 00 000 0000', role: account.role });
+    login({ firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone || '+94 00 000 0000', role: account.role });
     setShowGoogleModal(false);
     navigate('/');
   };
@@ -104,15 +156,40 @@ export function RegisterPage() {
               <span>{error}</span>
             </div>
           )}
+          {success && (
+            <div className="lp-success" style={{ color: '#059669', fontWeight: 600 }}>
+              <span>{success}</span>
+            </div>
+          )}
 
+          {step === 'register' && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {/* Full Name */}
             <div>
-              <label className="lp-label">Full Name</label>
+              <label className="lp-label">Username</label>
               <div className="lp-field-wrap">
                 <UserIcon className="lp-field-icon" />
-                <input className="lp-input" type="text" placeholder="Enter your full name" 
-                  value={form.fullName} onChange={e => update('fullName', e.target.value)} />
+                <input className="lp-input" type="text" name="username" placeholder="Enter your username" 
+                  value={form.username} onChange={e => update('username', e.target.value)} />
+              </div>
+            </div>
+
+            {/* Full Name */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div>
+                <label className="lp-label">First Name</label>
+                <div className="lp-field-wrap">
+                  <UserIcon className="lp-field-icon" />
+                  <input className="lp-input" type="text" placeholder="First name" 
+                    value={form.firstName} onChange={e => update('firstName', e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="lp-label">Last Name</label>
+                <div className="lp-field-wrap">
+                  <UserIcon className="lp-field-icon" />
+                  <input className="lp-input" type="text" placeholder="Last name" 
+                    value={form.lastName} onChange={e => update('lastName', e.target.value)} />
+                </div>
               </div>
             </div>
 
@@ -171,6 +248,20 @@ export function RegisterPage() {
 
             <button type="submit" className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>CREATE ACCOUNT</button>
           </form>
+          )}
+
+          {step === 'verify' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label className="lp-label">Enter OTP sent to {savedEmail}</label>
+                <div className="lp-field-wrap">
+                  <input className="lp-input" type="text" placeholder="Enter 6-digit OTP" 
+                    value={otp} onChange={e => setOtp(e.target.value)} style={{ paddingLeft: '1rem' }} />
+                </div>
+              </div>
+              <button type="button" onClick={handleVerifyOtp} className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>VERIFY OTP</button>
+            </div>
+          )}
 
           <div className="lp-divider" style={{ margin: '0.8rem 0' }}><span>OR</span></div>
 
@@ -193,9 +284,9 @@ export function RegisterPage() {
                 onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
-                <div style={{ width: '1.9rem', height: '1.9rem', borderRadius: '50%', background: '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.72rem', fontWeight: 700 }}>{acc.fullName[0]}</div>
+                <div style={{ width: '1.9rem', height: '1.9rem', borderRadius: '50%', background: '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.72rem', fontWeight: 700 }}>{acc.firstName[0]}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>{acc.fullName}</p>
+                  <p style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>{acc.firstName} {acc.lastName}</p>
                   <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0 }}>{acc.email}</p>
                 </div>
               </button>
