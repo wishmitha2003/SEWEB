@@ -22,11 +22,13 @@ async function parseJsonResponse(response) {
 
 async function request(method, path, data, customOptions = {}) {
   const url = buildUrl(path);
+  const token = localStorage.getItem('ezy_token');
   const options = {
     method,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
       ...customOptions.headers,
     },
     credentials: 'include', // only if backend supports cookies/sessions
