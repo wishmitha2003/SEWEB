@@ -44,7 +44,10 @@ export function Sidebar({
       </div>
 
       {/* User Profile - Mobile only */}
-      <div className={`p-4 border-b border-white/5 lg:hidden flex items-center gap-4 bg-white/5`}>
+      <Link
+        to="/profile"
+        className={`p-4 border-b border-white/5 lg:hidden flex items-center gap-4 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer`}
+      >
         <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 p-0.5 shadow-lg shadow-blue-900/40">
           <div className="w-full h-full rounded-[14px] bg-slate-900 flex items-center justify-center overflow-hidden">
             {user?.profileImage ? (
@@ -60,7 +63,7 @@ export function Sidebar({
           <p className="text-sm font-bold text-white truncate">{userName}</p>
           <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">{userRole}</p>
         </div>
-      </div>
+      </Link>
 
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
         {items.map((item) => {

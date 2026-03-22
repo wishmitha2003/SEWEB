@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { FormInput } from '../components/ui/FormInput';
 import { SettingsIcon, UserIcon, LockIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { api } from '../services/apiClient';
+import { useAuth } from '../context/AuthContext';
 
 const sidebarItems = [
   {
@@ -15,7 +16,19 @@ const sidebarItems = [
 ];
 
 export function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('reset-password'); // 'edit-profile' or 'reset-password'
+  const { user, updateUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('edit-profile'); // 'edit-profile' or 'reset-password'
+  
+  // Edit Profile States
+  const [profileData, setProfileData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: ''
+  });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileFetchLoading, setProfileFetchLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState('');
   
   // Reset Password States
   const [resetStep, setResetStep] = useState(1); // 1: Send OTP, 2: New Password
@@ -25,6 +38,76 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (activeTab === 'edit-profile') {
+      fetchUserProfile();
+    }
+  }, [activeTab]);
+
+  const fetchUserProfile = async () => {
+    setProfileFetchLoading(true);
+    setProfileError('');
+    try {
+      const response = await api.get('/api/auth/me');
+      const userData = response.user || response;
+      
+      // If API returns firstName/lastName, use them; otherwise split fullName
+      let firstName = userData.firstName || '';
+      let lastName = userData.lastName || '';
+      
+      if (!firstName && !lastName && user?.fullName) {
+        const nameParts = user.fullName.trim().split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
+      }
+      
+      setProfileData({
+        firstName,
+        lastName,
+        phone: userData.phone || user?.phone || ''
+      });
+    } catch (err) {
+      setProfileError('Failed to load profile data. Please try again.');
+    } finally {
+      setProfileFetchLoading(false);
+    }
+  };
+
+  const handleProfileInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setProfileError('');
+    setProfileSuccess('');
+    setProfileLoading(true);
+
+    try {
+      const response = await api.put('/api/auth/update-profile', {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        phone: profileData.phone
+      });
+
+      // Update local user data
+      updateUser({
+        fullName: `${profileData.firstName} ${profileData.lastName}`.trim(),
+        phone: profileData.phone
+      });
+
+      setProfileSuccess(response.message || 'Profile updated successfully!');
+    } catch (err) {
+      setProfileError(err.message || 'Failed to update profile. Please try again.');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const resetForm = () => {
     setResetStep(1);
@@ -147,11 +230,82 @@ export function SettingsPage() {
       {/* Edit Profile Section */}
       {activeTab === 'edit-profile' && (
         <Card>
-          <div className="text-center py-8">
-            <UserIcon className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Edit Profile Coming Soon</h3>
-            <p className="text-slate-500">Profile editing functionality will be available soon.</p>
-          </div>
+          <h2 className="text-lg font-bold text-slate-900 mb-6">Edit Profile</h2>
+
+          {/* Error Message */}
+          {profileError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex gap-3">
+              <AlertCircleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{profileError}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {profileSuccess && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex gap-3">
+              <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-green-700">{profileSuccess}</p>
+            </div>
+          )}
+
+          {profileFetchLoading ? (
+            <div className="text-center py-8">
+              <div className="text-slate-500">Loading profile data...</div>
+            </div>
+          ) : (
+            <form onSubmit={handleProfileSubmit} className="space-y-4">
+              {/* Email - Read Only */}
+              <FormInput
+                label="Email"
+                type="email"
+                value={user?.email || ''}
+                readOnly
+                className="bg-slate-50"
+                helperText="Email cannot be changed"
+              />
+
+              {/* First Name */}
+              <FormInput
+                label="First Name"
+                name="firstName"
+                type="text"
+                value={profileData.firstName}
+                onChange={handleProfileInputChange}
+                placeholder="Enter your first name"
+                required
+              />
+
+              {/* Last Name */}
+              <FormInput
+                label="Last Name"
+                name="lastName"
+                type="text"
+                value={profileData.lastName}
+                onChange={handleProfileInputChange}
+                placeholder="Enter your last name"
+                required
+              />
+
+              {/* Phone */}
+              <FormInput
+                label="Phone"
+                name="phone"
+                type="tel"
+                value={profileData.phone}
+                onChange={handleProfileInputChange}
+                placeholder="Enter your phone number"
+              />
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={profileLoading}
+                className="w-full"
+              >
+                {profileLoading ? 'Updating...' : 'Update Profile'}
+              </Button>
+            </form>
+          )}
         </Card>
       )}
 
