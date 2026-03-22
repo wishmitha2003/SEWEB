@@ -17,6 +17,12 @@ export function ForgotPasswordPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!email) { setError('Please enter your registered email address.'); return; }
@@ -25,16 +31,7 @@ export function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8082/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || 'Failed to send OTP.');
-
+      const data = await api.post('/api/auth/forgot-password', { email });
       setSuccess(data?.message || 'OTP sent, please check your email.');
       setError('');
       setStep(2);
@@ -81,16 +78,7 @@ export function ForgotPasswordPage() {
     if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8082/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp, newPassword }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || 'Reset password failed.');
-
+      const data = await api.post('/api/auth/reset-password', { email, otp, newPassword });
       setSuccess(data?.message || 'Password reset successfully.');
       setError('');
       setStep(4);

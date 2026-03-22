@@ -143,6 +143,19 @@ export function SettingsPage() {
     }
   };
 
+  const handleResendOtp = async () => {
+    setError('');
+    setSuccess('');
+    setResendCooldown(30);
+
+    try {
+      const response = await api.post('/api/auth/resend-reset-password-otp', {});
+      setSuccess(response.message || 'OTP resent successfully. Please check your email.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP. Please try again.');
+    }
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError('');
