@@ -19,7 +19,9 @@ export function ProfilePage() {
     firstName: '',
     lastName: '',
     phone: '',
-    email: ''
+    email: '',
+    address: '',
+    profileImageUrl: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -47,7 +49,9 @@ export function ProfilePage() {
         firstName,
         lastName,
         phone: data.phone || user?.phone || '',
-        email: data.email || user?.email || ''
+        email: data.email || user?.email || '',
+        address: data.address || '',
+        profileImageUrl: data.profileImageUrl || data.profileImage || ''
       });
     } catch (err) {
       setError('Failed to load profile data. Please try again.');
@@ -82,6 +86,29 @@ export function ProfilePage() {
           )}
 
           <div className="space-y-6">
+            {/* Profile Picture */}
+            <div className="flex flex-col items-center">
+              <div className="w-24 h-24 rounded-full bg-blue-600 border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
+                {userData.profileImageUrl ? (
+                  <img 
+                    src={userData.profileImageUrl} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full flex items-center justify-center ${userData.profileImageUrl ? 'hidden' : ''}`}>
+                  <span className="text-white text-2xl font-black">
+                    {userData.firstName.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 mt-2">Profile Picture</p>
+            </div>
+
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -119,6 +146,16 @@ export function ProfilePage() {
               </label>
               <div className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900">
                 {userData.phone || 'Not provided'}
+              </div>
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Address
+              </label>
+              <div className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900">
+                {userData.address || 'Not provided'}
               </div>
             </div>
           </div>

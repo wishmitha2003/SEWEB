@@ -23,7 +23,9 @@ export function SettingsPage() {
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
-    phone: ''
+    phone: '',
+    address: '',
+    profileImageUrl: ''
   });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileFetchLoading, setProfileFetchLoading] = useState(true);
@@ -65,7 +67,9 @@ export function SettingsPage() {
       setProfileData({
         firstName,
         lastName,
-        phone: userData.phone || user?.phone || ''
+        phone: userData.phone || user?.phone || '',
+        address: userData.address || '',
+        profileImageUrl: userData.profileImageUrl || userData.profileImage || ''
       });
     } catch (err) {
       setProfileError('Failed to load profile data. Please try again.');
@@ -92,13 +96,16 @@ export function SettingsPage() {
       const response = await api.put('/api/auth/update-profile', {
         firstName: profileData.firstName,
         lastName: profileData.lastName,
-        phone: profileData.phone
+        phone: profileData.phone,
+        address: profileData.address,
+        profileImageUrl: profileData.profileImageUrl
       });
 
       // Update local user data
       updateUser({
         fullName: `${profileData.firstName} ${profileData.lastName}`.trim(),
-        phone: profileData.phone
+        phone: profileData.phone,
+        profileImage: profileData.profileImageUrl
       });
 
       setProfileSuccess(response.message || 'Profile updated successfully!');
@@ -295,6 +302,49 @@ export function SettingsPage() {
                 onChange={handleProfileInputChange}
                 placeholder="Enter your phone number"
               />
+
+              {/* Address */}
+              <FormInput
+                label="Address"
+                name="address"
+                type="text"
+                value={profileData.address}
+                onChange={handleProfileInputChange}
+                placeholder="Enter your address"
+              />
+
+              {/* Profile Picture URL */}
+              <FormInput
+                label="Profile Picture URL"
+                name="profileImageUrl"
+                type="url"
+                value={profileData.profileImageUrl}
+                onChange={handleProfileInputChange}
+                placeholder="Enter profile picture URL"
+              />
+
+              {/* Profile Picture Preview */}
+              {profileData.profileImageUrl && (
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-full bg-blue-600 border-2 border-white shadow-lg flex items-center justify-center overflow-hidden">
+                    <img
+                      src={profileData.profileImageUrl}
+                      alt="Profile Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-full h-full flex items-center justify-center hidden">
+                      <span className="text-white text-lg font-black">
+                        {profileData.firstName.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Preview</p>
+                </div>
+              )}
 
               {/* Submit Button */}
               <Button
