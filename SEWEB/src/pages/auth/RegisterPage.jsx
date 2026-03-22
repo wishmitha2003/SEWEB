@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, UserIcon, LockIcon, ArrowLeftIcon, AlertCircleIcon, PhoneIcon, MailIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
@@ -16,7 +16,7 @@ export function RegisterPage() {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'student',
+    role: 'STUDENT',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,8 +28,8 @@ export function RegisterPage() {
   const navigate = useNavigate();
 
   const GOOGLE_ACCOUNTS = [
-    { username: 'wishmitha', firstName: 'Wishmitha', lastName: 'Devinda', email: 'wishmitha@gmail.com', role: 'student', phone: '+94 77 999 8888' },
-    { username: 'student',   firstName: 'Kasun', lastName: 'Perera',      email: 'kasun@ezy.com',        role: 'student' },
+    { username: 'wishmitha', firstName: 'Wishmitha', lastName: 'Devinda', email: 'wishmitha@gmail.com', role: 'STUDENT', phone: '+94 77 999 8888' },
+    { username: 'student',   firstName: 'Kasun', lastName: 'Perera',      email: 'kasun@ezy.com',        role: 'STUDENT' },
   ];
 
   const update = (field, value) => {
@@ -39,8 +39,9 @@ export function RegisterPage() {
 
   const getRoleDashboard = (role) => {
     switch (role) {
-      case 'teacher': return '/teacher';
-      case 'admin':   return '/admin';
+      case 'TEACHER': return '/teacher';
+      case 'ADMIN':   return '/admin';
+      case 'COURIER': return '/courier';
       default:        return '/student';
     }
   };
@@ -64,10 +65,10 @@ export function RegisterPage() {
         email: form.email,
         phone: form.phone,
         password: form.password,
-        roles: [form.role],
+        role: form.role,
       };
       console.log(payload);
-      const response = await api.post('/api/auth/register', payload);
+      const response = await api.post('/api/auth/signup', payload);
       console.log('Register response status:', response?.status ?? 200); // if wrapped response object has status
       console.log('Register response data:', response);
 
@@ -86,6 +87,14 @@ export function RegisterPage() {
     }
   };
 
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => setResendCooldown(prev => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
   const handleVerifyOtp = async () => {
     try {
       const payload = { email: savedEmail, otp };
@@ -101,6 +110,26 @@ export function RegisterPage() {
       const message = err?.message || 'OTP verification failed.';
       setError(message);
       setSuccess('');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!savedEmail) {
+      setError('Email is required to resend OTP.');
+      setSuccess('');
+      return;
+    }
+
+    setError('');
+    setSuccess('');
+    setResendCooldown(30);
+
+    try {
+      const response = await api.post('/api/auth/resend-registration-otp', { email: savedEmail });
+      setSuccess(response?.message || 'OTP resent successfully. Please check your email.');
+    } catch (err) {
+      const message = err?.message || 'Failed to resend OTP. Please try again.';
+      setError(message);
     }
   };
 
@@ -214,10 +243,10 @@ export function RegisterPage() {
             {/* Role Select */}
             <div>
               <label className="lp-label">Account Type</label>
-              <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.3rem', borderRadius: '0.65rem' }}>
-                {['student', 'teacher'].map(r => (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.3rem', borderRadius: '0.65rem' }}>
+                {['STUDENT', 'TEACHER', 'ADMIN', 'COURIER'].map(r => (
                   <button key={r} type="button" onClick={() => update('role', r)}
-                    style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+                    style={{ padding: '0.5rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer', transition: 'all 0.2s',
                              fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
                              background: form.role === r ? 'white' : 'transparent',
                              color: form.role === r ? '#0ea5e9' : '#64748b',
@@ -260,6 +289,15 @@ export function RegisterPage() {
                 </div>
               </div>
               <button type="button" onClick={handleVerifyOtp} className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>VERIFY OTP</button>
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                className="lp-signin-btn"
+                disabled={resendCooldown > 0}
+                style={{ marginTop: '0.5rem', background: resendCooldown > 0 ? '#94a3b8' : undefined }}
+              >
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+              </button>
             </div>
           )}
 

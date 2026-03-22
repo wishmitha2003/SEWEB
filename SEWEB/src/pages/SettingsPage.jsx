@@ -40,6 +40,13 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (activeTab === 'edit-profile') {
@@ -139,6 +146,19 @@ export function SettingsPage() {
       setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError('');
+    setSuccess('');
+    setResendCooldown(30);
+
+    try {
+      const response = await api.post('/api/auth/resend-reset-password-otp', {});
+      setSuccess(response.message || 'OTP resent successfully. Please check your email.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP. Please try again.');
     }
   };
 
@@ -403,6 +423,14 @@ export function SettingsPage() {
                   onChange={(e) => setOtp(e.target.value)}
                   icon={<LockIcon className="w-4 h-4" />}
                 />
+                <Button
+                  variant="secondary"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0}
+                  className="w-full"
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                </Button>
                 <FormInput
                   label="New Password"
                   type="password"

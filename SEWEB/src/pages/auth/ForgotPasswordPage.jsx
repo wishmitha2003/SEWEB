@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, ShieldCheckIcon, LockIcon, ArrowLeftIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/apiClient';
 
 export function ForgotPasswordPage() {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
@@ -13,7 +14,14 @@ export function ForgotPasswordPage() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -23,16 +31,7 @@ export function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8082/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || 'Failed to send OTP.');
-
+      const data = await api.post('/api/auth/forgot-password', { email });
       setSuccess(data?.message || 'OTP sent, please check your email.');
       setError('');
       setStep(2);
@@ -50,22 +49,30 @@ export function ForgotPasswordPage() {
     setTimeout(() => { setLoading(false); setStep(3); setError(''); }, 1500);
   };
 
+  const handleResendOtp = async () => {
+    if (!email) {
+      setError('No email available to resend OTP.');
+      setSuccess('');
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setResendCooldown(30);
+    try {
+      const data = await api.post('/api/auth/resend-forgot-password-otp', { email });
+      setSuccess(data?.message || 'OTP resent successfully. Check your email.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP. Please try again.');
+    }
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (newPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
     if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8082/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp, newPassword }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || 'Reset password failed.');
-
+      const data = await api.post('/api/auth/reset-password', { email, otp, newPassword });
       setSuccess(data?.message || 'Password reset successfully.');
       setError('');
       setStep(4);
@@ -169,7 +176,21 @@ export function ForgotPasswordPage() {
                 <button type="submit" className="lp-signin-btn" disabled={loading}>
                   {loading ? 'VERIFYING...' : 'VERIFY OTP'}
                 </button>
-                <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Resend Code</button>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: resendCooldown > 0 ? '#94a3b8' : '#0ea5e9',
+                    fontWeight: 700,
+                    cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
+                    fontSize: '0.82rem'
+                  }}
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
+                </button>
               </form>
             </div>
           )}
