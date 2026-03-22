@@ -40,6 +40,7 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
     if (activeTab === 'edit-profile') {
@@ -183,6 +184,30 @@ export function SettingsPage() {
       setLoading(false);
     }
   };
+
+  const handleResendOtp = async () => {
+    setError('');
+    setSuccess('');
+
+    setLoading(true);
+    try {
+      const response = await api.post('/api/auth/resend-reset-password-otp', {});
+      setSuccess(response.message || 'OTP resent successfully! Please check your email.');
+      setResendCooldown(30);
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Countdown timer effect
+  React.useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   return (
     <DashboardLayout sidebarItems={sidebarItems}>
@@ -403,6 +428,20 @@ export function SettingsPage() {
                   onChange={(e) => setOtp(e.target.value)}
                   icon={<LockIcon className="w-4 h-4" />}
                 />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={resendCooldown > 0 || loading}
+                    className={`text-sm font-medium ${
+                      resendCooldown > 0 || loading
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-blue-600 hover:text-blue-700 cursor-pointer'
+                    }`}
+                  >
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                  </button>
+                </div>
                 <FormInput
                   label="New Password"
                   type="password"

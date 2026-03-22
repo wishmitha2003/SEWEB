@@ -24,6 +24,7 @@ export function RegisterPage() {
   const [step, setStep] = useState('register');
   const [otp, setOtp] = useState('');
   const [savedEmail, setSavedEmail] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -103,6 +104,28 @@ export function RegisterPage() {
       setSuccess('');
     }
   };
+
+  const handleResendOtp = async () => {
+    try {
+      const payload = { email: savedEmail };
+      const response = await api.post('/api/auth/resend-registration-otp', payload);
+      setSuccess('OTP resent successfully! Please check your email.');
+      setError('');
+      setResendCooldown(30);
+    } catch (err) {
+      const message = err?.message || 'Failed to resend OTP.';
+      setError(message);
+      setSuccess('');
+    }
+  };
+
+  // Countdown timer effect
+  React.useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleSelectAccount = (account) => {
     login({ firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone || '+94 00 000 0000', role: account.role });
@@ -260,6 +283,22 @@ export function RegisterPage() {
                 </div>
               </div>
               <button type="button" onClick={handleVerifyOtp} className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>VERIFY OTP</button>
+              <button 
+                type="button" 
+                onClick={handleResendOtp} 
+                disabled={resendCooldown > 0}
+                style={{ 
+                  marginTop: '0.5rem', 
+                  background: 'none', 
+                  border: 'none', 
+                  color: resendCooldown > 0 ? '#94a3b8' : '#0ea5e9', 
+                  fontWeight: 600, 
+                  cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+              </button>
             </div>
           )}
 

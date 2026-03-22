@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, ShieldCheckIcon, LockIcon, ArrowLeftIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/apiClient';
 
 export function ForgotPasswordPage() {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
@@ -13,6 +14,7 @@ export function ForgotPasswordPage() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
 
   const handleSendOtp = async (e) => {
@@ -49,6 +51,29 @@ export function ForgotPasswordPage() {
     setLoading(true);
     setTimeout(() => { setLoading(false); setStep(3); setError(''); }, 1500);
   };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const response = await api.post('/api/auth/resend-forgot-password-otp', { email });
+      setSuccess(response?.message || 'OTP resent successfully! Please check your email.');
+      setError('');
+      setResendCooldown(30);
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP.');
+      setSuccess('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -169,7 +194,21 @@ export function ForgotPasswordPage() {
                 <button type="submit" className="lp-signin-btn" disabled={loading}>
                   {loading ? 'VERIFYING...' : 'VERIFY OTP'}
                 </button>
-                <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Resend Code</button>
+                <button 
+                  type="button" 
+                  onClick={handleResendOtp} 
+                  disabled={resendCooldown > 0 || loading}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: (resendCooldown > 0 || loading) ? '#94a3b8' : '#0ea5e9', 
+                    fontWeight: 700, 
+                    cursor: (resendCooldown > 0 || loading) ? 'not-allowed' : 'pointer', 
+                    fontSize: '0.82rem' 
+                  }}
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
+                </button>
               </form>
             </div>
           )}
