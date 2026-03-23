@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, UserIcon, LockIcon, EyeIcon, EyeOffIcon, AlertCircleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { signin } from '../../services/authService';
 
 const DEMO_ACCOUNTS = [
   { username: 'student',  password: 'student123',  fullName: 'Kasun Perera',     role: 'student',  email: 'kasun@ezy.com',  phone: '+94 77 123 4567' },
@@ -41,13 +42,24 @@ export function LoginPage() {
     e.preventDefault();
     setError('');
     if (!username || !password) { setError('Please enter both username and password.'); return; }
-    const account = DEMO_ACCOUNTS.find(a => a.username.toLowerCase() === username.toLowerCase() && a.password === password);
-    if (account) {
-      login({ fullName: account.fullName, email: account.email, phone: account.phone, role: account.role });
-      navigate(getRoleDashboard(account.role));
-    } else {
-      setError('Invalid username or password.');
-    }
+    // attempt real signin against backend
+    signin({ username, password })
+      .then(data => {
+        const fullName = data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : (data.email ? data.email.split('@')[0] : username);
+        const role = (data.roles && data.roles[0]) || 'student';
+        login({ fullName, email: data.email || username, phone: data.phone || '' , role }, data.accessToken || data.token);
+        navigate(getRoleDashboard(role));
+      })
+      .catch(err => {
+        // fallback to demo accounts
+        const account = DEMO_ACCOUNTS.find(a => a.username.toLowerCase() === username.toLowerCase() && a.password === password);
+        if (account) {
+          login({ fullName: account.fullName, email: account.email, phone: account.phone, role: account.role });
+          navigate(getRoleDashboard(account.role));
+        } else {
+          setError(err.message || 'Invalid username or password.');
+        }
+      });
   };
 
   const handleSelectAccount = (account) => {

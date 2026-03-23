@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, UserIcon, LockIcon, ArrowLeftIcon, AlertCircleIcon, PhoneIcon, MailIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { signup, signin } from '../../services/authService';
 
 const FLOAT_CHARS = ['A','B','C','文','学','英','語','أ','ب','த','क','Z','E','G','W','英','语'];
 
@@ -48,8 +49,45 @@ export function RegisterPage() {
       setError('Passwords do not match.');
       return;
     }
-    login({ fullName: form.fullName, email: form.email, phone: form.phone, role: form.role });
-    navigate(getRoleDashboard(form.role));
+    if (form.password.length < 6 || form.password.length > 40) {
+      setError('Password must be between 6 and 40 characters.');
+      return;
+    }
+    setError('');
+    const [firstName, ...rest] = form.fullName.trim().split(' ');
+    const lastName = rest.join(' ');
+    const payload = { username: form.email, email: form.email, password: form.password, firstName, lastName, phone: form.phone, roles: [form.role] };
+    console.log('Signup payload:', payload);
+    signup(payload)
+      .then(() => signin({ username: form.email, password: form.password }))
+      .then(data => {
+        const fullName = data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : form.fullName;
+        const role = (data.roles && data.roles[0]) || form.role;
+        login({ fullName, email: data.email || form.email, phone: data.phone || form.phone, role }, data.accessToken || data.token);
+        navigate(getRoleDashboard(role));
+      })
+      .catch(err => {
+        console.error('Signup error status:', err.status);
+        console.error('Signup error body:', err.body);
+        console.error(err);
+        let bodyMsg = null;
+        if (err && err.body) {
+          if (typeof err.body === 'string') bodyMsg = err.body;
+          else {
+            try {
+              bodyMsg = JSON.stringify(err.body);
+            } catch { bodyMsg = String(err.body); }
+          }
+        }
+        // attempt to extract common validation messages
+        let userMessage = err.message || 'Signup failed';
+        if (err.body) {
+          if (err.body.message) userMessage = err.body.message;
+          else if (err.body.error) userMessage = err.body.error;
+          else if (err.body.errors) userMessage = Array.isArray(err.body.errors) ? err.body.errors.join('; ') : String(err.body.errors);
+        }
+        setError(userMessage + (bodyMsg ? ` — ${bodyMsg}` : ''));
+      });
   };
 
   const handleSelectAccount = (account) => {
