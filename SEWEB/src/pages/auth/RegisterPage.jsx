@@ -88,14 +88,6 @@ export function RegisterPage() {
     }
   };
 
-  const [resendCooldown, setResendCooldown] = useState(0);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const interval = setInterval(() => setResendCooldown(prev => Math.max(prev - 1, 0)), 1000);
-    return () => clearInterval(interval);
-  }, [resendCooldown]);
-
   const handleVerifyOtp = async () => {
     try {
       const payload = { email: savedEmail, otp };

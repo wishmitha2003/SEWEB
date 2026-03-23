@@ -198,22 +198,6 @@ export function SettingsPage() {
     }
   };
 
-  const handleResendOtp = async () => {
-    setError('');
-    setSuccess('');
-
-    setLoading(true);
-    try {
-      const response = await api.post('/api/auth/resend-reset-password-otp', {});
-      setSuccess(response.message || 'OTP resent successfully! Please check your email.');
-      setResendCooldown(30);
-    } catch (err) {
-      setError(err.message || 'Failed to resend OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Countdown timer effect
   React.useEffect(() => {
     if (resendCooldown > 0) {
