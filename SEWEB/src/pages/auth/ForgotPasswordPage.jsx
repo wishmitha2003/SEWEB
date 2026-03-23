@@ -1,24 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpenIcon, PhoneIcon, ShieldCheckIcon, LockIcon, ArrowLeftIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
+import { BookOpenIcon, ShieldCheckIcon, LockIcon, ArrowLeftIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/apiClient';
 
 export function ForgotPasswordPage() {
-  const [step, setStep] = useState(1); // 1: Mobile, 2: OTP, 3: New Password, 4: Success
-  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
 
-  const handleSendOtp = (e) => {
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!phone) { setError('Please enter your registered mobile number.'); return; }
+    if (!email) { setError('Please enter your registered email address.'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { setError('Please enter a valid email address.'); return; }
+
     setLoading(true);
-    setTimeout(() => { setLoading(false); setStep(2); setError(''); }, 1500);
+    try {
+      const data = await api.post('/api/auth/forgot-password', { email });
+      setSuccess(data?.message || 'OTP sent, please check your email.');
+      setError('');
+      setStep(2);
+    } catch (err) {
+      setError(err.message || 'Failed to send OTP.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = (e) => {
@@ -28,12 +49,44 @@ export function ForgotPasswordPage() {
     setTimeout(() => { setLoading(false); setStep(3); setError(''); }, 1500);
   };
 
-  const handleResetPassword = (e) => {
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const response = await api.post('/api/auth/resend-forgot-password-otp', { email });
+      setSuccess(response?.message || 'OTP resent successfully! Please check your email.');
+      setError('');
+      setResendCooldown(30);
+    } catch (err) {
+      setError(err.message || 'Failed to resend OTP.');
+      setSuccess('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     if (newPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
     if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
     setLoading(true);
-    setTimeout(() => { setLoading(false); setStep(4); setError(''); }, 1500);
+    try {
+      const data = await api.post('/api/auth/reset-password', { email, otp, newPassword });
+      setSuccess(data?.message || 'Password reset successfully.');
+      setError('');
+      setStep(4);
+    } catch (err) {
+      setError(err.message || 'Failed to reset password.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,7 +131,7 @@ export function ForgotPasswordPage() {
           {step === 1 && (
             <div>
               <h2 className="lp-card-title">Forgot Password?</h2>
-              <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.5rem' }}>Enter your mobile number to receive a verification code.</p>
+              <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.5rem' }}>Enter your email to receive a verification code.</p>
               
               {error && (
                 <div className="lp-error">
@@ -89,11 +142,11 @@ export function ForgotPasswordPage() {
 
               <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label className="lp-label">Mobile Number</label>
+                  <label className="lp-label">Email Address</label>
                   <div className="lp-field-wrap">
-                    <PhoneIcon className="lp-field-icon" />
-                    <input className="lp-input" type="tel" placeholder="+94 7X XXX XXXX" value={phone} 
-                      onChange={e => { setPhone(e.target.value); setError(''); }} />
+                    <BookOpenIcon className="lp-field-icon" />
+                    <input className="lp-input" type="email" placeholder="you@example.com" value={email} 
+                      onChange={e => { setEmail(e.target.value); setError(''); }} />
                   </div>
                 </div>
                 <button type="submit" className="lp-signin-btn" disabled={loading} style={{ background: loading ? '#94a3b8' : undefined }}>
@@ -110,7 +163,7 @@ export function ForgotPasswordPage() {
               </div>
               <h2 className="lp-card-title">Verify OTP</h2>
               <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.5rem' }}>
-                We've sent a 6-digit code to <span style={{ color: '#0f172a', fontWeight: 700 }}>{phone}</span>.
+                We've sent a 6-digit code to <span style={{ color: '#0f172a', fontWeight: 700 }}>{email}</span>.
               </p>
 
               {error && (
@@ -129,7 +182,21 @@ export function ForgotPasswordPage() {
                 <button type="submit" className="lp-signin-btn" disabled={loading}>
                   {loading ? 'VERIFYING...' : 'VERIFY OTP'}
                 </button>
-                <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Resend Code</button>
+                <button 
+                  type="button" 
+                  onClick={handleResendOtp} 
+                  disabled={resendCooldown > 0 || loading}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: (resendCooldown > 0 || loading) ? '#94a3b8' : '#0ea5e9', 
+                    fontWeight: 700, 
+                    cursor: (resendCooldown > 0 || loading) ? 'not-allowed' : 'pointer', 
+                    fontSize: '0.82rem' 
+                  }}
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
+                </button>
               </form>
             </div>
           )}

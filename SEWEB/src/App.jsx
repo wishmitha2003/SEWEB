@@ -14,6 +14,8 @@ import { MaterialsPage } from './pages/MaterialsPage';
 import { GamificationPage } from './pages/GamificationPage';
 import { MapSection } from './pages/MapSection';
 import { ContactPage } from './pages/ContactPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { useLocation } from 'react-router-dom';
 
 import { LoadingProvider } from './context/LoadingContext';
@@ -38,6 +40,7 @@ export function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/role-select" element={<RoleSelectPage />} />
         <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/settings" element={<SettingsPage />} />
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="/admin/*" element={<AdminPanel />} />
         <Route path="/courier" element={<CourierDashboard />} />
@@ -46,6 +49,7 @@ export function App() {
         <Route path="/gamification" element={<GamificationPage />} />
         <Route path="/map" element={<MapSection />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </LoadingProvider>
   </BrowserRouter>);
