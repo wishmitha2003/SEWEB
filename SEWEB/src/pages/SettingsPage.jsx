@@ -43,12 +43,6 @@ export function SettingsPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
-  useEffect(() => {
     if (activeTab === 'edit-profile') {
       fetchUserProfile();
     }
@@ -203,6 +197,14 @@ export function SettingsPage() {
       setLoading(false);
     }
   };
+
+  // Countdown timer effect
+  React.useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   return (
     <DashboardLayout sidebarItems={sidebarItems}>
@@ -423,14 +425,20 @@ export function SettingsPage() {
                   onChange={(e) => setOtp(e.target.value)}
                   icon={<LockIcon className="w-4 h-4" />}
                 />
-                <Button
-                  variant="secondary"
-                  onClick={handleResendOtp}
-                  disabled={resendCooldown > 0}
-                  className="w-full"
-                >
-                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
-                </Button>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={resendCooldown > 0 || loading}
+                    className={`text-sm font-medium ${
+                      resendCooldown > 0 || loading
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-blue-600 hover:text-blue-700 cursor-pointer'
+                    }`}
+                  >
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                  </button>
+                </div>
                 <FormInput
                   label="New Password"
                   type="password"

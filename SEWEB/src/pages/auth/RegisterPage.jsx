@@ -24,6 +24,7 @@ export function RegisterPage() {
   const [step, setStep] = useState('register');
   const [otp, setOtp] = useState('');
   const [savedEmail, setSavedEmail] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -87,14 +88,6 @@ export function RegisterPage() {
     }
   };
 
-  const [resendCooldown, setResendCooldown] = useState(0);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const interval = setInterval(() => setResendCooldown(prev => Math.max(prev - 1, 0)), 1000);
-    return () => clearInterval(interval);
-  }, [resendCooldown]);
-
   const handleVerifyOtp = async () => {
     try {
       const payload = { email: savedEmail, otp };
@@ -114,24 +107,26 @@ export function RegisterPage() {
   };
 
   const handleResendOtp = async () => {
-    if (!savedEmail) {
-      setError('Email is required to resend OTP.');
-      setSuccess('');
-      return;
-    }
-
-    setError('');
-    setSuccess('');
-    setResendCooldown(30);
-
     try {
-      const response = await api.post('/api/auth/resend-registration-otp', { email: savedEmail });
-      setSuccess(response?.message || 'OTP resent successfully. Please check your email.');
+      const payload = { email: savedEmail };
+      const response = await api.post('/api/auth/resend-registration-otp', payload);
+      setSuccess('OTP resent successfully! Please check your email.');
+      setError('');
+      setResendCooldown(30);
     } catch (err) {
-      const message = err?.message || 'Failed to resend OTP. Please try again.';
+      const message = err?.message || 'Failed to resend OTP.';
       setError(message);
+      setSuccess('');
     }
   };
+
+  // Countdown timer effect
+  React.useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleSelectAccount = (account) => {
     login({ firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone || '+94 00 000 0000', role: account.role });
@@ -289,12 +284,19 @@ export function RegisterPage() {
                 </div>
               </div>
               <button type="button" onClick={handleVerifyOtp} className="lp-signin-btn" style={{ marginTop: '0.5rem' }}>VERIFY OTP</button>
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                className="lp-signin-btn"
+              <button 
+                type="button" 
+                onClick={handleResendOtp} 
                 disabled={resendCooldown > 0}
-                style={{ marginTop: '0.5rem', background: resendCooldown > 0 ? '#94a3b8' : undefined }}
+                style={{ 
+                  marginTop: '0.5rem', 
+                  background: 'none', 
+                  border: 'none', 
+                  color: resendCooldown > 0 ? '#94a3b8' : '#0ea5e9', 
+                  fontWeight: 600, 
+                  cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.9rem'
+                }}
               >
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
               </button>

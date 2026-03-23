@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, ShieldCheckIcon, LockIcon, ArrowLeftIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
@@ -50,21 +50,27 @@ export function ForgotPasswordPage() {
   };
 
   const handleResendOtp = async () => {
-    if (!email) {
-      setError('No email available to resend OTP.');
-      setSuccess('');
-      return;
-    }
-    setError('');
-    setSuccess('');
-    setResendCooldown(30);
+    setLoading(true);
     try {
-      const data = await api.post('/api/auth/resend-forgot-password-otp', { email });
-      setSuccess(data?.message || 'OTP resent successfully. Check your email.');
+      const response = await api.post('/api/auth/resend-forgot-password-otp', { email });
+      setSuccess(response?.message || 'OTP resent successfully! Please check your email.');
+      setError('');
+      setResendCooldown(30);
     } catch (err) {
-      setError(err.message || 'Failed to resend OTP. Please try again.');
+      setError(err.message || 'Failed to resend OTP.');
+      setSuccess('');
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -176,17 +182,17 @@ export function ForgotPasswordPage() {
                 <button type="submit" className="lp-signin-btn" disabled={loading}>
                   {loading ? 'VERIFYING...' : 'VERIFY OTP'}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={resendCooldown > 0}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: resendCooldown > 0 ? '#94a3b8' : '#0ea5e9',
-                    fontWeight: 700,
-                    cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
-                    fontSize: '0.82rem'
+                <button 
+                  type="button" 
+                  onClick={handleResendOtp} 
+                  disabled={resendCooldown > 0 || loading}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: (resendCooldown > 0 || loading) ? '#94a3b8' : '#0ea5e9', 
+                    fontWeight: 700, 
+                    cursor: (resendCooldown > 0 || loading) ? 'not-allowed' : 'pointer', 
+                    fontSize: '0.82rem' 
                   }}
                 >
                   {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
