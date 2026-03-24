@@ -22,3 +22,6 @@ yarn-error.log*
 
 # temp scripts
 *.ps1
+
+# local scripts folder
+scripts/

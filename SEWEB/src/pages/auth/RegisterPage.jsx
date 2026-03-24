@@ -32,7 +32,8 @@ export function RegisterPage() {
   };
 
   const getRoleDashboard = (role) => {
-    switch (role) {
+    const normalizedRole = (role || '').toLowerCase();
+    switch (normalizedRole) {
       case 'teacher': return '/teacher';
       case 'admin':   return '/admin';
       default:        return '/student';
@@ -70,23 +71,23 @@ export function RegisterPage() {
         console.error('Signup error status:', err.status);
         console.error('Signup error body:', err.body);
         console.error(err);
-        let bodyMsg = null;
-        if (err && err.body) {
-          if (typeof err.body === 'string') bodyMsg = err.body;
-          else {
-            try {
-              bodyMsg = JSON.stringify(err.body);
-            } catch { bodyMsg = String(err.body); }
-          }
-        }
-        // attempt to extract common validation messages
+
+        // Extract error message
         let userMessage = err.message || 'Signup failed';
         if (err.body) {
           if (err.body.message) userMessage = err.body.message;
           else if (err.body.error) userMessage = err.body.error;
           else if (err.body.errors) userMessage = Array.isArray(err.body.errors) ? err.body.errors.join('; ') : String(err.body.errors);
         }
-        setError(userMessage + (bodyMsg ? ` — ${bodyMsg}` : ''));
+
+        // If 401, it means backend signup endpoint is protected (misconfigured)
+        if (err.status === 401) {
+          setError('Backend signup endpoint requires authentication (misconfigured). Redirecting to login with demo account...');
+          // Auto redirect to login after 2 seconds
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setError(userMessage);
+        }
       });
   };
 

@@ -26,6 +26,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from 'react';
+import { getUsers as fetchUsersFromApi } from '../../services/userService';
 const sidebarItems = [
 {
   icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -113,42 +115,7 @@ const revenueData = [
   revenue: 2500000
 }];
 
-const userData = [
-{
-  name: 'Kasun Silva',
-  email: 'kasun@email.com',
-  role: 'Student',
-  status: 'Active',
-  joinDate: 'Jan 15, 2026'
-},
-{
-  name: 'Ms. Dilani',
-  email: 'dilani@email.com',
-  role: 'Teacher',
-  status: 'Active',
-  joinDate: 'Dec 1, 2025'
-},
-{
-  name: 'Nisha Fernando',
-  email: 'nisha@email.com',
-  role: 'Parent',
-  status: 'Active',
-  joinDate: 'Feb 3, 2026'
-},
-{
-  name: 'Ruwan Jay',
-  email: 'ruwan@email.com',
-  role: 'Student',
-  status: 'Inactive',
-  joinDate: 'Nov 20, 2025'
-},
-{
-  name: 'Amaya Perera',
-  email: 'amaya@email.com',
-  role: 'Student',
-  status: 'Active',
-  joinDate: 'Jan 28, 2026'
-}];
+// users will be loaded from backend; demo/static users removed
 
 const classAdminData = [
 {
@@ -223,8 +190,9 @@ const leaderboardData = [
 
 const userColumns = [
 {
-  key: 'name',
-  header: 'Name'
+  key: 'fullName',
+  header: 'Name',
+  render: (val, row) => val || row?.name || row?.fullName || row?.email
 },
 {
   key: 'email',
@@ -247,8 +215,9 @@ const userColumns = [
 
 },
 {
-  key: 'joinDate',
-  header: 'Join Date'
+  key: 'createdAt',
+  header: 'Join Date',
+  render: (val) => val ? new Date(val).toLocaleDateString() : '-'
 },
 {
   key: 'actions',
@@ -337,6 +306,45 @@ export function AdminPanel() {
   const location = useLocation();
   const path = location.pathname;
 
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [usersError, setUsersError] = useState(null);
+
+  function isDemo(u) {
+    if (!u) return false;
+    const email = (u.email || '').toLowerCase();
+    const name = (u.fullName || u.name || '').toLowerCase();
+    if (email.includes('demo') || name.includes('demo')) return true;
+    if (email.endsWith('@example.com')) return true;
+    return false;
+  }
+
+  async function loadUsers() {
+    setLoadingUsers(true);
+    setUsersError(null);
+    try {
+      const token = localStorage.getItem('ezy_token');
+      if (!token) {
+        throw new Error('Not authenticated. Please sign in to view users.');
+      }
+      const res = await fetchUsersFromApi();
+      console.debug('getUsers response ->', res);
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      setUsers(arr.filter((u) => !isDemo(u)));
+    } catch (err) {
+      setUsersError(err?.message || String(err));
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  }
+
+  useEffect(() => {
+    if (path.startsWith('/admin')) {
+      loadUsers();
+    }
+  }, [path]);
+
   const renderStats = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <Card>
@@ -345,7 +353,7 @@ export function AdminPanel() {
             <UsersIcon className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-2xl font-extrabold text-slate-900">5,234</p>
+            <p className="text-2xl font-extrabold text-slate-900">{users?.length?.toLocaleString?.() || '0'}</p>
             <p className="text-sm text-slate-500">Total Users</p>
           </div>
         </div>
@@ -399,7 +407,7 @@ export function AdminPanel() {
             <h2 className="text-lg font-bold text-slate-900">Recent Users</h2>
             <Button size="sm" variant="ghost">View All</Button>
           </div>
-          <Table columns={userColumns.slice(0, 3)} data={userData.slice(0, 5)} />
+          <Table columns={userColumns.slice(0, 3)} data={users.slice(0, 5)} />
         </Card>
         <Card>
           <div className="flex items-center justify-between mb-5">
@@ -422,11 +430,17 @@ export function AdminPanel() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex gap-4 items-center">
             <h2 className="text-lg font-bold text-slate-900">All Users</h2>
-            <Badge variant="info">5,234 Total</Badge>
+            <Badge variant="info">{users?.length?.toLocaleString?.() || '0'} Total</Badge>
           </div>
           <Button size="sm">Add New User</Button>
         </div>
-        <Table columns={userColumns} data={userData} />
+        {usersError && (
+          <div className="p-4 mb-4 rounded bg-red-50 text-red-700">Failed to load users: {usersError}</div>
+        )}
+        {loadingUsers && (
+          <div className="p-4 mb-4 rounded bg-slate-50 text-slate-600">Loading users...</div>
+        )}
+        <Table columns={userColumns} data={users} />
       </Card>
     </>
   );

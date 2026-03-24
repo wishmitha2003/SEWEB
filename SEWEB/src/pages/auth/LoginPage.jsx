@@ -30,7 +30,8 @@ export function LoginPage() {
   ];
 
   const getRoleDashboard = (role) => {
-    switch (role) {
+    const normalizedRole = (role || '').toLowerCase();
+    switch (normalizedRole) {
       case 'teacher': return '/teacher';
       case 'admin':   return '/admin';
       case 'courier': return '/courier';
@@ -51,13 +52,15 @@ export function LoginPage() {
         navigate(getRoleDashboard(role));
       })
       .catch(err => {
+        console.error('Login error:', err);
         // fallback to demo accounts
         const account = DEMO_ACCOUNTS.find(a => a.username.toLowerCase() === username.toLowerCase() && a.password === password);
         if (account) {
           login({ fullName: account.fullName, email: account.email, phone: account.phone, role: account.role });
           navigate(getRoleDashboard(account.role));
         } else {
-          setError(err.message || 'Invalid username or password.');
+          const errorMessage = err.message || err.toString() || 'Backend server is not running or connection failed. Using demo accounts.';
+          setError(errorMessage);
         }
       });
   };
