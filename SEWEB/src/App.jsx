@@ -9,8 +9,7 @@ import { StudentDashboard } from './pages/student/StudentDashboard';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
 import { AdminPanel } from './pages/admin/AdminPanel';
 import { CourierDashboard } from './pages/courier/CourierDashboard';
-import { ClassesPage } from './pages/ClassesPage';
-import { MaterialsPage } from './pages/MaterialsPage';
+import { ResourcesPage } from './pages/ResourcesPage';
 import { GamificationPage } from './pages/GamificationPage';
 import { MapSection } from './pages/MapSection';
 import { ContactPage } from './pages/ContactPage';
@@ -44,8 +43,9 @@ export function App() {
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="/admin/*" element={<AdminPanel />} />
         <Route path="/courier" element={<CourierDashboard />} />
-        <Route path="/classes" element={<ClassesPage />} />
-        <Route path="/materials" element={<MaterialsPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/classes" element={<ResourcesPage />} />
+        <Route path="/materials" element={<ResourcesPage />} />
         <Route path="/gamification" element={<GamificationPage />} />
         <Route path="/map" element={<MapSection />} />
         <Route path="/contact" element={<ContactPage />} />
