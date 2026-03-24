@@ -60,8 +60,7 @@ export function Navbar({ transparent = false }) {
 
   const navLinks = [
     { label: 'Home', path: '/' },
-    { label: 'Classes', path: '/classes' },
-    { label: 'Materials', path: '/materials' },
+    { label: 'Resources', path: '/resources' },
     { label: 'Map', path: '/map' },
     { label: 'Contact', path: '/contact' },
   ]
