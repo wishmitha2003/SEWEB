@@ -15,13 +15,17 @@ import {
   ClockIcon,
   MapPinIcon,
   AlertCircleIcon,
-  CheckCircleIcon } from 'lucide-react';
+  CheckCircleIcon
+} from 'lucide-react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
-import { useAuth } from '../../context/AuthContext';
+import { Modal } from '../../components/ui/Modal';
+import { FormInput } from '../../components/ui/FormInput';
+import { getClasses as fetchClassesFromApi, createClass as createClassInApi } from '../../services/classService';
+import { useEffect } from 'react';
 
 const sidebarItems = [
   { icon: <LayoutDashboardIcon className="w-4 h-4" />, label: 'Dashboard', path: '/teacher' },
@@ -142,10 +146,54 @@ const upcomingLectures = [
 export function TeacherClasses() {
   const { user } = useAuth();
   const [filter, setFilter] = useState('all');
+  const [classes, setClasses] = useState([]);
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false);
+  const [newClass, setNewClass] = useState({
+    name: '',
+    teacher: user?.fullName || '',
+    studentCount: 0,
+    schedule: '',
+    branch: '',
+    type: 'online', // Default value
+    status: 'Active'
+  });
+
+  const loadClasses = async () => {
+    try {
+      const res = await fetchClassesFromApi();
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      setClasses(arr);
+    } catch (err) {
+      console.error('Failed to load classes', err);
+    }
+  };
+
+  useEffect(() => {
+    loadClasses();
+  }, []);
+
+  const handleCreateClass = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await createClassInApi(newClass);
+      setClasses(prev => [...prev, res]);
+      setIsClassModalOpen(false);
+      setNewClass({
+        name: '',
+        teacher: user?.fullName || '',
+        studentCount: 0,
+        schedule: '',
+        branch: '',
+        status: 'Active'
+      });
+    } catch (err) {
+      alert('Failed to create class: ' + (err?.message || String(err)));
+    }
+  };
 
   const filteredClasses = filter === 'active'
-    ? classesData.filter(c => c.status === 'Active')
-    : classesData;
+    ? classes.filter(c => c.status === 'Active')
+    : classes;
 
   return (
     <DashboardLayout sidebarItems={sidebarItems}>
@@ -237,32 +285,95 @@ export function TeacherClasses() {
             <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  filter === 'all'
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'all'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setFilter('active')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  filter === 'active'
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'active'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 Active
               </button>
             </div>
-            <Button size="sm" icon={<PlusIcon className="w-4 h-4" />}>
+            <Button 
+                size="sm" 
+                icon={<PlusIcon className="w-4 h-4" />}
+                onClick={() => setIsClassModalOpen(true)}
+            >
               Create Class
             </Button>
           </div>
         </div>
         <Table columns={classColumns} data={filteredClasses} />
       </Card>
+
+      <Modal
+        isOpen={isClassModalOpen}
+        onClose={() => setIsClassModalOpen(false)}
+        title="Create New Class"
+        size="md"
+      >
+        <form onSubmit={handleCreateClass} className="space-y-4">
+          <FormInput
+            label="Class Name"
+            value={newClass.name}
+            onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
+            placeholder="e.g. English Grammar"
+            required
+          />
+          <FormInput
+            label="Teacher"
+            value={newClass.teacher}
+            onChange={(e) => setNewClass({ ...newClass, teacher: e.target.value })}
+            placeholder="e.g. Ms. Dilani"
+          />
+          <FormInput
+            label="Student Count"
+            type="number"
+            value={newClass.studentCount}
+            onChange={(e) => setNewClass({ ...newClass, studentCount: parseInt(e.target.value) || 0 })}
+          />
+          <FormInput
+            label="Schedule"
+            value={newClass.schedule}
+            onChange={(e) => setNewClass({ ...newClass, schedule: e.target.value })}
+            placeholder="e.g. Mon, Wed 9AM"
+          />
+          <FormInput
+            label="Branch"
+            value={newClass.branch}
+            onChange={(e) => setNewClass({ ...newClass, branch: e.target.value })}
+            placeholder="e.g. Colombo"
+          />
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Class Type</label>
+            <select
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={newClass.type}
+              onChange={(e) => setNewClass({ ...newClass, type: e.target.value })}
+            >
+              <option value="online">Online</option>
+              <option value="physical">Physical</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" type="button" onClick={() => setIsClassModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              Create Class
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </DashboardLayout>
   );
 }
