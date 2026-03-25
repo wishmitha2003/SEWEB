@@ -66,7 +66,13 @@ export function SettingsPage() {
         profileImageUrl: userData.profileImageUrl || userData.profileImage || ''
       });
     } catch (err) {
-      setProfileError('Failed to load profile data. Please try again.');
+      const message = err?.message || '';
+      if (!message) {
+        // Keep UI clean; still surface details in devtools.
+        // eslint-disable-next-line no-console
+        console.error('Failed to load profile data', err);
+      }
+      setProfileError(message);
     } finally {
       setProfileFetchLoading(false);
     }
