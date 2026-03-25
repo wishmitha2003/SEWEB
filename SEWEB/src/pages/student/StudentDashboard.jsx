@@ -1,11 +1,6 @@
 import React from 'react';
 import {
-  LayoutDashboardIcon,
   BookOpenIcon,
-  FolderIcon,
-  GamepadIcon,
-  CreditCardIcon,
-  SettingsIcon,
   UsersIcon,
   ClockIcon,
   TrophyIcon,
@@ -30,37 +25,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { useAuth } from '../../context/AuthContext';
-const sidebarItems = [
-{
-  icon: <LayoutDashboardIcon className="w-4 h-4" />,
-  label: 'Dashboard',
-  path: '/student'
-},
-{
-  icon: <BookOpenIcon className="w-4 h-4" />,
-  label: 'My Classes',
-  path: '/classes'
-},
-{
-  icon: <FolderIcon className="w-4 h-4" />,
-  label: 'Materials',
-  path: '/materials'
-},
-{
-  icon: <GamepadIcon className="w-4 h-4" />,
-  label: 'Gamification',
-  path: '/gamification'
-},
-{
-  icon: <CreditCardIcon className="w-4 h-4" />,
-  label: 'Payments',
-  path: '/student/payments'
-},
-{
-  icon: <SettingsIcon className="w-4 h-4" />,
-  label: 'Settings',
-  path: '/student/settings'
-}];
+import { studentSidebarItems } from '../../config/studentSidebarItems.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const chartData = [
 {
@@ -98,9 +64,10 @@ const chartData = [
 
 export function StudentDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   return (
     <DashboardLayout
-      sidebarItems={sidebarItems}>
+      sidebarItems={studentSidebarItems}>
 
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-slate-900">
@@ -239,7 +206,10 @@ export function StudentDashboard() {
               showPercentage
               size="sm" />
 
-            <Button className="w-full" size="md">
+            <Button
+              className="w-full"
+              size="md"
+              onClick={() => navigate('/student/payments')}>
               Pay Now
             </Button>
           </div>

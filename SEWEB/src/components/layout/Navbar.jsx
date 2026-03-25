@@ -90,19 +90,19 @@ export function Navbar({ transparent = false }) {
     <header
       className={`
         fixed top-0 left-0 right-0 z-40 transition-all duration-300
-        ${showBg ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100' : (isOpen ? 'bg-slate-950/80 backdrop-blur-xl border-b border-white/10' : 'bg-transparent')}
+        ${showBg ? 'bg-gray-900/90 backdrop-blur-md' : (isOpen ? 'bg-slate-950/80 backdrop-blur-xl' : 'bg-transparent')}
       `}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2.5 group">
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${showBg ? 'bg-blue-600' : 'bg-white/20'}`}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${showBg ? 'bg-white/10' : 'bg-white/20'}`}
             >
               <BookOpenIcon className="w-5 h-5 text-white" />
             </div>
             <span
-              className={`text-xl font-extrabold tracking-tight transition-colors ${showBg ? 'text-slate-900' : 'text-white'}`}
+              className={`text-xl font-extrabold tracking-tight transition-colors ${showBg ? 'text-white' : 'text-white'}`}
             >
               Ezy English
             </span>
@@ -116,7 +116,7 @@ export function Navbar({ transparent = false }) {
                 onClick={(e) => handleNavClick(e, link.path)}
                 className={`
                   px-4 py-2 rounded-full text-[12px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2
-                  ${location.pathname === link.path ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/20') : showBg ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' : 'text-white/60 hover:text-white hover:bg-white/10'}
+                  ${location.pathname === link.path ? (showBg ? 'text-white bg-white/15' : 'text-white bg-white/20') : showBg ? 'text-blue-100 hover:text-white hover:bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}
                 `}
               >
                 {link.label === 'Contact' ? (
@@ -207,7 +207,7 @@ export function Navbar({ transparent = false }) {
                     size="md"
                     className={!showBg ? 'text-white hover:bg-white/10' : ''}
                   >
-                    Log In
+                    Login
                   </Button>
                 </Link>
                 <Link to="/register">
@@ -220,7 +220,7 @@ export function Navbar({ transparent = false }) {
           </div>
 
           <button
-            className={`md:hidden p-2 rounded-lg transition-colors ${showBg ? 'text-slate-600 hover:bg-slate-100' : 'text-white hover:bg-white/10'}`}
+            className={`md:hidden p-2 rounded-lg transition-colors ${showBg ? 'text-white hover:bg-white/10' : 'text-white hover:bg-white/10'}`}
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -243,8 +243,8 @@ export function Navbar({ transparent = false }) {
                   className={`
                     px-4 py-3 rounded-xl text-base font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-3
                     ${location.pathname === link.path
-                      ? (showBg ? 'text-blue-600 bg-blue-50' : 'text-white bg-blue-600/20')
-                      : (showBg ? 'text-slate-500 hover:bg-slate-50' : 'text-white/60 hover:text-white hover:bg-white/10')}
+                      ? (showBg ? 'text-white bg-white/15' : 'text-white bg-blue-600/20')
+                      : (showBg ? 'text-blue-100 hover:text-white hover:bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10')}
                   `}
                 >
                   {link.label === 'Contact' ? (

@@ -5,11 +5,11 @@ import {
   DownloadIcon,
   FilterIcon } from
 'lucide-react';
-import { Navbar } from '../components/layout/Navbar';
-import { FooterBar } from '../components/layout/FooterBar';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 const materials = [
 {
   id: 1,
@@ -92,9 +92,8 @@ export function MaterialsPage() {
     return 'danger';
   };
   return (
-    <div className="w-full min-h-screen bg-slate-50">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+    <DashboardLayout sidebarItems={studentSidebarItems}>
+      <div className="max-w-7xl mx-auto">
         <div className="mb-10">
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
             Learning Materials
@@ -164,17 +163,16 @@ export function MaterialsPage() {
           )}
         </div>
 
-        {filtered.length === 0 &&
-        <div className="text-center py-16">
+        {filtered.length === 0 && (
+          <div className="text-center py-16">
             <FileTextIcon className="w-12 h-12 text-slate-200 mx-auto mb-4" />
             <p className="text-slate-500 font-medium">No materials found</p>
             <p className="text-sm text-slate-400 mt-1">
               Try adjusting your search or filter
             </p>
           </div>
-        }
-      </main>
-      <FooterBar />
-    </div>);
-
+        )}
+      </div>
+    </DashboardLayout>
+  );
 }
