@@ -33,6 +33,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '../../services/userService';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
+import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
 const sidebarItems = [
   {
     icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -291,6 +292,19 @@ export function AdminPanel() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState(null);
 
+  const [materials, setMaterials] = useState([]);
+  const [loadingMaterials, setLoadingMaterials] = useState(false);
+  const [materialsError, setMaterialsError] = useState(null);
+  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
+  const [newMaterialFiles, setNewMaterialFiles] = useState([]);
+  const [newMaterial, setNewMaterial] = useState({
+    title: '',
+    type: 'PDF',
+    className: '',
+    uploadedBy: user?.fullName || '',
+    status: 'Published'
+  });
+
   function isDemo(u) {
     if (!u) return false;
     const email = (u.email || '').toLowerCase();
@@ -482,10 +496,64 @@ export function AdminPanel() {
     }
   }
 
+  async function loadMaterials() {
+    setLoadingMaterials(true);
+    setMaterialsError(null);
+    try {
+      const res = await fetchMaterialsFromApi();
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      setMaterials(arr);
+    } catch (err) {
+      setMaterialsError(err?.message || String(err));
+      setMaterials([]);
+    } finally {
+      setLoadingMaterials(false);
+    }
+  }
+
+  async function handleUploadMaterial(e) {
+    e.preventDefault();
+    if (!newMaterialFiles || newMaterialFiles.length === 0) {
+      alert('Please select at least one file to upload');
+      return;
+    }
+    
+    try {
+      const res = await createMaterialInApi({
+        ...newMaterial,
+        uploadedBy: user?.fullName || newMaterial.uploadedBy
+      }, newMaterialFiles);
+      setMaterials(prev => [...prev, res]);
+      setIsMaterialModalOpen(false);
+      setNewMaterialFiles([]);
+      setNewMaterial({
+        title: '',
+        type: 'PDF',
+        className: '',
+        uploadedBy: user?.fullName || '',
+        status: 'Published'
+      });
+    } catch (err) {
+      alert('Failed to upload material: ' + (err?.message || String(err)));
+    }
+  }
+
+  async function handleDeleteMaterial(id) {
+    if (!id) return;
+    if (!window.confirm('Are you sure you want to delete this material?')) return;
+    try {
+      await deleteMaterialInApi(id);
+      setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
+    } catch (err) {
+      alert('Failed to delete material: ' + (err?.message || String(err)));
+    }
+  }
+
   useEffect(() => {
     if (path.startsWith('/admin')) {
       loadUsers();
       loadClasses();
+      loadMaterials();
     }
   }, [path]);
 
@@ -620,14 +688,89 @@ export function AdminPanel() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-lg font-bold text-slate-900">All Materials</h2>
-            <p className="text-xs text-slate-500 mt-1">This is a demo list. Connect to your API to manage real materials.</p>
+            <p className="text-xs text-slate-500 mt-1">Manage real teaching resources via API.</p>
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="outline">Create Folder</Button>
-            <Button size="sm">Upload Material</Button>
+            <Button size="sm" onClick={() => setIsMaterialModalOpen(true)}>Upload Material</Button>
           </div>
         </div>
-        <Table columns={materialsColumns} data={materialsData} />
+        {materialsError && (
+          <div className="p-4 mb-4 rounded bg-red-50 text-red-700">Failed to load materials: {materialsError}</div>
+        )}
+        {loadingMaterials && (
+          <div className="p-4 mb-4 rounded bg-slate-50 text-slate-600">Loading materials...</div>
+        )}
+        <Table 
+            columns={[
+                {
+                  key: 'title',
+                  header: 'Title',
+                  render: (val, row) => (
+                    <div className="flex flex-col">
+                      <span className="font-medium text-slate-900">{val}</span>
+                      {row.fileUrls && row.fileUrls.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {row.fileUrls.map((url, idx) => (
+                            <a 
+                              key={idx}
+                              href={`http://localhost:8082${url}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors border border-blue-100"
+                            >
+                              File {idx + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                },
+                {
+                  key: 'type',
+                  header: 'Type',
+                  render: (val) => (
+                    <Badge variant="info">{val}</Badge>
+                  )
+                },
+                {
+                  key: 'className',
+                  header: 'Class'
+                },
+                {
+                  key: 'uploadedBy',
+                  header: 'Uploaded By'
+                },
+                {
+                  key: 'uploadedOn',
+                  header: 'Uploaded On',
+                  render: (val) => val ? new Date(val).toLocaleDateString() : '-'
+                },
+                {
+                  key: 'status',
+                  header: 'Status',
+                  render: (val) => (
+                    <Badge variant={val === 'Published' ? 'success' : 'warning'}>{val}</Badge>
+                  )
+                },
+                {
+                  key: 'actions',
+                  header: 'Actions',
+                  render: (_, row) => (
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleDeleteMaterial(row.id || row._id)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )
+                }
+              ]} 
+            data={materials} 
+        />
       </Card>
     </>
   );
@@ -842,7 +985,7 @@ export function AdminPanel() {
           />
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Class Type</label>
-            <select 
+            <select
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={newClass.type}
               onChange={(e) => setNewClass({ ...newClass, type: e.target.value })}
@@ -857,6 +1000,82 @@ export function AdminPanel() {
             </Button>
             <Button type="submit">
               Create Class
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={isMaterialModalOpen}
+        onClose={() => setIsMaterialModalOpen(false)}
+        title="Upload Learning Material"
+        size="md"
+      >
+        <form onSubmit={handleUploadMaterial} className="space-y-4">
+          <FormInput
+            label="Material Title"
+            value={newMaterial.title}
+            onChange={(e) => setNewMaterial({ ...newMaterial, title: e.target.value })}
+            placeholder="e.g. Grammar Fundamentals Pack"
+            required
+          />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Attach Documents (Select one or more)</label>
+            <input 
+              type="file" 
+              multiple
+              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all border border-slate-200 rounded-xl p-2"
+              onChange={(e) => setNewMaterialFiles(e.target.files)}
+              required
+            />
+            <p className="text-[10px] text-slate-400 mt-1">You can select multiple files at once.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">File Type (Main)</label>
+              <select 
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newMaterial.type}
+                onChange={(e) => setNewMaterial({ ...newMaterial, type: e.target.value })}
+              >
+                <option value="PDF">PDF Document</option>
+                <option value="ZIP">ZIP Archive</option>
+                <option value="DOCX">Word Document</option>
+                <option value="MULTI">Multiple Files</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Class</label>
+              <select 
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newMaterial.className}
+                onChange={(e) => setNewMaterial({ ...newMaterial, className: e.target.value })}
+                required
+              >
+                <option value="">Select Class</option>
+                {classes.map(c => (
+                  <option key={c.id || c._id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Status</label>
+            <select 
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={newMaterial.status}
+              onChange={(e) => setNewMaterial({ ...newMaterial, status: e.target.value })}
+            >
+              <option value="Published">Published</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" type="button" onClick={() => setIsMaterialModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              Upload Material
             </Button>
           </div>
         </form>
