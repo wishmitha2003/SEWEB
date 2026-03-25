@@ -5,13 +5,6 @@ import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
 import { signin } from '../../services/authService';
 
-const DEMO_ACCOUNTS = [
-  { username: 'student',  password: 'student123',  fullName: 'Kasun Perera',     role: 'student',  email: 'kasun@ezy.com',  phone: '+94 77 123 4567' },
-  { username: 'teacher',  password: 'teacher123',  fullName: 'Nimal Fernando',   role: 'teacher',  email: 'nimal@ezy.com',  phone: '+94 71 234 5678' },
-  { username: 'admin',    password: 'admin123',    fullName: 'Sunil Silva',       role: 'admin',    email: 'sunil@ezy.com',  phone: '+94 76 345 6789' },
-  { username: 'courier',  password: 'courier123',  fullName: 'Ruwan Jayasinghe', role: 'courier',  email: 'ruwan@ezy.com',  phone: '+94 75 456 7890' },
-];
-
 const FLOAT_CHARS = ['A','B','C','文','学','英','語','أ','ب','த','क','Z','E','G','W','英','语'];
 
 export function LoginPage() {
@@ -26,7 +19,6 @@ export function LoginPage() {
 
   const GOOGLE_ACCOUNTS = [
     { username: 'wishmitha', fullName: 'Wishmitha Devinda', email: 'wishmitha@gmail.com', role: 'student', phone: '+94 77 999 8888' },
-    ...DEMO_ACCOUNTS,
   ];
 
   const getRoleDashboard = (role) => {
@@ -53,15 +45,8 @@ export function LoginPage() {
       })
       .catch(err => {
         console.error('Login error:', err);
-        // fallback to demo accounts
-        const account = DEMO_ACCOUNTS.find(a => a.username.toLowerCase() === username.toLowerCase() && a.password === password);
-        if (account) {
-          login({ fullName: account.fullName, email: account.email, phone: account.phone, role: account.role });
-          navigate(getRoleDashboard(account.role));
-        } else {
-          const errorMessage = err.message || err.toString() || 'Backend server is not running or connection failed. Using demo accounts.';
-          setError(errorMessage);
-        }
+        const errorMessage = err.message || err.toString() || 'Login failed. Please check your details and try again.';
+        setError(errorMessage);
       });
   };
 
@@ -114,18 +99,6 @@ export function LoginPage() {
             Your journey to English fluency continues.<br />
             Reconnect and excel.
           </p>
-
-          {/* Demo hint */}
-          <div className="lp-demo-box">
-            <p className="lp-demo-title">Demo Accounts</p>
-            {DEMO_ACCOUNTS.map(acc => (
-              <div key={acc.username} className="lp-demo-row">
-                <span className="lp-demo-user">{acc.username}</span>
-                <span className="lp-demo-pass">{acc.password}</span>
-                <span className="lp-demo-role">{acc.role}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* RIGHT — glassmorphism form card */}

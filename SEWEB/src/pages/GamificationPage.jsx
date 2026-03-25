@@ -1,11 +1,5 @@
 import React from 'react';
 import {
-  LayoutDashboardIcon,
-  BookOpenIcon,
-  FolderIcon,
-  GamepadIcon,
-  CreditCardIcon,
-  SettingsIcon,
   ZapIcon,
   TrophyIcon,
   StarIcon,
@@ -20,37 +14,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Table } from '../components/ui/Table';
-const sidebarItems = [
-{
-  icon: <LayoutDashboardIcon className="w-4 h-4" />,
-  label: 'Dashboard',
-  path: '/student'
-},
-{
-  icon: <BookOpenIcon className="w-4 h-4" />,
-  label: 'My Classes',
-  path: '/classes'
-},
-{
-  icon: <FolderIcon className="w-4 h-4" />,
-  label: 'Materials',
-  path: '/materials'
-},
-{
-  icon: <GamepadIcon className="w-4 h-4" />,
-  label: 'Gamification',
-  path: '/gamification'
-},
-{
-  icon: <CreditCardIcon className="w-4 h-4" />,
-  label: 'Payments',
-  path: '/student/payments'
-},
-{
-  icon: <SettingsIcon className="w-4 h-4" />,
-  label: 'Settings',
-  path: '/student/settings'
-}];
+import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 
 const leaderboardData = [
 {
@@ -200,7 +164,7 @@ const leaderboardColumns = [
 export function GamificationPage() {
   return (
     <DashboardLayout
-      sidebarItems={sidebarItems}
+      sidebarItems={studentSidebarItems}
       userName="Kasun Silva"
       userRole="Student">
 

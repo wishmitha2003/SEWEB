@@ -45,6 +45,11 @@ const sidebarItems = [
   path: '/admin/classes'
 },
 {
+  icon: <BookOpenIcon className="w-4 h-4" />,
+  label: 'Materials',
+  path: '/admin/materials'
+},
+{
   icon: <BuildingIcon className="w-4 h-4" />,
   label: 'Branches',
   path: '/admin/branches'
@@ -261,6 +266,78 @@ const classAdminColumns = [
   render: (val) => <Badge variant="success">{val}</Badge>
 }];
 
+const materialsData = [
+{
+  title: 'Beginner Grammar Guide',
+  type: 'PDF',
+  className: 'Grammar Fundamentals',
+  uploadedBy: 'Ms. Dilani',
+  uploadedAt: '2026-02-10',
+  status: 'Published'
+},
+{
+  title: 'IELTS Practice Pack',
+  type: 'ZIP',
+  className: 'IELTS Preparation',
+  uploadedBy: 'Mr. Kamal',
+  uploadedAt: '2026-02-18',
+  status: 'Published'
+},
+{
+  title: 'Speaking Prompts – Week 4',
+  type: 'DOCX',
+  className: 'Speaking Practice',
+  uploadedBy: 'Ms. Priya',
+  uploadedAt: '2026-03-05',
+  status: 'Draft'
+}
+];
+
+const materialsColumns = [
+{
+  key: 'title',
+  header: 'Title'
+},
+{
+  key: 'type',
+  header: 'Type'
+},
+{
+  key: 'className',
+  header: 'Class'
+},
+{
+  key: 'uploadedBy',
+  header: 'Uploaded By'
+},
+{
+  key: 'uploadedAt',
+  header: 'Uploaded On',
+  render: (val) => val ? new Date(val).toLocaleDateString() : '-'
+},
+{
+  key: 'status',
+  header: 'Status',
+  render: (val) => (
+    <Badge variant={val === 'Published' ? 'success' : 'warning'}>{val}</Badge>
+  )
+},
+{
+  key: 'actions',
+  header: 'Actions',
+  render: () => (
+    <div className="flex gap-2">
+      <button className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+        <PencilIcon className="w-4 h-4" />
+      </button>
+      <button className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+        <TrashIcon className="w-4 h-4" />
+      </button>
+    </div>
+  )
+}
+];
+
 const leaderboardColumns = [
 {
   key: 'rank',
@@ -461,6 +538,28 @@ export function AdminPanel() {
     </>
   );
 
+  const renderMaterials = () => (
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Materials Management</h1>
+        <p className="text-slate-500 mt-1">Upload and organize learning materials for all classes.</p>
+      </div>
+      <Card>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">All Materials</h2>
+            <p className="text-xs text-slate-500 mt-1">This is a demo list. Connect to your API to manage real materials.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline">Create Folder</Button>
+            <Button size="sm">Upload Material</Button>
+          </div>
+        </div>
+        <Table columns={materialsColumns} data={materialsData} />
+      </Card>
+    </>
+  );
+
   const renderBranches = () => (
     <>
       <div className="mb-8">
@@ -618,6 +717,7 @@ export function AdminPanel() {
     switch (path) {
       case '/admin/users': return renderUsers();
       case '/admin/classes': return renderClasses();
+      case '/admin/materials': return renderMaterials();
       case '/admin/branches': return renderBranches();
       case '/admin/revenue': return renderRevenue();
       case '/admin/leaderboard': return renderLeaderboard();

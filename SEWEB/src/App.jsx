@@ -15,7 +15,10 @@ import { TeacherSchedule } from './pages/teacher/TeacherSchedule';
 import { AdminPanel } from './pages/admin/AdminPanel';
 import { CourierDashboard } from './pages/courier/CourierDashboard';
 import { ResourcesPage } from './pages/ResourcesPage';
+import { ClassesPage } from './pages/ClassesPage';
+import { MaterialsPage } from './pages/MaterialsPage';
 import { GamificationPage } from './pages/GamificationPage';
+import { PaymentsPage } from './pages/PaymentsPage';
 import { MapSection } from './pages/MapSection';
 import { ContactPage } from './pages/ContactPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -47,6 +50,7 @@ export function App() {
         <Route path="/role-select" element={<RoleSelectPage />} />
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/student/settings" element={<SettingsPage />} />
+        <Route path="/student/payments" element={<PaymentsPage />} />
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="/teacher/profile" element={<TeacherDashboard />} />
         <Route path="/teacher/classes" element={<TeacherClasses />} />
@@ -56,8 +60,8 @@ export function App() {
         <Route path="/admin/*" element={<AdminPanel />} />
         <Route path="/courier" element={<CourierDashboard />} />
         <Route path="/resources" element={<ResourcesPage />} />
-        <Route path="/classes" element={<ResourcesPage />} />
-        <Route path="/materials" element={<ResourcesPage />} />
+        <Route path="/classes" element={<ClassesPage />} />
+        <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/gamification" element={<GamificationPage />} />
         <Route path="/map" element={<MapSection />} />
         <Route path="/contact" element={<ContactPage />} />

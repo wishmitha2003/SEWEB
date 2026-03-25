@@ -25,11 +25,11 @@ import { useAuth } from '../../context/AuthContext';
 
 const sidebarItems = [
   { icon: <LayoutDashboardIcon className="w-4 h-4" />, label: 'Dashboard', path: '/teacher' },
+  { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', path: '/teacher/profile' },
   { icon: <BookOpenIcon className="w-4 h-4" />, label: 'My Classes', path: '/teacher/classes' },
   { icon: <FileTextIcon className="w-4 h-4" />, label: 'Assignments', path: '/teacher/assignments' },
   { icon: <UsersIcon className="w-4 h-4" />, label: 'Students', path: '/teacher/students' },
-  { icon: <CalendarIcon className="w-4 h-4" />, label: 'Schedule', path: '/teacher/schedule' },
-  { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', path: '/teacher/profile' }
+  { icon: <CalendarIcon className="w-4 h-4" />, label: 'Schedule', path: '/teacher/schedule' }
 ];
 
 const classesData = [
