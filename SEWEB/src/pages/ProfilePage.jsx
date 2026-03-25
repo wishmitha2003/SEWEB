@@ -59,7 +59,12 @@ export function ProfilePage() {
         setProfileImage(data.profileImageUrl || data.profileImage);
       }
     } catch (err) {
-      setError('Failed to load profile data. Please try again.');
+      const message = err?.message || '';
+      if (!message) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load profile data', err);
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }
