@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboardIcon,
   BookOpenIcon,
@@ -25,7 +26,6 @@ import { Table } from '../../components/ui/Table';
 import { Modal } from '../../components/ui/Modal';
 import { FormInput } from '../../components/ui/FormInput';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi } from '../../services/classService';
-import { useEffect } from 'react';
 
 const sidebarItems = [
   { icon: <LayoutDashboardIcon className="w-4 h-4" />, label: 'Dashboard', path: '/teacher' },

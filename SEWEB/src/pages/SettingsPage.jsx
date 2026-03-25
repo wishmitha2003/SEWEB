@@ -278,7 +278,7 @@ export function SettingsPage() {
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               {/* Email - Read Only */}
               <FormInput
-                label="Email"
+                label="Email/User Name"
                 type="email"
                 value={user?.email || ''}
                 readOnly
