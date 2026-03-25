@@ -14,9 +14,6 @@ export function Sidebar({
   const location = useLocation();
   const navigate = useNavigate();
 
-  const headerItem = items[0];
-  const restItems = items.slice(1);
-
   const handleLogout = () => {
     if(confirm('Are you sure you want to log out?')) {
       logout();
@@ -26,47 +23,16 @@ export function Sidebar({
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 via-blue-950 to-blue-900 text-white">
-      {/* Top row: Dashboard + collapse toggle (desktop) */}
-      {headerItem && (
-        <div className="hidden lg:flex items-center gap-3 px-4 pt-3 pb-2">
-          <Link
-            key={headerItem.path}
-            to={headerItem.path}
-            onClick={() => setMobileOpen(false)}
-            className={`
-              flex-1 flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold
-              transition-all duration-300 relative group
-              ${collapsed ? 'justify-center' : ''}
-              ${location.pathname === headerItem.path
-                ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40'
-                : 'text-blue-200/60 hover:bg-white/5 hover:text-white'}
-            `}
-            title={collapsed ? headerItem.label : undefined}
-          >
-            <span
-              className={`flex-shrink-0 transition-all duration-300 ${
-                location.pathname === headerItem.path
-                  ? 'scale-110 text-white'
-                  : 'group-hover:scale-110 text-blue-400/80 group-hover:text-blue-300'
-              } ${collapsed ? 'scale-125' : ''}`}
-            >
-              {headerItem.icon}
-            </span>
-            {!collapsed && <span>{headerItem.label}</span>}
-            {location.pathname === headerItem.path && !collapsed && (
-              <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />
-            )}
-          </Link>
-
-          <button
-            className="flex items-center justify-center w-10 h-10 rounded-2xl border border-white/15 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white shadow-lg shadow-slate-950/40 transition-all flex-shrink-0"
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        </div>
-      )}
+      {/* Top row: Collapse toggle (desktop) */}
+      <div className={`hidden lg:flex items-center px-4 pt-4 pb-2 ${collapsed ? 'justify-center' : 'justify-end'}`}>
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-2xl border border-white/15 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white shadow-lg shadow-slate-950/40 transition-all flex-shrink-0"
+          onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
 
       {/* User Profile - Mobile only */}
       <Link
@@ -91,7 +57,7 @@ export function Sidebar({
       </Link>
 
       <nav className="flex-1 px-4 pt-2 pb-4 space-y-1.5 overflow-y-auto custom-scrollbar">
-        {restItems.map((item) => {
+        {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link

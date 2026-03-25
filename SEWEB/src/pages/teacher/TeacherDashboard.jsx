@@ -108,7 +108,7 @@ const classColumns = [
   { key: 'schedule', header: 'Schedule' },
   { key: 'students', header: 'Students' },
   { key: 'status', header: 'Status', render: (val) => <Badge variant={val === 'Active' ? 'success' : 'info'}>{val}</Badge> },
-  { key: 'actions', header: 'Actions', render: () => <div className="flex gap-2"><button className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><EyeIcon className="w-4 h-4" /></button><button className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><PencilIcon className="w-4 h-4" /></button></div> }
+  { key: 'actions', header: 'Actions', render: () => <div className="flex gap-2"><button className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><EyeIcon className="w-5 h-5" /></button><button className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><PencilIcon className="w-5 h-5" /></button></div> }
 ];
 
 const studentColumns = [
@@ -288,18 +288,18 @@ export function TeacherDashboard() {
 
         <Card className="lg:col-span-1">
           <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
-          <div className="space-y-2.5">
-            <button className="w-full px-4 py-2.5 rounded-xl bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-              <UploadIcon className="w-4 h-4" /> Upload Assignment
+          <div className="space-y-3">
+            <button className="w-full px-5 py-3 rounded-xl bg-blue-600 text-white font-medium text-base hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+              <UploadIcon className="w-5 h-5" /> Upload Assignment
             </button>
-            <button className="w-full px-4 py-2.5 rounded-xl bg-slate-100 text-slate-900 font-medium text-sm hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
-              <MessageSquareIcon className="w-4 h-4" /> Send Announcement
+            <button className="w-full px-5 py-3 rounded-xl bg-slate-100 text-slate-900 font-medium text-base hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
+              <MessageSquareIcon className="w-5 h-5" /> Send Announcement
             </button>
-            <button className="w-full px-4 py-2.5 rounded-xl bg-slate-100 text-slate-900 font-medium text-sm hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
-              <FileTextIcon className="w-4 h-4" /> Create Quiz
+            <button className="w-full px-5 py-3 rounded-xl bg-slate-100 text-slate-900 font-medium text-base hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
+              <FileTextIcon className="w-5 h-5" /> Create Quiz
             </button>
-            <button className="w-full px-4 py-2.5 rounded-xl bg-slate-100 text-slate-900 font-medium text-sm hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
-              <MoreVerticalIcon className="w-4 h-4" /> View Reports
+            <button className="w-full px-5 py-3 rounded-xl bg-slate-100 text-slate-900 font-medium text-base hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
+              <MoreVerticalIcon className="w-5 h-5" /> View Reports
             </button>
           </div>
         </Card>
@@ -447,20 +447,20 @@ export function TeacherDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-2">Username</label>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Identity Card No</label>
                     <input
                       type="text"
                       value={editForm.username}
                       onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                      placeholder="@username"
+                      placeholder="e.g. 199012345678"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-2">Email</label>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Email/User Name</label>
                     <input
                       type="email"
                       value={editForm.email}

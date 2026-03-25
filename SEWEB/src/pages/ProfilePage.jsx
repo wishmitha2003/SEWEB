@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CameraIcon, SaveIcon, MailIcon, PhoneIcon, MapPinIcon } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { FormInput } from '../components/ui/FormInput';
 import { api } from '../services/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
@@ -13,18 +14,20 @@ export function ProfilePage() {
   const { user, updateUser } = useAuth();
 
   const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
+    fullName: '',
+    username: '',
     email: '',
+    phone: '',
     address: '',
-    profileImageUrl: ''
+    city: 'Colombo',
+    postalCode: '',
+    country: 'Sri Lanka'
   });
-
+  
+  const [profileImage, setProfileImage] = useState(user?.profileImage || null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     fetchUserProfile();
@@ -37,27 +40,39 @@ export function ProfilePage() {
       const response = await api.get('/api/auth/me');
       const data = response.user || response;
 
-      let firstName = data.firstName || '';
-      let lastName = data.lastName || '';
-
-      if (!firstName && !lastName && user?.fullName) {
-        const nameParts = user.fullName.trim().split(' ');
-        firstName = nameParts[0] || '';
-        lastName = nameParts.slice(1).join(' ') || '';
+      let fullName = data.fullName || user?.fullName || '';
+      if (!fullName && data.firstName) {
+        fullName = `${data.firstName} ${data.lastName || ''}`.trim();
       }
 
       setUserData({
-        firstName,
-        lastName,
-        phone: data.phone || user?.phone || '',
+        fullName: fullName || '',
+        username: data.username || user?.username || '',
         email: data.email || user?.email || '',
+        phone: data.phone || user?.phone || '',
         address: data.address || '',
-        profileImageUrl: data.profileImageUrl || data.profileImage || ''
+        city: data.city || 'Colombo',
+        postalCode: data.postalCode || '',
+        country: data.country || 'Sri Lanka'
       });
+      if (data.profileImageUrl || data.profileImage) {
+        setProfileImage(data.profileImageUrl || data.profileImage);
+      }
     } catch (err) {
       setError('Failed to load profile data. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -72,25 +87,34 @@ export function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setSaving(true);
 
     try {
-      const response = await api.put('/api/auth/update-profile', {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+      const parts = userData.fullName.trim().split(' ');
+      const firstName = parts[0] || '';
+      const lastName = parts.slice(1).join(' ') || '';
+
+      await api.put('/api/auth/update-profile', {
+        firstName,
+        lastName,
         phone: userData.phone,
         address: userData.address,
-        profileImageUrl: userData.profileImageUrl
+        profileImageUrl: profileImage
       });
 
       updateUser({
-        fullName: `${userData.firstName} ${userData.lastName}`.trim(),
+        fullName: userData.fullName,
+        username: userData.username,
+        email: userData.email,
         phone: userData.phone,
-        profileImage: userData.profileImageUrl
+        address: userData.address,
+        city: userData.city,
+        postalCode: userData.postalCode,
+        country: userData.country,
+        profileImage
       });
 
-      setSuccess(response.message || 'Profile updated successfully!');
+      alert('Profile updated successfully!');
     } catch (err) {
       setError(err.message || 'Failed to update profile. Please try again.');
     } finally {
@@ -98,9 +122,12 @@ export function ProfilePage() {
     }
   };
 
-  const fullName = `${userData.firstName} ${userData.lastName}`.trim() || user?.fullName || 'Your Name';
-  const initial = (userData.firstName || user?.fullName || 'U').charAt(0).toUpperCase();
-  const roleLabel = user?.role || 'Student';
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const roleLabel = user?.role || 'STUDENT';
 
   if (loading) {
     return (
@@ -114,172 +141,168 @@ export function ProfilePage() {
 
   return (
     <DashboardLayout sidebarItems={studentSidebarItems}>
-      <div className="mb-8 flex flex-col gap-2">
-        <h1 className="text-2xl font-extrabold text-slate-900">Profile Settings</h1>
-        <p className="text-slate-500">Manage your personal information and account details.</p>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900">Edit Profile</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
-        {/* Left summary card */}
-        <Card className="h-full">
-          <div className="p-6 flex flex-col items-center text-center gap-4">
-            <div className="w-24 h-24 rounded-full bg-blue-600 border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
-              {userData.profileImageUrl ? (
-                <img
-                  src={userData.profileImageUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div className={`w-full h-full flex items-center justify-center ${userData.profileImageUrl ? 'hidden' : ''}`}>
-                <span className="text-white text-2xl font-black">{initial}</span>
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column: Profile Summary */}
+        <Card className="lg:col-span-1">
+          <div className="flex flex-col items-center text-center">
+            <div className="relative mb-6 mt-4">
+              <div className="w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#78bdeb] flex items-center justify-center">
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-6xl font-black text-white">{getInitials(userData.fullName)}</span>
+                )}
               </div>
+              <label className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-lg hover:bg-blue-700 transition-all border-2 border-white opacity-0 hover:opacity-100">
+                <CameraIcon className="w-5 h-5" />
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+              </label>
             </div>
 
-            <div className="space-y-2">
-              <h2 className="text-lg font-bold text-slate-900">{fullName}</h2>
-              <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                {roleLabel}
-              </span>
-            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">{userData.username || user?.username || userData.fullName || 'User'}</h3>
+            <Badge variant="info" className="uppercase tracking-widest text-[#1e40af] bg-[#eff6ff] border-[#bfdbfe]">{roleLabel}</Badge>
 
-            <div className="w-full pt-2 border-t border-slate-100 mt-2 space-y-2 text-left text-sm">
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">Email</span>
-                <span className="font-medium text-slate-900 truncate max-w-[60%]">
-                  {userData.email || user?.email || 'Not set'}
-                </span>
+            <div className="mt-8 space-y-3 w-full">
+              <div className="flex items-center gap-3 px-4 py-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                <MailIcon className="w-4 h-4 text-slate-400" />
+                <span className="text-sm text-slate-700 font-medium">{userData.email || 'Not provided'}</span>
               </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">Phone</span>
-                <span className="font-medium text-slate-900 truncate max-w-[60%]">
-                  {userData.phone || 'Not provided'}
-                </span>
+              <div className="flex items-center gap-3 px-4 py-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                <PhoneIcon className="w-4 h-4 text-slate-400" />
+                <span className="text-sm text-slate-500">{userData.phone || 'Not provided'}</span>
               </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">Address</span>
-                <span className="font-medium text-slate-900 truncate max-w-[60%]">
-                  {userData.address || 'Not provided'}
-                </span>
+              <div className="flex items-center gap-3 px-4 py-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                <MapPinIcon className="w-4 h-4 text-slate-400" />
+                <span className="text-sm text-slate-500">{userData.address || 'Not provided'}</span>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Right form card */}
-        <Card>
-          <div className="p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Edit Profile</h2>
-
-            {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
-                {success}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <FormInput
-                label="Email"
-                type="email"
-                value={userData.email || user?.email || ''}
-                readOnly
-                className="bg-slate-50"
-                helperText="Email cannot be changed"
-              />
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FormInput
-                  label="First Name"
-                  name="firstName"
-                  type="text"
-                  value={userData.firstName}
-                  onChange={handleChange}
-                  placeholder="Enter your first name"
-                  required
-                />
-                <FormInput
-                  label="Last Name"
-                  name="lastName"
-                  type="text"
-                  value={userData.lastName}
-                  onChange={handleChange}
-                  placeholder="Enter your last name"
-                  required
-                />
-              </div>
-
-              <FormInput
-                label="Phone"
-                name="phone"
-                type="tel"
-                value={userData.phone}
-                onChange={handleChange}
-                placeholder="Enter your phone number"
-              />
-
-              <FormInput
-                label="Address"
-                name="address"
-                type="text"
-                value={userData.address}
-                onChange={handleChange}
-                placeholder="Enter your address"
-              />
-
-              <FormInput
-                label="Profile Picture URL"
-                name="profileImageUrl"
-                type="url"
-                value={userData.profileImageUrl}
-                onChange={handleChange}
-                placeholder="Enter profile picture URL"
-              />
-
-              {userData.profileImageUrl && (
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-full bg-blue-600 border-2 border-white shadow-lg flex items-center justify-center overflow-hidden">
-                    <img
-                      src={userData.profileImageUrl}
-                      alt="Profile Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
-                      }}
-                    />
-                    <div className="w-full h-full flex items-center justify-center hidden">
-                      <span className="text-white text-lg font-black">{initial}</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Preview</p>
+        {/* Right Column: Edit Profile Information */}
+        <Card className="lg:col-span-2">
+          <div className="p-2">
+            <h2 className="text-lg font-extrabold text-slate-900 mb-6">Edit Profile Information</h2>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={userData.fullName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  />
                 </div>
-              )}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Identity Card No</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={userData.username}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                    placeholder="e.g. 199012345678"
+                  />
+                </div>
+              </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Email/User Name</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={userData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={userData.phone}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                    placeholder="+94 77..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Residential Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={userData.address}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={userData.city}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Postal Code</label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={userData.postalCode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Country</label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={userData.country}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-6 border-t border-slate-200 mt-6">
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="flex-1"
+                  size="lg"
+                  icon={<SaveIcon className="w-4 h-4" />}
                 >
-                  {saving ? 'Saving changes...' : 'Save Changes'}
+                  {saving ? 'SAVING...' : 'SAVE CHANGES'}
                 </Button>
                 <Button
                   type="button"
-                  variant="secondary"
-                  className="flex-1"
+                  size="lg"
+                  variant="outline"
                   onClick={() => navigate('/student')}
                 >
-                  Back to Dashboard
+                  BACK TO DASHBOARD
                 </Button>
               </div>
             </form>
