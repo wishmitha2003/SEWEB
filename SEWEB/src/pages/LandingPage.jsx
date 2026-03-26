@@ -91,7 +91,7 @@ export function LandingPage() {
       <Navbar transparent />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-24 pb-12 sm:pt-28 sm:pb-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-16 pb-12 sm:pt-20 sm:pb-20 overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />

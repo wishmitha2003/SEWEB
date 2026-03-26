@@ -10,10 +10,10 @@ const variantClasses = {
   ghost: 'text-slate-400 hover:text-white hover:bg-white/5 active:scale-95'
 };
 const sizeClasses = {
-  sm: 'px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full gap-2',
-  md: 'px-5 py-2 text-xs font-black uppercase tracking-widest rounded-full gap-2.5',
-  lg: 'px-7 py-2.5 text-sm font-black uppercase tracking-widest rounded-full gap-3',
-  xl: 'px-10 py-3.5 text-base font-black uppercase tracking-widest rounded-full gap-4'
+  sm: 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-full gap-2.5',
+  md: 'px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-full gap-3',
+  lg: 'px-8 py-3 text-base font-black uppercase tracking-widest rounded-full gap-3.5',
+  xl: 'px-12 py-4 text-lg font-black uppercase tracking-widest rounded-full gap-4'
 };
 export function Button({
   variant = 'primary',

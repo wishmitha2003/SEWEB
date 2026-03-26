@@ -6,14 +6,7 @@ import { FormInput } from '../components/ui/FormInput';
 import { SettingsIcon, UserIcon, LockIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { api } from '../services/apiClient';
 import { useAuth } from '../context/AuthContext';
-
-const sidebarItems = [
-  {
-    icon: <SettingsIcon className="w-4 h-4" />,
-    label: 'Settings',
-    path: '/student/settings'
-  }
-];
+import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 
 export function SettingsPage() {
   const { user, updateUser } = useAuth();
@@ -73,7 +66,13 @@ export function SettingsPage() {
         profileImageUrl: userData.profileImageUrl || userData.profileImage || ''
       });
     } catch (err) {
-      setProfileError('Failed to load profile data. Please try again.');
+      const message = err?.message || '';
+      if (!message) {
+        // Keep UI clean; still surface details in devtools.
+        // eslint-disable-next-line no-console
+        console.error('Failed to load profile data', err);
+      }
+      setProfileError(message);
     } finally {
       setProfileFetchLoading(false);
     }
@@ -207,7 +206,7 @@ export function SettingsPage() {
   }, [resendCooldown]);
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems}>
+    <DashboardLayout sidebarItems={studentSidebarItems}>
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-slate-900">Settings</h1>
         <p className="text-slate-500 mt-1">Manage your account and preferences.</p>
@@ -285,7 +284,7 @@ export function SettingsPage() {
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               {/* Email - Read Only */}
               <FormInput
-                label="Email"
+                label="Email/User Name"
                 type="email"
                 value={user?.email || ''}
                 readOnly

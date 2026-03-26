@@ -3,14 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpenIcon, UserIcon, LockIcon, EyeIcon, EyeOffIcon, AlertCircleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/apiClient';
-
-const DEMO_ACCOUNTS = [
-  { username: 'student',  password: 'student123',  fullName: 'Kasun Perera',     role: 'student',  email: 'kasun@ezy.com',  phone: '+94 77 123 4567' },
-  { username: 'teacher',  password: 'teacher123',  fullName: 'Nimal Fernando',   role: 'teacher',  email: 'nimal@ezy.com',  phone: '+94 71 234 5678' },
-  { username: 'admin',    password: 'admin123',    fullName: 'Sunil Silva',       role: 'admin',    email: 'sunil@ezy.com',  phone: '+94 76 345 6789' },
-  { username: 'courier',  password: 'courier123',  fullName: 'Ruwan Jayasinghe', role: 'courier',  email: 'ruwan@ezy.com',  phone: '+94 75 456 7890' },
-];
+import { signin } from '../../services/authService';
 
 const FLOAT_CHARS = ['A','B','C','文','学','英','語','أ','ب','த','क','Z','E','G','W','英','语'];
 
@@ -26,11 +19,11 @@ export function LoginPage() {
 
   const GOOGLE_ACCOUNTS = [
     { username: 'wishmitha', fullName: 'Wishmitha Devinda', email: 'wishmitha@gmail.com', role: 'student', phone: '+94 77 999 8888' },
-    ...DEMO_ACCOUNTS,
   ];
 
   const getRoleDashboard = (role) => {
-    switch (role) {
+    const normalizedRole = (role || '').toLowerCase();
+    switch (normalizedRole) {
       case 'teacher': return '/teacher';
       case 'admin':   return '/admin';
       case 'courier': return '/courier';
@@ -41,47 +34,20 @@ export function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!username || !password) {
-      setError('Please enter both username and password.');
-      return;
-    }
-
-    try {
-      const response = await api.post('/api/auth/login', { username, password });
-      console.log('Login response:', response);
-
-      const jwtToken = response?.accessToken || response?.token;
-      if (!jwtToken) {
-        throw new Error(response?.message || 'Invalid login response from server.');
-      }
-
-      const userData = {
-        id: response?.id || null,
-        username: response?.username || username,
-        email: response?.email || '',
-        roles: response?.roles || response?.role ? (Array.isArray(response.roles) ? response.roles : [response.role]) : [],
-      };
-
-      localStorage.setItem('ezy_token', jwtToken);
-      localStorage.setItem('ezy_user', JSON.stringify(userData));
-
-      login({
-        fullName: response?.fullName || response?.username || username,
-        email: userData.email,
-        phone: response?.phone || '',
-        role: userData.roles[0] || 'student',
+    if (!username || !password) { setError('Please enter both username and password.'); return; }
+    // attempt real signin against backend
+    signin({ username, password })
+      .then(data => {
+        const fullName = data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : (data.email ? data.email.split('@')[0] : username);
+        const role = (data.roles && data.roles[0]) || 'student';
+        login({ fullName, email: data.email || username, phone: data.phone || '' , role }, data.accessToken || data.token);
+        navigate(getRoleDashboard(role));
+      })
+      .catch(err => {
+        console.error('Login error:', err);
+        const errorMessage = err.message || err.toString() || 'Login failed. Please check your details and try again.';
+        setError(errorMessage);
       });
-
-      navigate(getRoleDashboard(userData.roles[0] || 'student'));
-    } catch (err) {
-      const account = DEMO_ACCOUNTS.find(a => a.username.toLowerCase() === username.toLowerCase() && a.password === password);
-      if (account) {
-        login({ fullName: account.fullName, email: account.email, phone: account.phone, role: account.role });
-        navigate(getRoleDashboard(account.role));
-      } else {
-        setError(err?.message || 'Login failed. Check server status and CORS.');
-      }
-    }
   };
 
   const handleSelectAccount = (account) => {
@@ -133,18 +99,6 @@ export function LoginPage() {
             Your journey to English fluency continues.<br />
             Reconnect and excel.
           </p>
-
-          {/* Demo hint */}
-          <div className="lp-demo-box">
-            <p className="lp-demo-title">Demo Accounts</p>
-            {DEMO_ACCOUNTS.map(acc => (
-              <div key={acc.username} className="lp-demo-row">
-                <span className="lp-demo-user">{acc.username}</span>
-                <span className="lp-demo-pass">{acc.password}</span>
-                <span className="lp-demo-role">{acc.role}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* RIGHT — glassmorphism form card */}

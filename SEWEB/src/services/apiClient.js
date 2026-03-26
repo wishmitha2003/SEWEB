@@ -23,20 +23,28 @@ async function parseJsonResponse(response) {
 async function request(method, path, data, customOptions = {}) {
   const url = buildUrl(path);
   const token = localStorage.getItem('ezy_token');
+  const isFormData = data instanceof FormData;
+  
+  const { headers: customHeaders, ...restOptions } = customOptions;
+  
   const options = {
     method,
     headers: {
-      'Content-Type': 'application/json',
+      ...(!isFormData && { 'Content-Type': 'application/json' }),
       Accept: 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
-      ...customOptions.headers,
+      ...customHeaders,
     },
     credentials: 'include', // only if backend supports cookies/sessions
-    ...customOptions,
+    ...restOptions,
   };
 
+  if (options.headers['Content-Type'] === undefined) {
+    delete options.headers['Content-Type'];
+  }
+
   if (data != null) {
-    options.body = JSON.stringify(data);
+    options.body = isFormData ? data : JSON.stringify(data);
   }
 
   const response = await fetch(url, options);
