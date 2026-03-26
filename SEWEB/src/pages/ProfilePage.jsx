@@ -18,6 +18,7 @@ export function ProfilePage() {
     username: '',
     email: '',
     phone: '',
+    idCardNo: '',
     address: '',
     city: 'Colombo',
     postalCode: '',
@@ -50,6 +51,7 @@ export function ProfilePage() {
         username: data.username || user?.username || '',
         email: data.email || user?.email || '',
         phone: data.phone || user?.phone || '',
+        idCardNo: data.idCardNo || '',
         address: data.address || '',
         city: data.city || 'Colombo',
         postalCode: data.postalCode || '',
@@ -103,7 +105,11 @@ export function ProfilePage() {
         firstName,
         lastName,
         phone: userData.phone,
+        idCardNo: userData.idCardNo,
         address: userData.address,
+        city: userData.city,
+        postalCode: userData.postalCode,
+        country: userData.country,
         profileImageUrl: profileImage
       });
 
@@ -161,17 +167,18 @@ export function ProfilePage() {
         <Card className="lg:col-span-1">
           <div className="flex flex-col items-center text-center">
             <div className="relative mb-6 mt-4">
-              <div className="w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#78bdeb] flex items-center justify-center">
+              <div className="w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#78bdeb] flex items-center justify-center relative group">
                 {profileImage ? (
-                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  <img src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `http://localhost:8082${profileImage}`} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-6xl font-black text-white">{getInitials(userData.fullName)}</span>
                 )}
+                <label className="absolute inset-0 bg-black/40 text-white flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <CameraIcon className="w-8 h-8 mb-1" />
+                  <span className="text-[10px] font-bold uppercase tracking-tighter">Change Photo</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                </label>
               </div>
-              <label className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-lg hover:bg-blue-700 transition-all border-2 border-white opacity-0 hover:opacity-100">
-                <CameraIcon className="w-5 h-5" />
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-              </label>
             </div>
 
             <h3 className="text-xl font-bold text-slate-900 mb-2">{userData.username || user?.username || userData.fullName || 'User'}</h3>
@@ -215,8 +222,8 @@ export function ProfilePage() {
                   <label className="block text-sm font-semibold text-slate-900 mb-2">Identity Card No</label>
                   <input
                     type="text"
-                    name="username"
-                    value={userData.username}
+                    name="idCardNo"
+                    value={userData.idCardNo}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                     placeholder="e.g. 199012345678"
