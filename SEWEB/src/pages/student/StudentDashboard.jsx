@@ -14,6 +14,8 @@ import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { useAuth } from '../../context/AuthContext';
 import { studentSidebarItems } from '../../config/studentSidebarItems.jsx';
+import { getClasses } from '../../services/classService';
+import { useState, useEffect } from 'react';
 
 const chartData = [
   { week: 'Week 1', hours: 3 },
@@ -41,6 +43,26 @@ const upcomingClasses = [
 export function StudentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadClasses() {
+      try {
+        const res = await getClasses();
+        const arr = Array.isArray(res) ? res : (res?.data || []);
+        // In a real app, we would filter by student enrollment
+        // For now, we'll show classes available to students or all
+        setClasses(arr);
+      } catch (err) {
+        console.error('Failed to load student classes:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadClasses();
+  }, []);
+
 
   return (
     <DashboardLayout sidebarItems={studentSidebarItems}>
@@ -59,7 +81,7 @@ export function StudentDashboard() {
               <BookOpenIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900">4</p>
+              <p className="text-2xl font-extrabold text-slate-900">{classes?.length || '0'}</p>
               <p className="text-sm text-slate-500">Enrolled Classes</p>
             </div>
           </div>
@@ -92,7 +114,9 @@ export function StudentDashboard() {
               <ClockIcon className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900">2</p>
+              <p className="text-2xl font-extrabold text-slate-900">
+                {classes?.filter(c => c.status === 'Active')?.length || '0'}
+              </p>
               <p className="text-sm text-slate-500">Upcoming Classes</p>
             </div>
           </div>
@@ -106,14 +130,14 @@ export function StudentDashboard() {
             <CalendarIcon className="w-5 h-5 text-slate-400" />
           </div>
           <div className="space-y-3">
-            {upcomingClasses.map((cls) => (
-              <div key={cls.id} className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50 transition-colors cursor-pointer border border-slate-100">
+            {(classes.length > 0 ? classes.slice(0, 3) : upcomingClasses).map((cls) => (
+              <div key={cls.id || cls._id} className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50 transition-colors cursor-pointer border border-slate-100">
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="font-semibold text-slate-900 text-sm">{cls.name}</h3>
-                  <Badge variant="info" className="text-xs">{cls.room}</Badge>
+                  <Badge variant="info" className="text-xs">{cls.branch || cls.room || 'Online'}</Badge>
                 </div>
                 <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
-                  <ClockIcon className="w-3 h-3" /> {cls.time}
+                  <ClockIcon className="w-3 h-3" /> {cls.schedule || cls.time}
                 </p>
               </div>
             ))}
