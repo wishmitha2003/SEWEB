@@ -40,6 +40,9 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { useAuth } from '../../context/AuthContext';
+import { getClasses } from '../../services/classService';
+import { getUsers } from '../../services/userService';
+import { useEffect } from 'react';
 
 const sidebarItems = [
   { icon: <LayoutDashboardIcon className="w-4 h-4" />, label: 'Dashboard', path: '/teacher' },
@@ -144,6 +147,38 @@ export function TeacherDashboard() {
     country: user?.country || 'Sri Lanka'
   });
 
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState([]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [clsRes, userRes] = await Promise.all([getClasses(), getUsers()]);
+        const clsArr = Array.isArray(clsRes) ? clsRes : (clsRes?.data || []);
+        const userArr = Array.isArray(userRes) ? userRes : (userRes?.data || []);
+        
+        // Filter classes for this teacher
+        const teacherClasses = clsArr.filter(c => 
+          c.teacher?.toLowerCase() === user?.fullName?.toLowerCase() ||
+          c.teacherId === user?.id
+        );
+        
+        setClasses(teacherClasses);
+        setAllUsers(userArr);
+      } catch (err) {
+        console.error('Failed to load teacher data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [user]);
+
+  // Total students for this teacher (sum of studentCount in their classes)
+  const totalStudentsCount = classes.reduce((sum, c) => sum + (parseInt(c.studentCount) || 0), 0);
+
+
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -187,7 +222,7 @@ export function TeacherDashboard() {
               <UsersIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900">156</p>
+              <p className="text-2xl font-extrabold text-slate-900">{totalStudentsCount || '0'}</p>
               <p className="text-sm text-slate-500">Total Students</p>
             </div>
           </div>
@@ -199,7 +234,7 @@ export function TeacherDashboard() {
               <BookOpenIcon className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900">8</p>
+              <p className="text-2xl font-extrabold text-slate-900">{classes?.length || '0'}</p>
               <p className="text-sm text-slate-500">Active Classes</p>
             </div>
           </div>
@@ -379,7 +414,7 @@ export function TeacherDashboard() {
           <h2 className="text-lg font-bold text-slate-900">Class Management</h2>
           <Button size="sm" variant="outline">Add Class</Button>
         </div>
-        <Table columns={classColumns} data={classData} />
+        <Table columns={classColumns} data={classes.length > 0 ? classes : classData} />
       </Card>
 
       <Card>

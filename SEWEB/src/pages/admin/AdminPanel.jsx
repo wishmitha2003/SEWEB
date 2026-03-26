@@ -34,6 +34,7 @@ import { useState, useEffect } from 'react';
 import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '../../services/userService';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
+import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi } from '../../services/branchService';
 const sidebarItems = [
   {
     icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -305,6 +306,19 @@ export function AdminPanel() {
     status: 'Published'
   });
 
+  const [branches, setBranches] = useState([]);
+  const [loadingBranches, setLoadingBranches] = useState(false);
+  const [branchesError, setBranchesError] = useState(null);
+  const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const [newBranch, setNewBranch] = useState({
+    name: '',
+    address: '',
+    managerName: '',
+    phone: ''
+  });
+  const [isEditingBranch, setIsEditingBranch] = useState(false);
+  const [currentBranchId, setCurrentBranchId] = useState(null);
+
   function isDemo(u) {
     if (!u) return false;
     const email = (u.email || '').toLowerCase();
@@ -549,11 +563,78 @@ export function AdminPanel() {
     }
   }
 
+  async function loadBranches() {
+    setLoadingBranches(true);
+    setBranchesError(null);
+    try {
+      const res = await fetchBranchesFromApi();
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      setBranches(arr);
+    } catch (err) {
+      setBranchesError(err?.message || String(err));
+      setBranches([]);
+    } finally {
+      setLoadingBranches(false);
+    }
+  }
+
+  async function handleCreateBranch(e) {
+    e.preventDefault();
+    try {
+      if (isEditingBranch) {
+        const res = await updateBranchInApi(currentBranchId, newBranch);
+        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? res : b));
+      } else {
+        const res = await createBranchInApi(newBranch);
+        setBranches(prev => [...prev, res]);
+      }
+      setIsBranchModalOpen(false);
+      resetBranchForm();
+    } catch (err) {
+      alert('Failed to save branch: ' + (err?.message || String(err)));
+    }
+  }
+
+  function resetBranchForm() {
+    setNewBranch({
+      name: '',
+      address: '',
+      managerName: '',
+      phone: ''
+    });
+    setIsEditingBranch(false);
+    setCurrentBranchId(null);
+  }
+
+  async function handleDeleteBranch(id) {
+    if (!id) return;
+    if (!window.confirm('Are you sure you want to delete this branch?')) return;
+    try {
+      await deleteBranchInApi(id);
+      setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
+    } catch (err) {
+      alert('Failed to delete branch: ' + (err?.message || String(err)));
+    }
+  }
+
+  function openEditBranch(branch) {
+    setNewBranch({
+      name: branch.name,
+      address: branch.address,
+      managerName: branch.managerName,
+      phone: branch.phone
+    });
+    setIsEditingBranch(true);
+    setCurrentBranchId(branch.id || branch._id);
+    setIsBranchModalOpen(true);
+  }
+
   useEffect(() => {
     if (path.startsWith('/admin')) {
       loadUsers();
       loadClasses();
       loadMaterials();
+      loadBranches();
     }
   }, [path]);
 
@@ -576,7 +657,7 @@ export function AdminPanel() {
             <BookOpenIcon className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
-            <p className="text-2xl font-extrabold text-slate-900">45</p>
+            <p className="text-2xl font-extrabold text-slate-900">{classes?.length?.toLocaleString?.() || '0'}</p>
             <p className="text-sm text-slate-500">Active Classes</p>
           </div>
         </div>
@@ -598,7 +679,7 @@ export function AdminPanel() {
             <BuildingIcon className="w-6 h-6 text-purple-600" />
           </div>
           <div>
-            <p className="text-2xl font-extrabold text-slate-900">10</p>
+            <p className="text-2xl font-extrabold text-slate-900">{branches?.length?.toLocaleString?.() || '0'}</p>
             <p className="text-sm text-slate-500">Branches</p>
           </div>
         </div>
@@ -781,35 +862,51 @@ export function AdminPanel() {
         <h1 className="text-2xl font-extrabold text-slate-900">Branch Management</h1>
         <p className="text-slate-500 mt-1">Manage physical locations and branch managers.</p>
       </div>
+      {branchesError && (
+        <div className="p-4 mb-4 rounded bg-red-50 text-red-700">Failed to load branches: {branchesError}</div>
+      )}
+      {loadingBranches && (
+        <div className="p-4 mb-4 rounded bg-slate-50 text-slate-600">Loading branches...</div>
+      )}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { name: 'Colombo Main', address: '42 Galle Road, Colombo 03', manager: 'Mr. Perera', students: '1,200', colors: { bg: 'bg-blue-100', text: 'text-blue-600' } },
-          { name: 'Kandy Branch', address: '15 Peradeniya Road, Kandy', manager: 'Ms. Silva', students: '850', colors: { bg: 'bg-emerald-100', text: 'text-emerald-600' } },
-          { name: 'Galle Branch', address: '78 Main Street, Galle Fort', manager: 'Mr. Fernando', students: '620', colors: { bg: 'bg-amber-100', text: 'text-amber-600' } },
-        ].map((branch) => (
-          <Card key={branch.name} className="hover:shadow-lg transition-shadow">
-            <div className={`w-12 h-12 rounded-2xl ${branch.colors.bg} flex items-center justify-center mb-4`}>
-              <BuildingIcon className={`w-6 h-6 ${branch.colors.text}`} />
-            </div>
-            <h3 className="font-bold text-slate-900 text-lg mb-1">{branch.name}</h3>
-            <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
-            <div className="space-y-2 mb-6">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Manager</span>
-                <span className="font-bold text-slate-700">{branch.manager}</span>
+        {branches.map((branch, idx) => {
+          const colorSchemes = [
+            { bg: 'bg-blue-100', text: 'text-blue-600' },
+            { bg: 'bg-emerald-100', text: 'text-emerald-600' },
+            { bg: 'bg-amber-100', text: 'text-amber-600' },
+            { bg: 'bg-purple-100', text: 'text-purple-600' },
+            { bg: 'bg-rose-100', text: 'text-rose-600' }
+          ];
+          const color = colorSchemes[idx % colorSchemes.length];
+          
+          return (
+            <Card key={branch.id || branch._id} className="hover:shadow-lg transition-shadow">
+              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4`}>
+                <BuildingIcon className={`w-6 h-6 ${color.text}`} />
               </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Students</span>
-                <span className="font-bold text-slate-700">{branch.students}</span>
+              <h3 className="font-bold text-slate-900 text-lg mb-1">{branch.name}</h3>
+              <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Manager</span>
+                  <span className="font-bold text-slate-700">{branch.managerName}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Phone</span>
+                  <span className="font-bold text-slate-700">{branch.phone}</span>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1">Edit</Button>
-              <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50">Delete</Button>
-            </div>
-          </Card>
-        ))}
-        <button className="border-2 border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50/50 transition-all group">
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditBranch(branch)}>Edit</Button>
+                <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteBranch(branch.id || branch._id)}>Delete</Button>
+              </div>
+            </Card>
+          );
+        })}
+        <button 
+          onClick={() => { resetBranchForm(); setIsBranchModalOpen(true); }}
+          className="border-2 border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50/50 transition-all group"
+        >
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
             <BuildingIcon className="w-6 h-6" />
           </div>
@@ -1076,6 +1173,51 @@ export function AdminPanel() {
             </Button>
             <Button type="submit">
               Upload Material
+            </Button>
+          </div>
+        </form>
+      </Modal>
+      <Modal
+        isOpen={isBranchModalOpen}
+        onClose={() => setIsBranchModalOpen(false)}
+        title={isEditingBranch ? "Edit Branch" : "Add New Branch"}
+        size="md"
+      >
+        <form onSubmit={handleCreateBranch} className="space-y-4">
+          <FormInput
+            label="Institute Name"
+            value={newBranch.name}
+            onChange={(e) => setNewBranch({ ...newBranch, name: e.target.value })}
+            placeholder="e.g. Colombo Main Institute"
+            required
+          />
+          <FormInput
+            label="Address"
+            value={newBranch.address}
+            onChange={(e) => setNewBranch({ ...newBranch, address: e.target.value })}
+            placeholder="e.g. 42 Galle Road, Colombo"
+            required
+          />
+          <FormInput
+            label="Branch Manager Name"
+            value={newBranch.managerName}
+            onChange={(e) => setNewBranch({ ...newBranch, managerName: e.target.value })}
+            placeholder="e.g. Mr. Sunil Perera"
+            required
+          />
+          <FormInput
+            label="Contact Number"
+            value={newBranch.phone}
+            onChange={(e) => setNewBranch({ ...newBranch, phone: e.target.value })}
+            placeholder="e.g. 0112345678"
+            required
+          />
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" type="button" onClick={() => setIsBranchModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              {isEditingBranch ? "Update Branch" : "Save Branch"}
             </Button>
           </div>
         </form>
