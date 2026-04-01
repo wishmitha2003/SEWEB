@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut } from 'lucide-react';
+import { Menu, X, LogOut, ZapIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export function Sidebar({
@@ -24,7 +24,24 @@ export function Sidebar({
   const sidebarContent = (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 via-blue-950 to-blue-900 text-white">
       {/* Top row: Collapse toggle (desktop) */}
-      <div className={`hidden lg:flex items-center px-4 pt-4 pb-2 ${collapsed ? 'justify-center' : 'justify-end'}`}>
+      <div className={`hidden lg:flex px-4 pt-4 pb-2 ${collapsed ? 'flex-col-reverse gap-4 items-center' : 'items-center justify-between'}`}>
+        <Link
+          to="/gamification"
+          className={`flex items-center bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-orange-500/20 transition-all duration-300 flex-shrink-0 ${
+            collapsed
+              ? 'justify-center w-10 h-10 rounded-2xl hover:scale-110'
+              : 'gap-2 px-4 h-10 rounded-2xl hover:scale-105'
+          }`}
+          title={collapsed ? 'Challenge Zone' : undefined}
+        >
+          <ZapIcon className="w-5 h-5 flex-shrink-0 drop-shadow-md fill-white" />
+          {!collapsed && (
+            <span className="text-sm font-extrabold tracking-wide drop-shadow-md whitespace-nowrap">
+              Challenge Zone
+            </span>
+          )}
+        </Link>
+
         <button
           className="flex items-center justify-center w-10 h-10 rounded-2xl border border-white/15 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white shadow-lg shadow-slate-950/40 transition-all flex-shrink-0"
           onClick={() => setCollapsed(!collapsed)}
@@ -57,7 +74,7 @@ export function Sidebar({
       </Link>
 
       <nav className="flex-1 px-4 pt-2 pb-4 space-y-1.5 overflow-y-auto custom-scrollbar">
-        {items.map((item) => {
+        {items.filter(item => item.label !== 'Challenge Zone').map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
