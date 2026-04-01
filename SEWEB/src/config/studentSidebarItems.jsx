@@ -11,6 +11,11 @@ import {
 
 export const studentSidebarItems = [
   {
+    icon: <GamepadIcon className="w-4 h-4" />,
+    label: 'Challenge Zone',
+    path: '/gamification',
+  },
+  {
     icon: <LayoutDashboardIcon className="w-4 h-4" />,
     label: 'Dashboard',
     path: '/student',
@@ -29,11 +34,6 @@ export const studentSidebarItems = [
     icon: <FolderIcon className="w-4 h-4" />,
     label: 'Materials',
     path: '/materials',
-  },
-  {
-    icon: <GamepadIcon className="w-4 h-4" />,
-    label: 'Gamification',
-    path: '/gamification',
   },
   {
     icon: <CreditCardIcon className="w-4 h-4" />,
