@@ -21,10 +21,18 @@ export function AuthProvider({ children }) {
 
   const login = (userData, tokenArg) => {
     const u = {
+      id: userData.id || '',
+      username: userData.username || '',
       fullName: userData.fullName || userData.email?.split('@')[0] || 'Student',
       email: userData.email || '',
       phone: userData.phone || '',
       role: userData.role || 'student',
+      idCardNo: userData.idCardNo || '',
+      address: userData.address || '',
+      city: userData.city || '',
+      postalCode: userData.postalCode || '',
+      country: userData.country || '',
+      profileImage: userData.profileImage || userData.profileImageUrl || null,
     };
     setUser(u);
     if (tokenArg) {
