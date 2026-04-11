@@ -326,7 +326,9 @@ export function AdminPanel() {
     managerName: '',
     phone: '',
     locationUrl: '',
-    logoUrl: ''
+    logoUrl: '',
+    lat: '',
+    lng: ''
   });
   const [branchLogoFile, setBranchLogoFile] = useState(null);
   const [isEditingBranch, setIsEditingBranch] = useState(false);
@@ -639,7 +641,9 @@ export function AdminPanel() {
       managerName: '',
       phone: '',
       locationUrl: '',
-      logoUrl: ''
+      logoUrl: '',
+      lat: '',
+      lng: ''
     });
     setBranchLogoFile(null);
     setIsEditingBranch(false);
@@ -669,7 +673,9 @@ export function AdminPanel() {
       managerName: branch.managerName,
       phone: branch.phone,
       locationUrl: branch.locationUrl || '',
-      logoUrl: branch.logoUrl || ''
+      logoUrl: branch.logoUrl || '',
+      lat: branch.lat || '',
+      lng: branch.lng || ''
     });
     setBranchLogoFile(null);
     setIsEditingBranch(true);
@@ -929,11 +935,30 @@ export function AdminPanel() {
           
           return (
             <Card key={branch.id || branch._id} className="hover:shadow-lg transition-shadow">
-              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4`}>
-                <BuildingIcon className={`w-6 h-6 ${color.text}`} />
+              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4 overflow-hidden border border-slate-100`}>
+                {branch.logoUrl ? (
+                  <img 
+                    src={branch.logoUrl.startsWith('http') ? branch.logoUrl : `http://localhost:8082${branch.logoUrl}`} 
+                    alt={branch.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <BuildingIcon className={`w-6 h-6 ${color.text}`} />
+                )}
               </div>
               <h3 className="font-bold text-slate-900 text-lg mb-1">{branch.name}</h3>
-              <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              {branch.locationUrl ? (
+                <a 
+                  href={branch.locationUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4 block"
+                >
+                  {branch.address}
+                </a>
+              ) : (
+                <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              )}
               <div className="space-y-2 mb-6">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-400">Manager</span>
@@ -943,6 +968,12 @@ export function AdminPanel() {
                   <span className="text-slate-400">Phone</span>
                   <span className="font-bold text-slate-700">{branch.phone}</span>
                 </div>
+                {(branch.lat || branch.lng) && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Coordinates</span>
+                    <span className="font-bold text-slate-700">{branch.lat || '0'}, {branch.lng || '0'}</span>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditBranch(branch)}>Edit</Button>
@@ -1389,21 +1420,75 @@ export function AdminPanel() {
             onChange={(e) => setNewBranch({ ...newBranch, locationUrl: e.target.value })}
             placeholder="e.g. https://maps.google.com/..."
           />
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Branch Logo</label>
-            {newBranch.logoUrl && !branchLogoFile && (
-              <img
-                src={`http://localhost:8082${newBranch.logoUrl}`}
-                alt="Current logo"
-                className="w-16 h-16 rounded-xl object-cover mb-2 border border-slate-200"
-              />
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all border border-slate-200 rounded-xl p-2"
-              onChange={(e) => setBranchLogoFile(e.target.files?.[0] || null)}
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              label="Latitude"
+              type="number"
+              step="any"
+              value={newBranch.lat}
+              onChange={(e) => setNewBranch({ ...newBranch, lat: e.target.value })}
+              placeholder="e.g. 6.9271"
             />
+            <FormInput
+              label="Longitude"
+              type="number"
+              step="any"
+              value={newBranch.lng}
+              onChange={(e) => setNewBranch({ ...newBranch, lng: e.target.value })}
+              placeholder="e.g. 79.8612"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Branch Logo</label>
+            <div className="flex items-center gap-4 mb-3">
+              {(newBranch.logoUrl || branchLogoFile) ? (
+                <div className="relative group">
+                  <img
+                    src={branchLogoFile ? URL.createObjectURL(branchLogoFile) : (newBranch.logoUrl.startsWith('http') ? newBranch.logoUrl : `http://localhost:8082${newBranch.logoUrl}`)}
+                    alt="Logo preview"
+                    className="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewBranch({ ...newBranch, logoUrl: '' });
+                      setBranchLogoFile(null);
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                    title="Remove Logo"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-400">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  id="branch-logo-input"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setBranchLogoFile(e.target.files?.[0] || null)}
+                />
+                <label
+                  htmlFor="branch-logo-input"
+                  className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 text-sm font-bold rounded-xl cursor-pointer hover:bg-blue-100 transition-all border border-blue-100"
+                >
+                  {branchLogoFile || newBranch.logoUrl ? "Change Logo" : "Upload Logo"}
+                </label>
+                <p className="text-[11px] text-slate-400 mt-1.5">Square JPG, PNG or SVG. Max 2MB.</p>
+              </div>
+            </div>
           </div>
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsBranchModalOpen(false)}>
