@@ -8,10 +8,12 @@ import { Button } from '../components/ui/Button';
 import { api } from '../services/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
+import { useToast } from '../components/ui/Toast';
 
 export function ProfilePage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+  const toast = useToast();
 
   const [userData, setUserData] = useState({
     fullName: '',
@@ -125,9 +127,9 @@ export function ProfilePage() {
         profileImage
       });
 
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      setError(err.message || 'Failed to update profile. Please try again.');
+      toast.error(err.message || 'Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
     }
