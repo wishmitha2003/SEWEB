@@ -34,7 +34,7 @@ import { useState, useEffect } from 'react';
 import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '../../services/userService';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
-import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi } from '../../services/branchService';
+import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi, uploadBranchLogo } from '../../services/branchService';
 const sidebarItems = [
   {
     icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -289,6 +289,16 @@ export function AdminPanel() {
   const location = useLocation();
   const path = location.pathname;
 
+  const [confirmModal, setConfirmModal] = useState({ open: false, message: '', title: '', onConfirm: null });
+
+  function showConfirm(title, message, onConfirm) {
+    setConfirmModal({ open: true, title, message, onConfirm });
+  }
+
+  function closeConfirm() {
+    setConfirmModal({ open: false, message: '', title: '', onConfirm: null });
+  }
+
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState(null);
@@ -314,8 +324,11 @@ export function AdminPanel() {
     name: '',
     address: '',
     managerName: '',
-    phone: ''
+    phone: '',
+    locationUrl: '',
+    logoUrl: ''
   });
+  const [branchLogoFile, setBranchLogoFile] = useState(null);
   const [isEditingBranch, setIsEditingBranch] = useState(false);
   const [currentBranchId, setCurrentBranchId] = useState(null);
 
@@ -330,14 +343,21 @@ export function AdminPanel() {
 
   async function handleDeleteUser(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    showConfirm(
+      'Delete User',
+      'Are you sure you want to permanently delete this user? This action cannot be undone.',
+      async () => {
+        try {
+          await deleteUserFromApi(id);
+          setUsers(prev => prev.filter(u => u.id !== id));
+        } catch (err) {
+          alert('Failed to delete user: ' + (err?.message || String(err)));
+        }
+      }
+    );
+    return;
 
-    try {
-      await deleteUserFromApi(id);
-      setUsers(prev => prev.filter(u => u.id !== id));
-    } catch (err) {
-      alert('Failed to delete user: ' + (err?.message || String(err)));
-    }
+
   }
 
   const userColumns = [
@@ -481,13 +501,18 @@ export function AdminPanel() {
 
   async function handleClassDelete(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this class?')) return;
-    try {
-      await deleteClassInApi(id);
-      setClasses(prev => prev.filter(c => c.id !== id));
-    } catch (err) {
-      alert('Failed to delete class: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Class',
+      'Are you sure you want to permanently delete this class? All associated data will be removed.',
+      async () => {
+        try {
+          await deleteClassInApi(id);
+          setClasses(prev => prev.filter(c => c.id !== id));
+        } catch (err) {
+          alert('Failed to delete class: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   async function loadUsers() {
@@ -554,13 +579,18 @@ export function AdminPanel() {
 
   async function handleDeleteMaterial(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this material?')) return;
-    try {
-      await deleteMaterialInApi(id);
-      setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
-    } catch (err) {
-      alert('Failed to delete material: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Material',
+      'Are you sure you want to permanently delete this material? Students will no longer be able to access it.',
+      async () => {
+        try {
+          await deleteMaterialInApi(id);
+          setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
+        } catch (err) {
+          alert('Failed to delete material: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   async function loadBranches() {
@@ -581,12 +611,19 @@ export function AdminPanel() {
   async function handleCreateBranch(e) {
     e.preventDefault();
     try {
+      let saved;
       if (isEditingBranch) {
-        const res = await updateBranchInApi(currentBranchId, newBranch);
-        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? res : b));
+        saved = await updateBranchInApi(currentBranchId, newBranch);
+        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? saved : b));
       } else {
-        const res = await createBranchInApi(newBranch);
-        setBranches(prev => [...prev, res]);
+        saved = await createBranchInApi(newBranch);
+        setBranches(prev => [...prev, saved]);
+      }
+      // Upload logo separately if a file was selected
+      if (branchLogoFile) {
+        const savedId = saved.id || saved._id;
+        const updated = await uploadBranchLogo(savedId, branchLogoFile);
+        setBranches(prev => prev.map(b => (b.id === savedId || b._id === savedId) ? updated : b));
       }
       setIsBranchModalOpen(false);
       resetBranchForm();
@@ -600,21 +637,29 @@ export function AdminPanel() {
       name: '',
       address: '',
       managerName: '',
-      phone: ''
+      phone: '',
+      locationUrl: '',
+      logoUrl: ''
     });
+    setBranchLogoFile(null);
     setIsEditingBranch(false);
     setCurrentBranchId(null);
   }
 
   async function handleDeleteBranch(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this branch?')) return;
-    try {
-      await deleteBranchInApi(id);
-      setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
-    } catch (err) {
-      alert('Failed to delete branch: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Branch',
+      'Are you sure you want to permanently delete this branch? This action cannot be reversed.',
+      async () => {
+        try {
+          await deleteBranchInApi(id);
+          setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
+        } catch (err) {
+          alert('Failed to delete branch: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   function openEditBranch(branch) {
@@ -622,8 +667,11 @@ export function AdminPanel() {
       name: branch.name,
       address: branch.address,
       managerName: branch.managerName,
-      phone: branch.phone
+      phone: branch.phone,
+      locationUrl: branch.locationUrl || '',
+      logoUrl: branch.logoUrl || ''
     });
+    setBranchLogoFile(null);
     setIsEditingBranch(true);
     setCurrentBranchId(branch.id || branch._id);
     setIsBranchModalOpen(true);
@@ -1042,6 +1090,129 @@ export function AdminPanel() {
     <DashboardLayout sidebarItems={sidebarItems}>
       {getContent()}
 
+      {/* Custom Confirmation Modal */}
+      {confirmModal.open && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(15, 23, 42, 0.55)',
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.15s ease'
+          }}
+          onClick={closeConfirm}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              padding: '36px 32px 28px',
+              maxWidth: '420px',
+              width: 'calc(100% - 40px)',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.1)',
+              animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+              textAlign: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '800',
+              color: '#0f172a',
+              margin: '0 0 10px',
+              letterSpacing: '-0.3px'
+            }}>
+              {confirmModal.title}
+            </h3>
+
+            {/* Message */}
+            <p style={{
+              fontSize: '14px',
+              color: '#64748b',
+              lineHeight: '1.6',
+              margin: '0 0 28px'
+            }}>
+              {confirmModal.message}
+            </p>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={closeConfirm}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #e2e8f0',
+                  background: '#f8fafc',
+                  color: '#475569',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseOver={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                onMouseOut={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  closeConfirm();
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 4px 12px rgba(220,38,38,0.35)'
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(220,38,38,0.45)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(220,38,38,0.35)'; }}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.95) } to { opacity: 1; transform: translateY(0) scale(1) } }
+          `}</style>
+        </div>
+      )}
+
       <Modal
         isOpen={isClassModalOpen}
         onClose={() => setIsClassModalOpen(false)}
@@ -1212,6 +1383,28 @@ export function AdminPanel() {
             placeholder="e.g. 0112345678"
             required
           />
+          <FormInput
+            label="Google Maps / Location URL"
+            value={newBranch.locationUrl}
+            onChange={(e) => setNewBranch({ ...newBranch, locationUrl: e.target.value })}
+            placeholder="e.g. https://maps.google.com/..."
+          />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Branch Logo</label>
+            {newBranch.logoUrl && !branchLogoFile && (
+              <img
+                src={`http://localhost:8082${newBranch.logoUrl}`}
+                alt="Current logo"
+                className="w-16 h-16 rounded-xl object-cover mb-2 border border-slate-200"
+              />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all border border-slate-200 rounded-xl p-2"
+              onChange={(e) => setBranchLogoFile(e.target.files?.[0] || null)}
+            />
+          </div>
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsBranchModalOpen(false)}>
               Cancel
