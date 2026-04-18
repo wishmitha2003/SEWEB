@@ -23,6 +23,7 @@ import { MapSection } from './pages/MapSection';
 import { ContactPage } from './pages/ContactPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { VocabularyPage } from './pages/VocabularyPage';
 import { useLocation } from 'react-router-dom';
 
 import { LoadingProvider } from './context/LoadingContext';
@@ -66,6 +67,7 @@ export function App() {
         <Route path="/map" element={<MapSection />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/vocabulary" element={<VocabularyPage />} />
       </Routes>
       </div>
     </LoadingProvider>
