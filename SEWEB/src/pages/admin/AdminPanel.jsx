@@ -34,7 +34,7 @@ import { useState, useEffect } from 'react';
 import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '../../services/userService';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
-import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi } from '../../services/branchService';
+import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi, uploadBranchLogo } from '../../services/branchService';
 const sidebarItems = [
   {
     icon: <LayoutDashboardIcon className="w-4 h-4" />,
@@ -55,6 +55,11 @@ const sidebarItems = [
     icon: <BookOpenIcon className="w-4 h-4" />,
     label: 'Materials',
     path: '/admin/materials'
+  },
+  {
+    icon: <BookOpenIcon className="w-4 h-4" />,
+    label: 'Vocabulary',
+    path: '/vocabulary'
   },
   {
     icon: <BuildingIcon className="w-4 h-4" />,
@@ -289,6 +294,16 @@ export function AdminPanel() {
   const location = useLocation();
   const path = location.pathname;
 
+  const [confirmModal, setConfirmModal] = useState({ open: false, message: '', title: '', onConfirm: null });
+
+  function showConfirm(title, message, onConfirm) {
+    setConfirmModal({ open: true, title, message, onConfirm });
+  }
+
+  function closeConfirm() {
+    setConfirmModal({ open: false, message: '', title: '', onConfirm: null });
+  }
+
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState(null);
@@ -314,8 +329,13 @@ export function AdminPanel() {
     name: '',
     address: '',
     managerName: '',
-    phone: ''
+    phone: '',
+    locationUrl: '',
+    logoUrl: '',
+    lat: '',
+    lng: ''
   });
+  const [branchLogoFile, setBranchLogoFile] = useState(null);
   const [isEditingBranch, setIsEditingBranch] = useState(false);
   const [currentBranchId, setCurrentBranchId] = useState(null);
 
@@ -330,14 +350,21 @@ export function AdminPanel() {
 
   async function handleDeleteUser(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    showConfirm(
+      'Delete User',
+      'Are you sure you want to permanently delete this user? This action cannot be undone.',
+      async () => {
+        try {
+          await deleteUserFromApi(id);
+          setUsers(prev => prev.filter(u => u.id !== id));
+        } catch (err) {
+          alert('Failed to delete user: ' + (err?.message || String(err)));
+        }
+      }
+    );
+    return;
 
-    try {
-      await deleteUserFromApi(id);
-      setUsers(prev => prev.filter(u => u.id !== id));
-    } catch (err) {
-      alert('Failed to delete user: ' + (err?.message || String(err)));
-    }
+
   }
 
   const userColumns = [
@@ -481,13 +508,18 @@ export function AdminPanel() {
 
   async function handleClassDelete(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this class?')) return;
-    try {
-      await deleteClassInApi(id);
-      setClasses(prev => prev.filter(c => c.id !== id));
-    } catch (err) {
-      alert('Failed to delete class: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Class',
+      'Are you sure you want to permanently delete this class? All associated data will be removed.',
+      async () => {
+        try {
+          await deleteClassInApi(id);
+          setClasses(prev => prev.filter(c => c.id !== id));
+        } catch (err) {
+          alert('Failed to delete class: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   async function loadUsers() {
@@ -554,13 +586,18 @@ export function AdminPanel() {
 
   async function handleDeleteMaterial(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this material?')) return;
-    try {
-      await deleteMaterialInApi(id);
-      setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
-    } catch (err) {
-      alert('Failed to delete material: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Material',
+      'Are you sure you want to permanently delete this material? Students will no longer be able to access it.',
+      async () => {
+        try {
+          await deleteMaterialInApi(id);
+          setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
+        } catch (err) {
+          alert('Failed to delete material: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   async function loadBranches() {
@@ -581,12 +618,19 @@ export function AdminPanel() {
   async function handleCreateBranch(e) {
     e.preventDefault();
     try {
+      let saved;
       if (isEditingBranch) {
-        const res = await updateBranchInApi(currentBranchId, newBranch);
-        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? res : b));
+        saved = await updateBranchInApi(currentBranchId, newBranch);
+        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? saved : b));
       } else {
-        const res = await createBranchInApi(newBranch);
-        setBranches(prev => [...prev, res]);
+        saved = await createBranchInApi(newBranch);
+        setBranches(prev => [...prev, saved]);
+      }
+      // Upload logo separately if a file was selected
+      if (branchLogoFile) {
+        const savedId = saved.id || saved._id;
+        const updated = await uploadBranchLogo(savedId, branchLogoFile);
+        setBranches(prev => prev.map(b => (b.id === savedId || b._id === savedId) ? updated : b));
       }
       setIsBranchModalOpen(false);
       resetBranchForm();
@@ -600,21 +644,31 @@ export function AdminPanel() {
       name: '',
       address: '',
       managerName: '',
-      phone: ''
+      phone: '',
+      locationUrl: '',
+      logoUrl: '',
+      lat: '',
+      lng: ''
     });
+    setBranchLogoFile(null);
     setIsEditingBranch(false);
     setCurrentBranchId(null);
   }
 
   async function handleDeleteBranch(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this branch?')) return;
-    try {
-      await deleteBranchInApi(id);
-      setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
-    } catch (err) {
-      alert('Failed to delete branch: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Branch',
+      'Are you sure you want to permanently delete this branch? This action cannot be reversed.',
+      async () => {
+        try {
+          await deleteBranchInApi(id);
+          setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
+        } catch (err) {
+          alert('Failed to delete branch: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   function openEditBranch(branch) {
@@ -622,8 +676,13 @@ export function AdminPanel() {
       name: branch.name,
       address: branch.address,
       managerName: branch.managerName,
-      phone: branch.phone
+      phone: branch.phone,
+      locationUrl: branch.locationUrl || '',
+      logoUrl: branch.logoUrl || '',
+      lat: branch.lat || '',
+      lng: branch.lng || ''
     });
+    setBranchLogoFile(null);
     setIsEditingBranch(true);
     setCurrentBranchId(branch.id || branch._id);
     setIsBranchModalOpen(true);
@@ -881,11 +940,30 @@ export function AdminPanel() {
           
           return (
             <Card key={branch.id || branch._id} className="hover:shadow-lg transition-shadow">
-              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4`}>
-                <BuildingIcon className={`w-6 h-6 ${color.text}`} />
+              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4 overflow-hidden border border-slate-100`}>
+                {branch.logoUrl ? (
+                  <img 
+                    src={branch.logoUrl.startsWith('http') ? branch.logoUrl : `http://localhost:8082${branch.logoUrl}`} 
+                    alt={branch.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <BuildingIcon className={`w-6 h-6 ${color.text}`} />
+                )}
               </div>
               <h3 className="font-bold text-slate-900 text-lg mb-1">{branch.name}</h3>
-              <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              {branch.locationUrl ? (
+                <a 
+                  href={branch.locationUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4 block"
+                >
+                  {branch.address}
+                </a>
+              ) : (
+                <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              )}
               <div className="space-y-2 mb-6">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-400">Manager</span>
@@ -895,6 +973,12 @@ export function AdminPanel() {
                   <span className="text-slate-400">Phone</span>
                   <span className="font-bold text-slate-700">{branch.phone}</span>
                 </div>
+                {(branch.lat || branch.lng) && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Coordinates</span>
+                    <span className="font-bold text-slate-700">{branch.lat || '0'}, {branch.lng || '0'}</span>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditBranch(branch)}>Edit</Button>
@@ -1041,6 +1125,129 @@ export function AdminPanel() {
   return (
     <DashboardLayout sidebarItems={sidebarItems}>
       {getContent()}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.open && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(15, 23, 42, 0.55)',
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.15s ease'
+          }}
+          onClick={closeConfirm}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              padding: '36px 32px 28px',
+              maxWidth: '420px',
+              width: 'calc(100% - 40px)',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.1)',
+              animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+              textAlign: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '800',
+              color: '#0f172a',
+              margin: '0 0 10px',
+              letterSpacing: '-0.3px'
+            }}>
+              {confirmModal.title}
+            </h3>
+
+            {/* Message */}
+            <p style={{
+              fontSize: '14px',
+              color: '#64748b',
+              lineHeight: '1.6',
+              margin: '0 0 28px'
+            }}>
+              {confirmModal.message}
+            </p>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={closeConfirm}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #e2e8f0',
+                  background: '#f8fafc',
+                  color: '#475569',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseOver={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                onMouseOut={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  closeConfirm();
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 4px 12px rgba(220,38,38,0.35)'
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(220,38,38,0.45)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(220,38,38,0.35)'; }}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.95) } to { opacity: 1; transform: translateY(0) scale(1) } }
+          `}</style>
+        </div>
+      )}
 
       <Modal
         isOpen={isClassModalOpen}
@@ -1212,6 +1419,82 @@ export function AdminPanel() {
             placeholder="e.g. 0112345678"
             required
           />
+          <FormInput
+            label="Google Maps / Location URL"
+            value={newBranch.locationUrl}
+            onChange={(e) => setNewBranch({ ...newBranch, locationUrl: e.target.value })}
+            placeholder="e.g. https://maps.google.com/..."
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              label="Latitude"
+              type="number"
+              step="any"
+              value={newBranch.lat}
+              onChange={(e) => setNewBranch({ ...newBranch, lat: e.target.value })}
+              placeholder="e.g. 6.9271"
+            />
+            <FormInput
+              label="Longitude"
+              type="number"
+              step="any"
+              value={newBranch.lng}
+              onChange={(e) => setNewBranch({ ...newBranch, lng: e.target.value })}
+              placeholder="e.g. 79.8612"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Branch Logo</label>
+            <div className="flex items-center gap-4 mb-3">
+              {(newBranch.logoUrl || branchLogoFile) ? (
+                <div className="relative group">
+                  <img
+                    src={branchLogoFile ? URL.createObjectURL(branchLogoFile) : (newBranch.logoUrl.startsWith('http') ? newBranch.logoUrl : `http://localhost:8082${newBranch.logoUrl}`)}
+                    alt="Logo preview"
+                    className="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewBranch({ ...newBranch, logoUrl: '' });
+                      setBranchLogoFile(null);
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                    title="Remove Logo"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-400">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  id="branch-logo-input"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setBranchLogoFile(e.target.files?.[0] || null)}
+                />
+                <label
+                  htmlFor="branch-logo-input"
+                  className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 text-sm font-bold rounded-xl cursor-pointer hover:bg-blue-100 transition-all border border-blue-100"
+                >
+                  {branchLogoFile || newBranch.logoUrl ? "Change Logo" : "Upload Logo"}
+                </label>
+                <p className="text-[11px] text-slate-400 mt-1.5">Square JPG, PNG or SVG. Max 2MB.</p>
+              </div>
+            </div>
+          </div>
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsBranchModalOpen(false)}>
               Cancel

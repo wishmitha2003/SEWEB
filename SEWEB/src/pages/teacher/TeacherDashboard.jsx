@@ -43,6 +43,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getClasses } from '../../services/classService';
 import { getUsers } from '../../services/userService';
 import { useEffect } from 'react';
+import { useToast } from '../../components/ui/Toast';
 
 const sidebarItems = [
   { icon: <LayoutDashboardIcon className="w-4 h-4" />, label: 'Dashboard', path: '/teacher' },
@@ -50,7 +51,8 @@ const sidebarItems = [
   { icon: <BookOpenIcon className="w-4 h-4" />, label: 'My Classes', path: '/teacher/classes' },
   { icon: <FileTextIcon className="w-4 h-4" />, label: 'Assignments', path: '/teacher/assignments' },
   { icon: <UsersIcon className="w-4 h-4" />, label: 'Students', path: '/teacher/students' },
-  { icon: <CalendarIcon className="w-4 h-4" />, label: 'Schedule', path: '/teacher/schedule' }
+  { icon: <CalendarIcon className="w-4 h-4" />, label: 'Schedule', path: '/teacher/schedule' },
+  { icon: <BookOpenIcon className="w-4 h-4" />, label: 'Vocabulary', path: '/vocabulary' }
 ];
 
 const performanceData = [
@@ -134,6 +136,7 @@ const submissionColumns = [
 export function TeacherDashboard() {
   const location = useLocation();
   const { user, updateUser } = useAuth();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState(location.pathname === '/teacher/profile' ? 'profile' : 'dashboard');
   const [profileImage, setProfileImage] = useState(user?.profileImage || null);
   const [editForm, setEditForm] = useState({
@@ -193,7 +196,7 @@ export function TeacherDashboard() {
   const handleSaveProfile = (e) => {
     e.preventDefault();
     updateUser({ ...editForm, profileImage });
-    alert('Profile updated successfully!');
+    toast.success('Profile updated successfully!');
   };
 
   const getInitials = (name) => {
