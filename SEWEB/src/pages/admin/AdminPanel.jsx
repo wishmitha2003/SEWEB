@@ -57,6 +57,11 @@ const sidebarItems = [
     path: '/admin/materials'
   },
   {
+    icon: <BookOpenIcon className="w-4 h-4" />,
+    label: 'Vocabulary',
+    path: '/vocabulary'
+  },
+  {
     icon: <BuildingIcon className="w-4 h-4" />,
     label: 'Branches',
     path: '/admin/branches'

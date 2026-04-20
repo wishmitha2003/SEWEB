@@ -51,7 +51,8 @@ const sidebarItems = [
   { icon: <BookOpenIcon className="w-4 h-4" />, label: 'My Classes', path: '/teacher/classes' },
   { icon: <FileTextIcon className="w-4 h-4" />, label: 'Assignments', path: '/teacher/assignments' },
   { icon: <UsersIcon className="w-4 h-4" />, label: 'Students', path: '/teacher/students' },
-  { icon: <CalendarIcon className="w-4 h-4" />, label: 'Schedule', path: '/teacher/schedule' }
+  { icon: <CalendarIcon className="w-4 h-4" />, label: 'Schedule', path: '/teacher/schedule' },
+  { icon: <BookOpenIcon className="w-4 h-4" />, label: 'Vocabulary', path: '/vocabulary' }
 ];
 
 const performanceData = [

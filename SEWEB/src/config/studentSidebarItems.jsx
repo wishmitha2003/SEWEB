@@ -36,6 +36,11 @@ export const studentSidebarItems = [
     path: '/materials',
   },
   {
+    icon: <BookOpenIcon className="w-4 h-4" />,
+    label: 'Vocabulary',
+    path: '/vocabulary',
+  },
+  {
     icon: <CreditCardIcon className="w-4 h-4" />,
     label: 'Payments',
     path: '/student/payments',
