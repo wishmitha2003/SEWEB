@@ -12,6 +12,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { PronunciationRecorder } from '../components/ui/PronunciationRecorder';
 import { useAuth } from '../context/AuthContext';
 import {
   getVocabularies,
@@ -236,10 +237,16 @@ export function VocabularyPage() {
                     {vocab.meaning}
                   </p>
                   {vocab.example && (
-                    <div className="p-3 bg-slate-50 rounded-lg">
+                    <div className="p-3 bg-slate-50 rounded-lg mb-3">
                       <p className="text-xs text-slate-500 italic">
                         "{vocab.example}"
                       </p>
+                    </div>
+                  )}
+                  {/* Pronunciation Recorder for students */}
+                  {!isTeacher && (
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                      <PronunciationRecorder vocabularyId={vocab.id} />
                     </div>
                   )}
                 </div>
