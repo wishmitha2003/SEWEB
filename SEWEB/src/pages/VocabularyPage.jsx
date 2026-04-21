@@ -22,6 +22,7 @@ import {
   deleteVocabulary
 } from '../services/vocabularyService';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
+import { adminSidebarItems } from '../config/adminSidebarItems.jsx';
 
 const AGE_SECTIONS = ['1-5', '6-10', '11-15', '16-20', '20+'];
 
@@ -29,6 +30,10 @@ export function VocabularyPage() {
   const { user, isLoggedIn } = useAuth();
   console.log('VocabularyPage - User:', user, 'isLoggedIn:', isLoggedIn);
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin' || user?.role === 'TEACHER' || user?.role === 'ADMIN' || user?.role === 'Teacher' || user?.role === 'Admin';
+  
+  // Determine sidebar items based on user role
+  const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN' || user?.role === 'Admin';
+  const sidebarItems = isAdmin ? adminSidebarItems : studentSidebarItems;
   
   const [activeTab, setActiveTab] = useState('1-5');
   const [vocabularies, setVocabularies] = useState([]);
@@ -174,7 +179,7 @@ export function VocabularyPage() {
   };
 
   return (
-    <DashboardLayout sidebarItems={studentSidebarItems}>
+    <DashboardLayout sidebarItems={sidebarItems}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
