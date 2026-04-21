@@ -22,6 +22,7 @@ import {
   deleteVocabulary
 } from '../services/vocabularyService';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
+import { adminSidebarItems } from '../config/adminSidebarItems.jsx';
 
 const AGE_SECTIONS = ['1-5', '6-10', '11-15', '16-20', '20+'];
 
@@ -47,6 +48,17 @@ export function VocabularyPage() {
   const [saving, setSaving] = useState(false);
   const [playingId, setPlayingId] = useState(null);
   const currentAudioRef = useRef(null);
+
+  // Pre-load voices for SpeechSynthesis
+  useEffect(() => {
+    const loadVoices = () => {
+      window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
 
   useEffect(() => {
     fetchVocabularies();
@@ -136,11 +148,8 @@ export function VocabularyPage() {
   };
 
   const playPronunciation = (word, id) => {
-    // Stop currently playing audio
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
+    // Cancel any current speech
+    window.speechSynthesis.cancel();
 
     if (playingId === id) {
       setPlayingId(null);
@@ -149,32 +158,32 @@ export function VocabularyPage() {
 
     setPlayingId(id);
 
-    const audio = new Audio(
-      `http://localhost:8082/api/pronunciation/play?text=${encodeURIComponent(word)}`
-    );
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+    utterance.pitch = 1.0;
 
-    audio.onended = () => {
-      setPlayingId(null);
-      currentAudioRef.current = null;
+    const voices = window.speechSynthesis.getVoices();
+    const findVoice = (voiceList) => {
+      return voiceList.find(v => 
+        (v.lang.includes('en') && (v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Natural')))
+      ) || voiceList.find(v => v.lang.startsWith('en'));
     };
 
-    audio.onerror = () => {
-      console.error('Audio playback error');
-      setPlayingId(null);
-      currentAudioRef.current = null;
-      alert('Failed to play pronunciation');
-    };
+    const voice = findVoice(voices);
+    if (voice) {
+      utterance.voice = voice;
+    }
 
-    audio.play().catch(error => {
-      console.error('Error playing pronunciation:', error);
-      setPlayingId(null);
-    });
+    utterance.onend = () => setPlayingId(null);
+    utterance.onerror = () => setPlayingId(null);
 
-    currentAudioRef.current = audio;
+    // Speak it
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
-    <DashboardLayout sidebarItems={studentSidebarItems}>
+    <DashboardLayout sidebarItems={isTeacher ? adminSidebarItems : studentSidebarItems}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -186,45 +195,46 @@ export function VocabularyPage() {
           </p>
         </div>
 
-        {/* Age Section Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {AGE_SECTIONS.map((section) => (
-            <button
-              key={section}
-              onClick={() => setActiveTab(section)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
-                activeTab === section
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-              }`}
-            >
-              Age {section}
-            </button>
-          ))}
-        </div>
-
-        {/* Search and Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
+        {/* Search, Filter and Actions */}
+        <div className="flex flex-col lg:flex-row gap-4 mb-10 items-center">
+          {/* Search input */}
+          <div className="relative flex-1 w-full">
             <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search vocabulary..."
+              placeholder="Search words..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
             />
           </div>
-          {isTeacher ? (
+
+          {/* Age Group Filters */}
+          <div className="flex gap-1.5 p-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-x-auto max-w-full">
+            {AGE_SECTIONS.map((section) => (
+              <button
+                key={section}
+                onClick={() => setActiveTab(section)}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                  activeTab === section
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                {section}
+              </button>
+            ))}
+          </div>
+
+          {/* Action Button */}
+          {isTeacher && (
             <Button
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl shadow-md h-[46px] whitespace-nowrap"
             >
               <PlusIcon className="w-4 h-4" />
               Add Word
             </Button>
-          ) : (
-            <div className="text-sm text-slate-500">isTeacher: {isTeacher ? 'true' : 'false'}, role: {user?.role}</div>
           )}
         </div>
 
@@ -248,47 +258,47 @@ export function VocabularyPage() {
             </p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredVocabularies.map((vocab) => (
-              <Card key={vocab.id} hover className="relative">
+              <Card key={vocab.id} hover className="relative p-4 overflow-hidden" padding={false}>
                 {isTeacher && (
-                  <div className="absolute top-4 right-4 flex gap-1">
+                  <div className="absolute top-2 right-2 flex gap-0.5">
                     <button
                       onClick={() => handleOpenModal(vocab)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="p-1 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                       title="Edit"
                     >
-                      <PencilIcon className="w-4 h-4" />
+                      <PencilIcon className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(vocab.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                       title="Delete"
                     >
-                      <Trash2Icon className="w-4 h-4" />
+                      <Trash2Icon className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}
-                <div className="pr-16">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-bold text-slate-900">
+                <div className={isTeacher ? "pr-12" : ""}>
+                  <div className="flex flex-col gap-2 mb-3">
+                    <h3 className="text-base font-black text-slate-900 truncate" title={vocab.word}>
                       {vocab.word}
                     </h3>
                     <button
                       onClick={() => playPronunciation(vocab.word, vocab.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium text-white transition-colors ${
-                        playingId === vocab.id ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+                      className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-sm ${
+                        playingId === vocab.id ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-blue-600 hover:bg-blue-700'
                       }`}
                     >
                       {playingId === vocab.id ? '⏹ Stop' : '🔊 Play'}
                     </button>
                   </div>
-                  <p className="text-sm text-slate-600 mb-3">
+                  <p className="text-xs font-bold text-slate-600 mb-3 line-clamp-2 min-h-[2rem]">
                     {vocab.meaning}
                   </p>
                   {vocab.example && (
-                    <div className="p-3 bg-slate-50 rounded-lg mb-3">
-                      <p className="text-xs text-slate-500 italic">
+                    <div className="p-2 border-l-2 border-blue-100 bg-blue-50/50 rounded-r-lg mb-2">
+                      <p className="text-[10px] text-slate-500 italic leading-relaxed line-clamp-2">
                         "{vocab.example}"
                       </p>
                     </div>
