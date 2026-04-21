@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   SearchIcon,
   PlusIcon,
@@ -45,6 +45,8 @@ export function VocabularyPage() {
     ageSection: '1-5'
   });
   const [saving, setSaving] = useState(false);
+  const [playingId, setPlayingId] = useState(null);
+  const currentAudioRef = useRef(null);
 
   useEffect(() => {
     fetchVocabularies();
@@ -131,6 +133,44 @@ export function VocabularyPage() {
       console.error('Error deleting vocabulary:', error);
       alert('Failed to delete vocabulary. Please try again.');
     }
+  };
+
+  const playPronunciation = (word, id) => {
+    // Stop currently playing audio
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+
+    if (playingId === id) {
+      setPlayingId(null);
+      return;
+    }
+
+    setPlayingId(id);
+
+    const audio = new Audio(
+      `http://localhost:8082/api/pronunciation/play?text=${encodeURIComponent(word)}`
+    );
+
+    audio.onended = () => {
+      setPlayingId(null);
+      currentAudioRef.current = null;
+    };
+
+    audio.onerror = () => {
+      console.error('Audio playback error');
+      setPlayingId(null);
+      currentAudioRef.current = null;
+      alert('Failed to play pronunciation');
+    };
+
+    audio.play().catch(error => {
+      console.error('Error playing pronunciation:', error);
+      setPlayingId(null);
+    });
+
+    currentAudioRef.current = audio;
   };
 
   return (
@@ -230,9 +270,19 @@ export function VocabularyPage() {
                   </div>
                 )}
                 <div className="pr-16">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">
-                    {vocab.word}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-lg font-bold text-slate-900">
+                      {vocab.word}
+                    </h3>
+                    <button
+                      onClick={() => playPronunciation(vocab.word, vocab.id)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium text-white transition-colors ${
+                        playingId === vocab.id ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+                      }`}
+                    >
+                      {playingId === vocab.id ? '⏹ Stop' : '🔊 Play'}
+                    </button>
+                  </div>
                   <p className="text-sm text-slate-600 mb-3">
                     {vocab.meaning}
                   </p>
