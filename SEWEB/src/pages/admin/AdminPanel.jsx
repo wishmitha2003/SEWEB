@@ -29,58 +29,14 @@ import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { Modal } from '../../components/ui/Modal';
 import { FormInput } from '../../components/ui/FormInput';
+import { adminSidebarItems } from '../../config/adminSidebarItems';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '../../services/userService';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
 import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi, uploadBranchLogo } from '../../services/branchService';
-const sidebarItems = [
-  {
-    icon: <LayoutDashboardIcon className="w-4 h-4" />,
-    label: 'Dashboard',
-    path: '/admin'
-  },
-  {
-    icon: <UsersIcon className="w-4 h-4" />,
-    label: 'Users',
-    path: '/admin/users'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Classes',
-    path: '/admin/classes'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Materials',
-    path: '/admin/materials'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Vocabulary',
-    path: '/vocabulary'
-  },
-  {
-    icon: <BuildingIcon className="w-4 h-4" />,
-    label: 'Branches',
-    path: '/admin/branches'
-  },
-  {
-    icon: <DollarSignIcon className="w-4 h-4" />,
-    label: 'Revenue',
-    path: '/admin/revenue'
-  },
-  {
-    icon: <TrophyIcon className="w-4 h-4" />,
-    label: 'Leaderboard',
-    path: '/admin/leaderboard'
-  },
-  {
-    icon: <SettingsIcon className="w-4 h-4" />,
-    label: 'Settings',
-    path: '/admin/settings'
-  }];
+
 
 const revenueData = [
   {
@@ -1123,7 +1079,7 @@ export function AdminPanel() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems}>
+    <DashboardLayout sidebarItems={adminSidebarItems}>
       {getContent()}
 
       {/* Custom Confirmation Modal */}
