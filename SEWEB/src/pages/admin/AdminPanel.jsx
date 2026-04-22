@@ -307,6 +307,7 @@ export function AdminPanel() {
   const [statusFilter, setStatusFilter] = useState('');
   const [actionModal, setActionModal] = useState({ open: false, payment: null, action: '', notes: '' });
   const [processingAction, setProcessingAction] = useState(false);
+  const [paymentsActiveTab, setPaymentsActiveTab] = useState('pending');
 
   // Payment helper functions
   const loadPayments = async (status = null) => {
@@ -1092,8 +1093,6 @@ export function AdminPanel() {
   );
 
   const renderPayments = () => {
-    const [activeTab, setActiveTab] = useState('pending');
-
     const formatDate = (dateString) => {
       if (!dateString) return '-';
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -1214,9 +1213,9 @@ export function AdminPanel() {
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button
-            onClick={() => setActiveTab('pending')}
+            onClick={() => setPaymentsActiveTab('pending')}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              activeTab === 'pending'
+              paymentsActiveTab === 'pending'
                 ? 'bg-blue-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
@@ -1224,9 +1223,9 @@ export function AdminPanel() {
             Pending Payments ({pendingPayments.length})
           </button>
           <button
-            onClick={() => setActiveTab('all')}
+            onClick={() => setPaymentsActiveTab('all')}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              activeTab === 'all'
+              paymentsActiveTab === 'all'
                 ? 'bg-blue-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
@@ -1245,7 +1244,7 @@ export function AdminPanel() {
           </div>
         ) : (
           <>
-            {activeTab === 'pending' && (
+            {paymentsActiveTab === 'pending' && (
               <Card>
                 <div className="flex items-center justify-between mb-5">
                   <div>
@@ -1264,7 +1263,7 @@ export function AdminPanel() {
               </Card>
             )}
 
-            {activeTab === 'all' && (
+            {paymentsActiveTab === 'all' && (
               <Card>
                 <div className="flex items-center justify-between mb-5">
                   <div>
