@@ -249,6 +249,14 @@ const leaderboardColumns = [
     header: 'Badges'
   }];
 
+// Helper to convert relative slip URL to full URL
+const getFullSlipUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // Convert relative path like /uploads/payments/filename.jpg to full URL using proxy
+  return url.startsWith('/') ? url : `/${url}`;
+};
+
 export function AdminPanel() {
   const { user } = useAuth();
   const location = useLocation();
@@ -354,10 +362,11 @@ export function AdminPanel() {
     if (!actionModal.payment) return;
     setProcessingAction(true);
     try {
-      await approvePayment(actionModal.payment.id, actionModal.notes);
-      setPendingPayments(prev => prev.filter(p => p.id !== actionModal.payment.id));
+      const paymentId = actionModal.payment.id || actionModal.payment._id;
+      await approvePayment(paymentId, actionModal.notes);
+      setPendingPayments(prev => prev.filter(p => (p.id || p._id) !== paymentId));
       setPayments(prev => prev.map(p => 
-        p.id === actionModal.payment.id 
+        (p.id || p._id) === paymentId
           ? { ...p, status: 'APPROVED', approvedAt: new Date().toISOString(), adminNotes: actionModal.notes }
           : p
       ));
@@ -374,10 +383,11 @@ export function AdminPanel() {
     if (!actionModal.payment) return;
     setProcessingAction(true);
     try {
-      await rejectPayment(actionModal.payment.id, actionModal.notes);
-      setPendingPayments(prev => prev.filter(p => p.id !== actionModal.payment.id));
+      const paymentId = actionModal.payment.id || actionModal.payment._id;
+      await rejectPayment(paymentId, actionModal.notes);
+      setPendingPayments(prev => prev.filter(p => (p.id || p._id) !== paymentId));
       setPayments(prev => prev.map(p => 
-        p.id === actionModal.payment.id 
+        (p.id || p._id) === paymentId
           ? { ...p, status: 'REJECTED', rejectedAt: new Date().toISOString(), adminNotes: actionModal.notes }
           : p
       ));
@@ -1143,14 +1153,6 @@ export function AdminPanel() {
         CASH: 'Cash'
       };
       return methodMap[method] || method;
-    };
-
-    // Helper to convert relative slip URL to full URL
-    const getFullSlipUrl = (url) => {
-      if (!url) return null;
-      if (url.startsWith('http://') || url.startsWith('https://')) return url;
-      // Convert relative path like /uploads/payments/filename.jpg to full URL
-      return `http://localhost:8080${url}`;
     };
 
     const pendingColumns = [
