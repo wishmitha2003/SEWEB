@@ -6,7 +6,8 @@ import {
   BuildingIcon,
   DollarSignIcon,
   TrophyIcon,
-  SettingsIcon
+  SettingsIcon,
+  CreditCardIcon
 } from 'lucide-react';
 
 export const adminSidebarItems = [
@@ -44,6 +45,11 @@ export const adminSidebarItems = [
     icon: <DollarSignIcon className="w-4 h-4" />,
     label: 'Revenue',
     path: '/admin/revenue'
+  },
+  {
+    icon: <CreditCardIcon className="w-4 h-4" />,
+    label: 'Payments',
+    path: '/admin/payments'
   },
   {
     icon: <TrophyIcon className="w-4 h-4" />,
