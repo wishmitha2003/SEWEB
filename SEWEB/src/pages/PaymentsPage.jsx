@@ -78,12 +78,19 @@ export function PaymentsPage() {
   const [activeTab, setActiveTab] = useState('make-payment');
 
   useEffect(() => {
+    const token = localStorage.getItem('ezy_token');
+    if (!token) {
+      setError('Please log in to view payments.');
+      setLoading(false);
+      return;
+    }
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
+      setError(''); // Clear any previous errors
       const [classesData, paymentsData] = await Promise.all([
         getClasses(),
         getMyPayments()
@@ -92,7 +99,22 @@ export function PaymentsPage() {
       setPayments(paymentsData || []);
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError('Failed to load data. Please try again.');
+      // Check for various error types
+      const status = err.response?.status;
+      const errorMessage = err.message || '';
+      
+      if (status === 401 || errorMessage.includes('401') || errorMessage.includes('unauthorized')) {
+        setError('Your session has expired. Please log in again.');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else if (status === 403) {
+        setError('You do not have permission to view payments.');
+      } else if (status === 0 || errorMessage.includes('Network') || errorMessage.includes('fetch')) {
+        setError('Cannot connect to server. Please ensure the backend is running.');
+      } else {
+        setError('Failed to load data. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
