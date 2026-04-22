@@ -316,6 +316,11 @@ export function AdminPanel() {
     try {
       const res = await getAllPayments(status);
       const arr = Array.isArray(res) ? res : (res?.data || []);
+      // Log first payment object to see all available fields
+      if (arr.length > 0) {
+        console.log('First payment object keys:', Object.keys(arr[0]));
+        console.log('First payment full object:', JSON.stringify(arr[0], null, 2));
+      }
       setPayments(arr);
     } catch (err) {
       setPaymentsError(err?.message || String(err));
@@ -331,6 +336,11 @@ export function AdminPanel() {
     try {
       const res = await getPendingPayments();
       const arr = Array.isArray(res) ? res : (res?.data || []);
+      // Log first payment object to see all available fields
+      if (arr.length > 0) {
+        console.log('First pending payment object keys:', Object.keys(arr[0]));
+        console.log('First pending payment full object:', JSON.stringify(arr[0], null, 2));
+      }
       setPendingPayments(arr);
     } catch (err) {
       setPaymentsError(err?.message || String(err));
@@ -1135,6 +1145,14 @@ export function AdminPanel() {
       return methodMap[method] || method;
     };
 
+    // Helper to convert relative slip URL to full URL
+    const getFullSlipUrl = (url) => {
+      if (!url) return null;
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+      // Convert relative path like /uploads/payments/filename.jpg to full URL
+      return `http://localhost:8080${url}`;
+    };
+
     const pendingColumns = [
       { key: 'studentName', header: 'Student Name', render: (val, row) => row?.user?.fullName || row?.studentName || val || '-' },
       { key: 'email', header: 'Email', render: (val, row) => row?.user?.email || row?.email || '-' },
@@ -1145,14 +1163,19 @@ export function AdminPanel() {
       { 
         key: 'slipImage', 
         header: 'Slip Image', 
-        render: (val) => val ? (
-          <button
-            onClick={() => window.open(val, '_blank')}
-            className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-200 transition-colors"
-          >
-            View Slip
-          </button>
-        ) : '-'
+        render: (val, row) => {
+          // Check multiple possible field names for slip image (including slipImageUrl from API)
+          const slipUrl = val || row?.slipImageUrl || row?.slipUrl || row?.slip_image || row?.receiptImage || row?.receipt || row?.image || row?.paymentSlip;
+          const fullSlipUrl = getFullSlipUrl(slipUrl);
+          return fullSlipUrl ? (
+            <button
+              onClick={() => window.open(fullSlipUrl, '_blank')}
+              className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-200 transition-colors"
+            >
+              View Slip
+            </button>
+          ) : '-';
+        }
       },
       {
         key: 'actions',
@@ -1192,14 +1215,19 @@ export function AdminPanel() {
       { 
         key: 'slipImage', 
         header: 'Slip', 
-        render: (val) => val ? (
-          <button
-            onClick={() => window.open(val, '_blank')}
-            className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-          >
-            <EyeIcon className="w-4 h-4" />
-          </button>
-        ) : '-'
+        render: (val, row) => {
+          // Check multiple possible field names for slip image (including slipImageUrl from API)
+          const slipUrl = val || row?.slipImageUrl || row?.slipUrl || row?.slip_image || row?.receiptImage || row?.receipt || row?.image || row?.paymentSlip;
+          const fullSlipUrl = getFullSlipUrl(slipUrl);
+          return fullSlipUrl ? (
+            <button
+              onClick={() => window.open(fullSlipUrl, '_blank')}
+              className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+            >
+              <EyeIcon className="w-4 h-4" />
+            </button>
+          ) : '-';
+        }
       }
     ];
 
@@ -1768,7 +1796,7 @@ export function AdminPanel() {
         isOpen={actionModal.open}
         onClose={() => setActionModal({ open: false, payment: null, action: '', notes: '' })}
         title={actionModal.action === 'approve' ? 'Approve Payment' : 'Reject Payment'}
-        size="md"
+        size="lg"
       >
         <div className="space-y-4">
           {actionModal.payment && (
@@ -1790,7 +1818,39 @@ export function AdminPanel() {
                   <span className="text-slate-500">Method:</span>
                   <span className="font-semibold ml-2">{actionModal.payment.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : actionModal.payment.paymentMethod === 'CASH' ? 'Cash' : 'Online'}</span>
                 </div>
+                {actionModal.payment.className && (
+                  <div>
+                    <span className="text-slate-500">Class:</span>
+                    <span className="font-semibold ml-2">{actionModal.payment.className}</span>
+                  </div>
+                )}
               </div>
+              
+              {/* Payment Slip Preview */}
+              {(() => {
+                // Check multiple possible field names for slip image (including slipImageUrl from API)
+                const slipUrl = actionModal.payment.slipImage || actionModal.payment.slipImageUrl || actionModal.payment.slipUrl || actionModal.payment.slip_image || actionModal.payment.receiptImage || actionModal.payment.receipt || actionModal.payment.image || actionModal.payment.paymentSlip;
+                const fullSlipUrl = getFullSlipUrl(slipUrl);
+                return fullSlipUrl ? (
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <span className="text-slate-500 text-sm font-medium">Payment Slip:</span>
+                    <div className="mt-2">
+                      <img 
+                        src={fullSlipUrl} 
+                        alt="Payment Slip" 
+                        className="max-w-full h-auto rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(fullSlipUrl, '_blank')}
+                      />
+                      <button
+                        onClick={() => window.open(fullSlipUrl, '_blank')}
+                        className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        View Full Size →
+                      </button>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
           )}
           
