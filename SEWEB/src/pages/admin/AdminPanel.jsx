@@ -9,7 +9,10 @@ import {
   TrophyIcon,
   SettingsIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  EyeIcon,
+  CheckCircleIcon,
+  CreditCardIcon
 } from
   'lucide-react';
 import {
@@ -36,6 +39,7 @@ import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
 import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi, uploadBranchLogo } from '../../services/branchService';
+import { getAllPayments, getPendingPayments, approvePayment, rejectPayment } from '../../services/paymentService';
 
 
 const revenueData = [
@@ -294,6 +298,101 @@ export function AdminPanel() {
   const [branchLogoFile, setBranchLogoFile] = useState(null);
   const [isEditingBranch, setIsEditingBranch] = useState(false);
   const [currentBranchId, setCurrentBranchId] = useState(null);
+
+  // Payment state
+  const [payments, setPayments] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [paymentsError, setPaymentsError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [actionModal, setActionModal] = useState({ open: false, payment: null, action: '', notes: '' });
+  const [processingAction, setProcessingAction] = useState(false);
+  const [paymentsActiveTab, setPaymentsActiveTab] = useState('pending');
+
+  // Payment helper functions
+  const loadPayments = async (status = null) => {
+    setLoadingPayments(true);
+    setPaymentsError(null);
+    try {
+      const res = await getAllPayments(status);
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      // Log first payment object to see all available fields
+      if (arr.length > 0) {
+        console.log('First payment object keys:', Object.keys(arr[0]));
+        console.log('First payment full object:', JSON.stringify(arr[0], null, 2));
+      }
+      setPayments(arr);
+    } catch (err) {
+      setPaymentsError(err?.message || String(err));
+      setPayments([]);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  const loadPendingPayments = async () => {
+    setLoadingPayments(true);
+    setPaymentsError(null);
+    try {
+      const res = await getPendingPayments();
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      // Log first payment object to see all available fields
+      if (arr.length > 0) {
+        console.log('First pending payment object keys:', Object.keys(arr[0]));
+        console.log('First pending payment full object:', JSON.stringify(arr[0], null, 2));
+      }
+      setPendingPayments(arr);
+    } catch (err) {
+      setPaymentsError(err?.message || String(err));
+      setPendingPayments([]);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  const handleApprovePayment = async () => {
+    if (!actionModal.payment) return;
+    setProcessingAction(true);
+    try {
+      await approvePayment(actionModal.payment.id, actionModal.notes);
+      setPendingPayments(prev => prev.filter(p => p.id !== actionModal.payment.id));
+      setPayments(prev => prev.map(p => 
+        p.id === actionModal.payment.id 
+          ? { ...p, status: 'APPROVED', approvedAt: new Date().toISOString(), adminNotes: actionModal.notes }
+          : p
+      ));
+      setActionModal({ open: false, payment: null, action: '', notes: '' });
+      alert('Payment approved successfully!');
+    } catch (err) {
+      alert('Failed to approve payment: ' + (err?.message || String(err)));
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRejectPayment = async () => {
+    if (!actionModal.payment) return;
+    setProcessingAction(true);
+    try {
+      await rejectPayment(actionModal.payment.id, actionModal.notes);
+      setPendingPayments(prev => prev.filter(p => p.id !== actionModal.payment.id));
+      setPayments(prev => prev.map(p => 
+        p.id === actionModal.payment.id 
+          ? { ...p, status: 'REJECTED', rejectedAt: new Date().toISOString(), adminNotes: actionModal.notes }
+          : p
+      ));
+      setActionModal({ open: false, payment: null, action: '', notes: '' });
+      alert('Payment rejected!');
+    } catch (err) {
+      alert('Failed to reject payment: ' + (err?.message || String(err)));
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  function openActionModal(payment, action) {
+    setActionModal({ open: true, payment, action, notes: '' });
+  }
 
   function isDemo(u) {
     if (!u) return false;
@@ -650,8 +749,12 @@ export function AdminPanel() {
       loadClasses();
       loadMaterials();
       loadBranches();
+      if (path === '/admin/payments') {
+        loadPayments(statusFilter);
+        loadPendingPayments();
+      }
     }
-  }, [path]);
+  }, [path, statusFilter]);
 
   const renderStats = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -999,6 +1102,231 @@ export function AdminPanel() {
     </>
   );
 
+  const renderPayments = () => {
+    const formatDate = (dateString) => {
+      if (!dateString) return '-';
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    const formatAmount = (amount) => {
+      return `LKR ${parseFloat(amount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`;
+    };
+
+    const getStatusBadge = (status) => {
+      const statusMap = {
+        PENDING: { variant: 'warning', label: 'Pending' },
+        APPROVED: { variant: 'success', label: 'Approved' },
+        REJECTED: { variant: 'danger', label: 'Rejected' }
+      };
+      const { variant, label } = statusMap[status] || { variant: 'info', label: status };
+      return <Badge variant={variant}>{label}</Badge>;
+    };
+
+    const getPaymentTypeLabel = (type) => {
+      const typeMap = {
+        CLASS_FEE: 'Class Fee',
+        OTHER: 'Other'
+      };
+      return typeMap[type] || type;
+    };
+
+    const getPaymentMethodLabel = (method) => {
+      const methodMap = {
+        BANK_TRANSFER: 'Bank Transfer',
+        ONLINE: 'Online Payment',
+        CASH: 'Cash'
+      };
+      return methodMap[method] || method;
+    };
+
+    // Helper to convert relative slip URL to full URL
+    const getFullSlipUrl = (url) => {
+      if (!url) return null;
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+      // Convert relative path like /uploads/payments/filename.jpg to full URL
+      return `http://localhost:8080${url}`;
+    };
+
+    const pendingColumns = [
+      { key: 'studentName', header: 'Student Name', render: (val, row) => row?.user?.fullName || row?.studentName || val || '-' },
+      { key: 'email', header: 'Email', render: (val, row) => row?.user?.email || row?.email || '-' },
+      { key: 'amount', header: 'Amount', className: 'font-semibold', render: (val) => formatAmount(val) },
+      { key: 'paymentType', header: 'Type', render: (val) => getPaymentTypeLabel(val) },
+      { key: 'className', header: 'Class Name', render: (val) => val || '-' },
+      { key: 'paymentMethod', header: 'Method', render: (val) => getPaymentMethodLabel(val) },
+      { 
+        key: 'slipImage', 
+        header: 'Slip Image', 
+        render: (val, row) => {
+          // Check multiple possible field names for slip image (including slipImageUrl from API)
+          const slipUrl = val || row?.slipImageUrl || row?.slipUrl || row?.slip_image || row?.receiptImage || row?.receipt || row?.image || row?.paymentSlip;
+          const fullSlipUrl = getFullSlipUrl(slipUrl);
+          return fullSlipUrl ? (
+            <button
+              onClick={() => window.open(fullSlipUrl, '_blank')}
+              className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-200 transition-colors"
+            >
+              View Slip
+            </button>
+          ) : '-';
+        }
+      },
+      {
+        key: 'actions',
+        header: 'Actions',
+        render: (_, row) => (
+          <div className="flex gap-2">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => openActionModal(row, 'approve')}>
+              Approve
+            </Button>
+            <Button size="sm" variant="danger" onClick={() => openActionModal(row, 'reject')}>
+              Reject
+            </Button>
+          </div>
+        )
+      }
+    ];
+
+    const allPaymentsColumns = [
+      { key: 'studentName', header: 'Student Name', render: (val, row) => row?.user?.fullName || row?.studentName || val || '-' },
+      { key: 'email', header: 'Email', render: (val, row) => row?.user?.email || row?.email || '-' },
+      { key: 'amount', header: 'Amount', className: 'font-semibold', render: (val) => formatAmount(val) },
+      { key: 'paymentType', header: 'Type', render: (val) => getPaymentTypeLabel(val) },
+      { key: 'className', header: 'Class Name', render: (val) => val || '-' },
+      { key: 'paymentMethod', header: 'Method', render: (val) => getPaymentMethodLabel(val) },
+      { key: 'status', header: 'Status', render: (val) => getStatusBadge(val) },
+      { key: 'createdAt', header: 'Submitted', render: (val) => formatDate(val) },
+      { 
+        key: 'approvedAt', 
+        header: 'Processed', 
+        render: (val, row) => row.status === 'APPROVED' || row.status === 'REJECTED' ? formatDate(val || row.updatedAt) : '-'
+      },
+      { 
+        key: 'adminNotes', 
+        header: 'Admin Notes', 
+        render: (val) => val || '-'
+      },
+      { 
+        key: 'slipImage', 
+        header: 'Slip', 
+        render: (val, row) => {
+          // Check multiple possible field names for slip image (including slipImageUrl from API)
+          const slipUrl = val || row?.slipImageUrl || row?.slipUrl || row?.slip_image || row?.receiptImage || row?.receipt || row?.image || row?.paymentSlip;
+          const fullSlipUrl = getFullSlipUrl(slipUrl);
+          return fullSlipUrl ? (
+            <button
+              onClick={() => window.open(fullSlipUrl, '_blank')}
+              className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+            >
+              <EyeIcon className="w-4 h-4" />
+            </button>
+          ) : '-';
+        }
+      }
+    ];
+
+    return (
+      <>
+        <div className="mb-8">
+          <h1 className="text-2xl font-extrabold text-slate-900">Payment Management</h1>
+          <p className="text-slate-500 mt-1">Review and process student payment submissions.</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setPaymentsActiveTab('pending')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              paymentsActiveTab === 'pending'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            Pending Payments ({pendingPayments.length})
+          </button>
+          <button
+            onClick={() => setPaymentsActiveTab('all')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              paymentsActiveTab === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            All Payments
+          </button>
+        </div>
+
+        {paymentsError && (
+          <div className="p-4 mb-4 rounded bg-red-50 text-red-700">{paymentsError}</div>
+        )}
+
+        {loadingPayments ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <>
+            {paymentsActiveTab === 'pending' && (
+              <Card>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 mb-1">Pending Payments</h2>
+                    <p className="text-sm text-slate-500">Payments waiting for approval</p>
+                  </div>
+                </div>
+                {pendingPayments.length > 0 ? (
+                  <Table columns={pendingColumns} data={pendingPayments} />
+                ) : (
+                  <div className="text-center py-12">
+                    <CheckCircleIcon className="w-12 h-12 text-emerald-300 mx-auto mb-3" />
+                    <p className="text-slate-500">No pending payments</p>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {paymentsActiveTab === 'all' && (
+              <Card>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 mb-1">All Payments</h2>
+                    <p className="text-sm text-slate-500">Complete payment history</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                    >
+                      <option value="">All Status</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="APPROVED">Approved</option>
+                      <option value="REJECTED">Rejected</option>
+                    </select>
+                  </div>
+                </div>
+                {payments.length > 0 ? (
+                  <Table columns={allPaymentsColumns} data={payments} />
+                ) : (
+                  <div className="text-center py-12">
+                    <CreditCardIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-slate-500">No payments found</p>
+                  </div>
+                )}
+              </Card>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
+
   const renderLeaderboard = () => (
     <>
       <div className="mb-8">
@@ -1072,6 +1400,7 @@ export function AdminPanel() {
       case '/admin/materials': return renderMaterials();
       case '/admin/branches': return renderBranches();
       case '/admin/revenue': return renderRevenue();
+      case '/admin/payments': return renderPayments();
       case '/admin/leaderboard': return renderLeaderboard();
       case '/admin/settings': return renderSettings();
       default: return renderDashboard();
@@ -1460,6 +1789,107 @@ export function AdminPanel() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Payment Action Modal */}
+      <Modal
+        isOpen={actionModal.open}
+        onClose={() => setActionModal({ open: false, payment: null, action: '', notes: '' })}
+        title={actionModal.action === 'approve' ? 'Approve Payment' : 'Reject Payment'}
+        size="lg"
+      >
+        <div className="space-y-4">
+          {actionModal.payment && (
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-slate-500">Student:</span>
+                  <span className="font-semibold ml-2">{actionModal.payment.user?.fullName || actionModal.payment.studentName || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Amount:</span>
+                  <span className="font-semibold ml-2">LKR {parseFloat(actionModal.payment.amount || 0).toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Type:</span>
+                  <span className="font-semibold ml-2">{actionModal.payment.paymentType === 'CLASS_FEE' ? 'Class Fee' : 'Other'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Method:</span>
+                  <span className="font-semibold ml-2">{actionModal.payment.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : actionModal.payment.paymentMethod === 'CASH' ? 'Cash' : 'Online'}</span>
+                </div>
+                {actionModal.payment.className && (
+                  <div>
+                    <span className="text-slate-500">Class:</span>
+                    <span className="font-semibold ml-2">{actionModal.payment.className}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Payment Slip Preview */}
+              {(() => {
+                // Check multiple possible field names for slip image (including slipImageUrl from API)
+                const slipUrl = actionModal.payment.slipImage || actionModal.payment.slipImageUrl || actionModal.payment.slipUrl || actionModal.payment.slip_image || actionModal.payment.receiptImage || actionModal.payment.receipt || actionModal.payment.image || actionModal.payment.paymentSlip;
+                const fullSlipUrl = getFullSlipUrl(slipUrl);
+                return fullSlipUrl ? (
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <span className="text-slate-500 text-sm font-medium">Payment Slip:</span>
+                    <div className="mt-2">
+                      <img 
+                        src={fullSlipUrl} 
+                        alt="Payment Slip" 
+                        className="max-w-full h-auto rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(fullSlipUrl, '_blank')}
+                      />
+                      <button
+                        onClick={() => window.open(fullSlipUrl, '_blank')}
+                        className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        View Full Size →
+                      </button>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+          )}
+          
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              value={actionModal.notes}
+              onChange={(e) => setActionModal({ ...actionModal, notes: e.target.value })}
+              placeholder={actionModal.action === 'approve' ? 'Add approval notes...' : 'Reason for rejection...'}
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-colors resize-none"
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="ghost" 
+              type="button" 
+              onClick={() => setActionModal({ open: false, payment: null, action: '', notes: '' })}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              onClick={actionModal.action === 'approve' ? handleApprovePayment : handleRejectPayment}
+              disabled={processingAction}
+              className={actionModal.action === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}
+            >
+              {processingAction 
+                ? 'Processing...' 
+                : actionModal.action === 'approve' 
+                  ? 'Approve Payment' 
+                  : 'Reject Payment'
+              }
+            </Button>
+          </div>
+        </div>
       </Modal>
     </DashboardLayout>
   );
