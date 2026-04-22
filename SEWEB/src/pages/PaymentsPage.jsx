@@ -91,12 +91,15 @@ export function PaymentsPage() {
     try {
       setLoading(true);
       setError(''); // Clear any previous errors
-      const [classesData, paymentsData] = await Promise.all([
+      const [classesResponse, paymentsResponse] = await Promise.all([
         getClasses(),
         getMyPayments()
       ]);
-      setClasses(classesData || []);
-      setPayments(paymentsData || []);
+      // Handle both direct array and wrapped response { data: [...] }
+      const classesData = classesResponse?.data || classesResponse || [];
+      const paymentsData = paymentsResponse?.data || paymentsResponse || [];
+      setClasses(Array.isArray(classesData) ? classesData : []);
+      setPayments(Array.isArray(paymentsData) ? paymentsData : []);
     } catch (err) {
       console.error('Error fetching data:', err);
       // Check for various error types
