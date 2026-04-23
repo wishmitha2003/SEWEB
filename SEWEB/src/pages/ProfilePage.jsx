@@ -171,7 +171,12 @@ export function ProfilePage() {
             <div className="relative mb-6 mt-4">
               <div className="w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#78bdeb] flex items-center justify-center relative group">
                 {profileImage ? (
-                  <img src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `http://localhost:8082${profileImage}`} alt="Profile" className="w-full h-full object-cover" />
+                  <img 
+                    src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `${profileImage}`} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover" 
+                    onError={() => setProfileImage(null)}
+                  />
                 ) : (
                   <span className="text-6xl font-black text-white">{getInitials(userData.fullName)}</span>
                 )}

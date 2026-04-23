@@ -79,6 +79,8 @@ export function Navbar({ transparent = false }) {
     }
   }
 
+  const [imgError, setImgError] = useState(false)
+  
   const handleLogout = () => {
     setProfileOpen(false)
     logout()
@@ -139,12 +141,13 @@ export function Navbar({ transparent = false }) {
                       : 'hover:bg-white/10'}
                   `}
                 >
-                  <div className={`w-9 h-9 rounded-full ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0 overflow-hidden`}>
-                    {user?.profileImage ? (
+                  <div className={`w-9 h-9 rounded-full ${user?.profileImage && !imgError ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0 overflow-hidden`}>
+                    {user?.profileImage && !imgError ? (
                       <img 
-                        src={user.profileImage.startsWith('data:') || user.profileImage.startsWith('http') ? user.profileImage : `http://localhost:8082${user.profileImage}`} 
+                        src={user.profileImage.startsWith('data:') || user.profileImage.startsWith('http') ? user.profileImage : `${user.profileImage}`} 
                         alt="Profile" 
                         className="w-full h-full object-cover" 
+                        onError={() => setImgError(true)}
                       />
                     ) : (
                       <span className="text-xs font-bold text-white">{getInitials(user?.fullName)}</span>
