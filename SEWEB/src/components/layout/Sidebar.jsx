@@ -3,6 +3,27 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, ZapIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
+function ProfileImage({ user, userName }) {
+  const [imgError, setImgError] = useState(false);
+  
+  if (user?.profileImage && !imgError) {
+    return (
+      <img 
+        src={user.profileImage} 
+        alt="Profile" 
+        className="w-full h-full object-cover" 
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  
+  return (
+    <span className="text-white text-sm font-black">
+      {userName.charAt(0)}
+    </span>
+  );
+}
+
 export function Sidebar({
   items = [],
 }) {
@@ -58,13 +79,7 @@ export function Sidebar({
       >
         <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 p-0.5 shadow-lg shadow-blue-900/40">
           <div className="w-full h-full rounded-[14px] bg-slate-900 flex items-center justify-center overflow-hidden">
-            {user?.profileImage ? (
-              <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-white text-sm font-black">
-                {userName.charAt(0)}
-              </span>
-            )}
+            <ProfileImage user={user} userName={userName} />
           </div>
         </div>
         <div className="min-w-0">
