@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   CreditCardIcon,
   CalendarIcon,
@@ -51,12 +52,13 @@ const PAYMENT_METHODS = [
 
 export function PaymentsPage() {
   const { user } = useAuth();
+  const location = useLocation();
   
   // Form state
   const [formData, setFormData] = useState({
     amount: '',
     paymentType: 'CLASS_FEE',
-    classId: '',
+    classId: location.state?.classId || '',
     paymentMethod: 'BANK_TRANSFER'
   });
   const [slipImage, setSlipImage] = useState(null);
@@ -87,6 +89,19 @@ export function PaymentsPage() {
     fetchData();
   }, []);
 
+  // Auto-fill amount when classId is pre-filled from navigation
+  useEffect(() => {
+    if (formData.classId && classes.length > 0 && !formData.amount) {
+      const selectedClass = classes.find(cls => cls.id == formData.classId);
+      if (selectedClass && selectedClass.price) {
+        setFormData(prev => ({
+          ...prev,
+          amount: selectedClass.price.toString()
+        }));
+      }
+    }
+  }, [classes]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -98,7 +113,15 @@ export function PaymentsPage() {
       // Handle both direct array and wrapped response { data: [...] }
       const classesData = classesResponse?.data || classesResponse || [];
       const paymentsData = paymentsResponse?.data || paymentsResponse || [];
-      setClasses(Array.isArray(classesData) ? classesData : []);
+      
+      // Normalize classes data
+      const normalizedClasses = (Array.isArray(classesData) ? classesData : []).map(cls => ({
+        ...cls,
+        id: cls.id || cls._id,
+        price: parseFloat(cls.fee || cls.price || 0)
+      }));
+      
+      setClasses(normalizedClasses);
       setPayments(Array.isArray(paymentsData) ? paymentsData : []);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -125,14 +148,25 @@ export function PaymentsPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Reset class selection when payment type changes to OTHER
-    if (name === 'paymentType' && value === 'OTHER') {
-      setFormData(prev => ({ ...prev, classId: '' }));
-    }
+    setFormData(prev => {
+      const updated = { ...prev, [name]: value };
+      
+      // Auto-fill amount when classId is selected
+      if (name === 'classId' && value) {
+        const selectedClass = classes.find(cls => cls.id == value);
+        if (selectedClass && selectedClass.price) {
+          updated.amount = selectedClass.price.toString();
+        }
+      }
+      
+      // Reset class selection when payment type changes to OTHER
+      if (name === 'paymentType' && value === 'OTHER') {
+        updated.classId = '';
+        updated.amount = '';
+      }
+      
+      return updated;
+    });
   };
 
   const handleFileChange = (e) => {
@@ -430,7 +464,7 @@ export function PaymentsPage() {
                             <option value="">Select a class</option>
                             {classes.map(cls => (
                               <option key={cls.id} value={cls.id}>
-                                {cls.name} - LKR {(cls.fee || 0).toLocaleString('en-LK')}
+                                {cls.name || cls.title} - LKR {(cls.price || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                               </option>
                             ))}
                           </select>

@@ -23,13 +23,15 @@ import {
 } from '../services/vocabularyService';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 import { adminSidebarItems } from '../config/adminSidebarItems.jsx';
+import { teacherSidebarItems } from '../config/teacherSidebarItems.jsx';
 
 const AGE_SECTIONS = ['1-5', '6-10', '11-15', '16-20', '20+'];
 
 export function VocabularyPage() {
   const { user, isLoggedIn } = useAuth();
   console.log('VocabularyPage - User:', user, 'isLoggedIn:', isLoggedIn);
-  const isTeacher = user?.role === 'teacher' || user?.role === 'admin' || user?.role === 'TEACHER' || user?.role === 'ADMIN' || user?.role === 'Teacher' || user?.role === 'Admin';
+  const isTeacher = user?.role === 'teacher' || user?.role === 'TEACHER' || user?.role === 'Teacher';
+  const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN' || user?.role === 'Admin';
   
   const [activeTab, setActiveTab] = useState('1-5');
   const [vocabularies, setVocabularies] = useState([]);
@@ -183,7 +185,7 @@ export function VocabularyPage() {
   };
 
   return (
-    <DashboardLayout sidebarItems={isTeacher ? adminSidebarItems : studentSidebarItems}>
+    <DashboardLayout sidebarItems={isAdmin ? adminSidebarItems : isTeacher ? teacherSidebarItems : studentSidebarItems}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

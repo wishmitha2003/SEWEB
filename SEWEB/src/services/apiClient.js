@@ -48,10 +48,23 @@ async function request(method, path, data, customOptions = {}) {
   }
 
   const response = await fetch(url, options);
+  
+  // Handle 401 Unauthorized globally
+  if (response.status === 401) {
+    console.warn('Session expired or unauthorized. Logging out...');
+    localStorage.removeItem('ezy_token');
+    localStorage.removeItem('ezy_user');
+    // Only redirect if not already on login/signup pages to avoid loops
+    if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+      window.location.href = '/login?expired=true';
+    }
+  }
+
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
     const message = payload?.message || payload?.error || response.statusText || 'Request failed';
+    console.error(`API Error [${response.status}] ${url}:`, message);
     const err = new Error(message);
     err.status = response.status;
     err.payload = payload;
