@@ -430,7 +430,7 @@ export function PaymentsPage() {
                             <option value="">Select a class</option>
                             {classes.map(cls => (
                               <option key={cls.id} value={cls.id}>
-                                {cls.name} - LKR {cls.price?.toLocaleString() || '0'}
+                                {cls.name} - LKR {(cls.fee || 0).toLocaleString('en-LK')}
                               </option>
                             ))}
                           </select>
