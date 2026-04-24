@@ -502,6 +502,11 @@ export function AdminPanel() {
       )
     },
     {
+      key: 'fee',
+      header: 'Fee',
+      render: (val) => <span className="font-semibold text-blue-600">LKR {val || 0}</span>
+    },
+    {
       key: 'status',
       header: 'Status',
       render: (val) => <Badge variant={val === 'Active' ? 'success' : 'warning'}>{val}</Badge>
@@ -533,7 +538,8 @@ export function AdminPanel() {
     schedule: '',
     branch: '',
     type: 'online',
-    status: 'Active'
+    status: 'Active',
+    fee: 0
   });
 
   async function loadClasses() {
@@ -564,7 +570,8 @@ export function AdminPanel() {
         schedule: '',
         branch: '',
         type: 'online',
-        status: 'Active'
+        status: 'Active',
+        fee: 0
       });
     } catch (err) {
       alert('Failed to create class: ' + (err?.message || String(err)));
@@ -835,7 +842,7 @@ export function AdminPanel() {
             <h2 className="text-lg font-bold text-slate-900">Active Classes</h2>
             <Button size="sm" variant="ghost">View All</Button>
           </div>
-          <Table columns={classAdminColumns.slice(0, 3)} data={classes.slice(0, 5)} />
+          <Table columns={[classAdminColumns[0], classAdminColumns[1], classAdminColumns[6], classAdminColumns[7]]} data={classes.slice(0, 5)} />
         </Card>
       </div>
     </>
@@ -1585,6 +1592,13 @@ export function AdminPanel() {
               <option value="physical">Physical</option>
             </select>
           </div>
+          <FormInput
+            label="Fee"
+            type="number"
+            value={newClass.fee}
+            onChange={(e) => setNewClass({ ...newClass, fee: parseFloat(e.target.value) || 0 })}
+            placeholder="e.g. 5000"
+          />
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsClassModalOpen(false)}>
               Cancel
