@@ -431,20 +431,10 @@ export function ShootingGame() {
 
   return (
     <div className="w-screen h-screen bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
-      {/* Title, Instructions and Close Button - Left Middle */}
+      {/* Title and Instructions - Left Middle */}
       <div className="absolute top-24 left-4 z-20 max-w-xs">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h1 className="text-xl font-bold text-white leading-tight">Shooting Game</h1>
-            <p className="text-xs text-gray-300 mt-2">Click the target matching the English word</p>
-          </div>
-          <button
-            onClick={() => navigate('/gamification')}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm whitespace-nowrap transition flex-shrink-0"
-          >
-            ✕ Close
-          </button>
-        </div>
+        <h1 className="text-xl font-bold text-white leading-tight">Shooting Game</h1>
+        <p className="text-xs text-gray-300 mt-2">Click the target matching the English word</p>
       </div>
 
       {/* Game Canvas */}
