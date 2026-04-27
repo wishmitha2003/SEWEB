@@ -12,13 +12,15 @@ import {
   SwordsIcon,
   ChevronRightIcon,
   MedalIcon,
-  Loader2Icon
+  Loader2Icon,
+  XIcon,
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Table } from '../components/ui/Table';
+import { ShootingGame } from '../components/games/ShootingGame';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 import missionService from '../services/missionService';
 import userService from '../services/userService';
@@ -105,6 +107,7 @@ export function GamificationPage() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(null);
+  const [activeGame, setActiveGame] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -185,6 +188,22 @@ export function GamificationPage() {
 
   return (
     <DashboardLayout sidebarItems={studentSidebarItems}>
+      {activeGame ? (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
+            <button
+              onClick={() => setActiveGame(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+            >
+              <XIcon className="w-6 h-6" />
+            </button>
+            <div className="p-4">
+              <ShootingGame />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="relative overflow-hidden mb-8 p-8 rounded-3xl bg-slate-900 text-white shadow-2xl">
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-600 opacity-20 blur-[100px] rounded-full"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-purple-600 opacity-20 blur-[80px] rounded-full"></div>
@@ -261,7 +280,43 @@ export function GamificationPage() {
             </div>
           </Card>
 
-          {/* Daily Missions */}
+          {/* Play Games Section */}
+          <Card className="p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-slate-900">Available Games</h2>
+              <Badge className="bg-blue-100 text-blue-600 font-bold">NEW</Badge>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {/* Shooting Game Card */}
+              <div className="group p-6 rounded-2xl border border-slate-100 bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-lg hover:border-blue-300 transition-all duration-300 cursor-pointer" onClick={() => setActiveGame('shooting')}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                    <TargetIcon className="w-6 h-6" />
+                  </div>
+                  <Badge variant="success" className="text-[10px]">PLAY</Badge>
+                </div>
+                <h4 className="font-extrabold text-slate-900 mb-2">Shooting Game</h4>
+                <p className="text-sm text-slate-600 mb-4 leading-relaxed">Test your English vocabulary by shooting targets with correct translations. Earn points and improve your language skills!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">+50 XP per round</span>
+                  <ChevronRightIcon className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                </div>
+              </div>
+
+              {/* Coming Soon Card */}
+              <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50 opacity-60">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-300 flex items-center justify-center text-white shadow-lg">
+                    <StarIcon className="w-6 h-6" />
+                  </div>
+                  <Badge className="bg-slate-200 text-slate-600 text-[10px]">COMING SOON</Badge>
+                </div>
+                <h4 className="font-extrabold text-slate-700 mb-2">Quiz Master</h4>
+                <p className="text-sm text-slate-500 mb-4 leading-relaxed">Master English through challenging quizzes with different difficulty levels.</p>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">+100 XP per quiz</div>
+              </div>
+            </div>
+          </Card>
           <Card className="p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-black text-slate-900">Daily Missions</h2>
@@ -365,7 +420,9 @@ export function GamificationPage() {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-xl">
+            <button 
+              onClick={() => setActiveGame('shooting')}
+              className="w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-xl">
               <SwordsIcon className="w-5 h-5" /> START ENGLISH BATTLE
             </button>
           </Card>
