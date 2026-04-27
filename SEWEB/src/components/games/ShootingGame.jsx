@@ -10,6 +10,10 @@ export function ShootingGame() {
     const initializeGame = () => {
       if (!gameContainerRef.current) return;
 
+      // Get viewport dimensions
+      const gameWidth = window.innerWidth;
+      const gameHeight = window.innerHeight;
+
       // Create Phaser Scene
       class GameScene extends Phaser.Scene {
         constructor() {
@@ -21,8 +25,8 @@ export function ShootingGame() {
           this.correctAnswer = null;
           this.options = [];
           this.targets = [];
-          this.gameWidth = 1200;
-          this.gameHeight = 700;
+          this.gameWidth = gameWidth;
+          this.gameHeight = gameHeight;
           this.allGameData = [];
           this.elapsedTime = 0;
         }
@@ -48,8 +52,8 @@ export function ShootingGame() {
         createLauncher() {
           // Create semi-circle launcher at bottom center
           const launcherX = this.gameWidth / 2;
-          const launcherY = this.gameHeight - 40;
-          const launcherRadius = 50;
+          const launcherY = this.gameHeight - 60;
+          const launcherRadius = Math.min(60, this.gameWidth * 0.05);
 
           // Semi-circle using arc graphics
           const launcherGraphics = this.make.graphics({ x: 0, y: 0, add: false });
@@ -67,7 +71,7 @@ export function ShootingGame() {
           this.launcher.setDepth(5);
 
           // Store launcher position for bullet origin
-          this.launcherCenter = { x: launcherX, y: launcherY - 20 };
+          this.launcherCenter = { x: launcherX, y: launcherY - 25 };
         }
 
         async create() {
@@ -120,8 +124,9 @@ export function ShootingGame() {
           this.createStars();
 
           // Create score text - top left
+          const fontSize = Math.max(18, Math.min(32, this.gameWidth * 0.025));
           this.scoreText = this.add.text(30, 30, 'Score: 0', {
-            fontSize: '28px',
+            fontSize: `${fontSize}px`,
             fill: '#ffffff',
             fontFamily: 'Arial Black',
             fontStyle: 'bold',
@@ -130,7 +135,7 @@ export function ShootingGame() {
 
           // Create correct text - top right
           this.correctText = this.add.text(this.gameWidth - 30, 30, 'Correct: 0', {
-            fontSize: '28px',
+            fontSize: `${fontSize}px`,
             fill: '#22c55e',
             fontFamily: 'Arial Black',
             fontStyle: 'bold',
@@ -140,8 +145,8 @@ export function ShootingGame() {
           this.correctText.setDepth(10);
 
           // Create wrong text - top right, below correct
-          this.wrongText = this.add.text(this.gameWidth - 30, 70, 'Wrong: 0', {
-            fontSize: '28px',
+          this.wrongText = this.add.text(this.gameWidth - 30, 30 + fontSize + 10, 'Wrong: 0', {
+            fontSize: `${fontSize}px`,
             fill: '#ef4444',
             fontFamily: 'Arial Black',
             fontStyle: 'bold',
@@ -152,8 +157,8 @@ export function ShootingGame() {
 
           // Create launcher with English word
           this.createLauncher();
-          this.wordText = this.add.text(this.gameWidth / 2, this.gameHeight - 40, '', {
-            fontSize: '20px',
+          this.wordText = this.add.text(this.gameWidth / 2, this.gameHeight - 60, '', {
+            fontSize: `${Math.max(16, fontSize - 8)}px`,
             fill: '#ffffff',
             fontFamily: 'Arial Black',
             fontStyle: 'bold',
@@ -254,7 +259,10 @@ export function ShootingGame() {
         }
 
         handleClick(pointer) {
-          // Find clicked target
+          // Log click for debugging
+          console.log('Click detected at:', pointer.x, pointer.y);
+          
+          // Find clicked target - improved detection
           const clickedTarget = this.targets.find((target) => {
             const distance = Phaser.Math.Distance.Between(
               pointer.x,
@@ -262,12 +270,15 @@ export function ShootingGame() {
               target.x,
               target.y
             );
+            console.log(`Target at (${target.x}, ${target.y}), distance: ${distance}, radius: ${target.radius}`);
             return distance < target.radius;
           });
 
           if (clickedTarget) {
-            // Shoot bullet
+            console.log('Target clicked:', clickedTarget.meaning);
             this.shootBullet(clickedTarget);
+          } else {
+            console.log('No target hit');
           }
         }
 
@@ -384,8 +395,8 @@ export function ShootingGame() {
       // Create Phaser game instance
       const config = {
         type: Phaser.AUTO,
-        width: 1200,
-        height: 700,
+        width: gameWidth,
+        height: gameHeight,
         parent: gameContainerRef.current,
         scene: new GameScene(),
         physics: {
@@ -417,19 +428,21 @@ export function ShootingGame() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 p-4">
-      <h1 className="text-5xl font-bold mb-2 text-center text-white">Shooting Game</h1>
-      <p className="text-xl text-gray-300 mb-6 text-center">Click on the target that matches the English word!</p>
+    <div className="w-screen h-screen bg-gray-900 flex flex-col">
+      <div className="absolute top-4 left-4 right-4 z-20">
+        <h1 className="text-3xl font-bold text-white">Shooting Game</h1>
+        <p className="text-sm text-gray-300 mt-1">Click on the target that matches the English word!</p>
+      </div>
       <div
         ref={gameContainerRef}
-        className="rounded-xl shadow-2xl border-4 border-blue-500 overflow-hidden"
+        className="flex-1 w-full h-full"
         style={{
-          width: '1200px',
-          height: '700px',
+          width: '100vw',
+          height: '100vh',
         }}
       ></div>
-      <div className="mt-6 text-center">
-        <p className="text-lg text-gray-400">
+      <div className="absolute bottom-4 left-0 right-0 text-center">
+        <p className="text-sm text-gray-400">
           🎯 Select the correct Sinhala translation • ⭐ Each correct answer = 10 points
         </p>
       </div>
