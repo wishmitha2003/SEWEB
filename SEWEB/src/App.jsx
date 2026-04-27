@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -24,7 +24,7 @@ import { ContactPage } from './pages/ContactPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { VocabularyPage } from './pages/VocabularyPage';
-import { useLocation } from 'react-router-dom';
+import { ShootingGameTest } from './pages/ShootingGameTest';
 
 import { LoadingProvider } from './context/LoadingContext';
 
@@ -38,40 +38,53 @@ function ScrollToTop() {
   return null;
 }
 
+function AppLayout() {
+  const location = useLocation();
+  const isFullScreenGame = location.pathname === '/shooting-game-test';
+
+  return (
+    <>
+      {!isFullScreenGame && <Navbar />}
+      <div className={isFullScreenGame ? '' : 'pt-16'}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/role-select" element={<RoleSelectPage />} />
+          <Route path="/student" element={<StudentDashboard />} />
+          <Route path="/student/settings" element={<SettingsPage />} />
+          <Route path="/student/payments" element={<PaymentsPage />} />
+          <Route path="/teacher" element={<TeacherDashboard />} />
+          <Route path="/teacher/profile" element={<TeacherDashboard />} />
+          <Route path="/teacher/classes" element={<TeacherClasses />} />
+          <Route path="/teacher/assignments" element={<TeacherAssignments />} />
+          <Route path="/teacher/students" element={<TeacherStudents />} />
+          <Route path="/teacher/schedule" element={<TeacherSchedule />} />
+          <Route path="/admin/*" element={<AdminPanel />} />
+          <Route path="/courier" element={<CourierDashboard />} />
+          <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/classes" element={<ClassesPage />} />
+          <Route path="/materials" element={<MaterialsPage />} />
+          <Route path="/gamification" element={<GamificationPage />} />
+          <Route path="/shooting-game-test" element={<ShootingGameTest />} />
+          <Route path="/map" element={<MapSection />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/vocabulary" element={<VocabularyPage />} />
+        </Routes>
+      </div>
+    </>
+  );
+}
+
 export function App() {
   return (
     <BrowserRouter>
       <LoadingProvider>
         <ScrollToTop />
-        <Navbar />
-        <div className="pt-16">
-          <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/role-select" element={<RoleSelectPage />} />
-        <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/settings" element={<SettingsPage />} />
-        <Route path="/student/payments" element={<PaymentsPage />} />
-        <Route path="/teacher" element={<TeacherDashboard />} />
-        <Route path="/teacher/profile" element={<TeacherDashboard />} />
-        <Route path="/teacher/classes" element={<TeacherClasses />} />
-        <Route path="/teacher/assignments" element={<TeacherAssignments />} />
-        <Route path="/teacher/students" element={<TeacherStudents />} />
-        <Route path="/teacher/schedule" element={<TeacherSchedule />} />
-        <Route path="/admin/*" element={<AdminPanel />} />
-        <Route path="/courier" element={<CourierDashboard />} />
-        <Route path="/resources" element={<ResourcesPage />} />
-        <Route path="/classes" element={<ClassesPage />} />
-        <Route path="/materials" element={<MaterialsPage />} />
-        <Route path="/gamification" element={<GamificationPage />} />
-        <Route path="/map" element={<MapSection />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/vocabulary" element={<VocabularyPage />} />
-      </Routes>
-      </div>
-    </LoadingProvider>
-  </BrowserRouter>);
-  }
+        <AppLayout />
+      </LoadingProvider>
+    </BrowserRouter>
+  );
+}
