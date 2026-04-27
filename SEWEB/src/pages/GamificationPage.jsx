@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ZapIcon,
   TrophyIcon,
@@ -11,7 +11,8 @@ import {
   TrendingUpIcon,
   SwordsIcon,
   ChevronRightIcon,
-  MedalIcon
+  MedalIcon,
+  Loader2Icon
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
@@ -19,19 +20,10 @@ import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Table } from '../components/ui/Table';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
+import missionService from '../services/missionService';
+import userService from '../services/userService';
 
-const leaderboardData = [
-  { rank: 1, name: 'Kasun Silva', xp: 4200, level: 'Platinum', badges: 12, isCurrentUser: true },
-  { rank: 2, name: 'Amaya Perera', xp: 3850, level: 'Platinum', badges: 10, isCurrentUser: false },
-  { rank: 3, name: 'Dinesh Kumar', xp: 3600, level: 'Gold', badges: 9, isCurrentUser: false },
-  { rank: 4, name: 'Sachini Fernando', xp: 3200, level: 'Gold', badges: 8, isCurrentUser: false },
-  { rank: 5, name: 'Ruwan Jayawardena', xp: 2900, level: 'Gold', badges: 7, isCurrentUser: false },
-  { rank: 6, name: 'Nimali Dias', xp: 2700, level: 'Silver', badges: 6, isCurrentUser: false },
-  { rank: 7, name: 'Tharindu Perera', xp: 2450, level: 'Silver', badges: 5, isCurrentUser: false },
-  { rank: 8, name: 'Ishara Silva', xp: 2200, level: 'Silver', badges: 5, isCurrentUser: false },
-  { rank: 9, name: 'Chaminda Raj', xp: 2000, level: 'Bronze', badges: 4, isCurrentUser: false },
-  { rank: 10, name: 'Malini Fernando', xp: 1800, level: 'Bronze', badges: 3, isCurrentUser: false },
-];
+
 
 const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -108,6 +100,89 @@ const leaderboardColumns = [
 ];
 
 export function GamificationPage() {
+  const [userData, setUserData] = useState(null);
+  const [missions, setMissions] = useState([]);
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [user, dailyMissions, leaderboardUsers] = await Promise.all([
+        userService.getCurrentUser(),
+        missionService.getDailyMissions(),
+        userService.getLeaderboard()
+      ]);
+      setUserData(user);
+      setMissions(dailyMissions);
+      
+      const formattedLeaderboard = (leaderboardUsers || []).map((lbUser, index) => {
+        const xp = lbUser.xp || 0;
+        return {
+          rank: index + 1,
+          name: lbUser.fullName || lbUser.username,
+          xp: xp,
+          level: xp >= 3000 ? 'Platinum' : xp >= 2000 ? 'Gold' : xp >= 1000 ? 'Silver' : 'Bronze',
+          badges: Math.floor(xp / 500) + 1,
+          isCurrentUser: lbUser.username === user?.username
+        };
+      });
+      setLeaderboardData(formattedLeaderboard);
+    } catch (error) {
+      console.error('Error fetching gamification data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClaim = async (missionId) => {
+    try {
+      setClaiming(missionId);
+      await missionService.claimReward(missionId);
+      await fetchData();
+    } catch (error) {
+      console.error('Error claiming reward:', error);
+    } finally {
+      setClaiming(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout sidebarItems={studentSidebarItems}>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2Icon className="w-12 h-12 text-blue-500 animate-spin" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const missionColors = {
+    VOCAB: 'bg-blue-500',
+    STREAK: 'bg-emerald-500',
+    QUIZ: 'bg-purple-500',
+    GENERAL: 'bg-slate-500'
+  };
+
+  const missionIcons = {
+    VOCAB: <StarIcon className="w-6 h-6" />,
+    STREAK: <FlameIcon className="w-6 h-6" />,
+    QUIZ: <TargetIcon className="w-6 h-6" />,
+    GENERAL: <ZapIcon className="w-6 h-6" />
+  };
+
+  // Logic to determine level and progress
+  const totalXp = userData?.xp || 0;
+  const currentTier = totalXp >= 3000 ? 'PLATINUM' : totalXp >= 2000 ? 'GOLD' : totalXp >= 1000 ? 'SILVER' : 'BRONZE';
+  const nextTierXp = totalXp >= 3000 ? 5000 : totalXp >= 2000 ? 3000 : totalXp >= 1000 ? 2000 : 1000;
+  const tierMinXp = totalXp >= 3000 ? 3000 : totalXp >= 2000 ? 2000 : totalXp >= 1000 ? 1000 : 0;
+  const progressValue = totalXp - tierMinXp;
+  const progressMax = nextTierXp - tierMinXp;
+
   return (
     <DashboardLayout sidebarItems={studentSidebarItems}>
       <div className="relative overflow-hidden mb-8 p-8 rounded-3xl bg-slate-900 text-white shadow-2xl">
@@ -116,28 +191,28 @@ export function GamificationPage() {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-black tracking-tight mb-2">Challenge Zone</h1>
-            <p className="text-slate-400 max-w-md text-lg font-medium leading-tight">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">Challenge Zone</h1>
+            <p className="text-slate-400 max-w-md text-base md:text-lg font-medium leading-tight">
               Fuel your competitive spirit. Level up, earn badges, and dominate the leaderboard!
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex items-center gap-4 shadow-xl">
               <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
                 <FlameIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-black">7 Days</p>
+                <p className="text-2xl font-black">{userData?.streak || 0} Days</p>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Current Streak</p>
               </div>
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex items-center gap-4 shadow-xl">
               <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <MedalIcon className="w-6 h-6 text-white" />
+                <ZapIcon className="w-6 h-6 text-white fill-white" />
               </div>
               <div>
-                <p className="text-2xl font-black">#1</p>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">World Rank</p>
+                <p className="text-2xl font-black">{totalXp.toLocaleString()}</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Current XP</p>
               </div>
             </div>
           </div>
@@ -149,18 +224,20 @@ export function GamificationPage() {
         <div className="lg:col-span-8 space-y-6">
           {/* XP Progress Card */}
           <Card className="p-8 border-none shadow-xl bg-gradient-to-br from-white to-blue-50">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-8">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 mb-1">XP Mastery</h2>
                 <div className="flex items-center gap-2">
-                  <Badge variant="info" className="bg-blue-100 text-blue-700 font-bold border-blue-200">GOLD TIER</Badge>
-                  <span className="text-sm font-bold text-slate-400 italic">550 XP to Platinum</span>
+                  <Badge variant={currentTier === 'PLATINUM' ? 'info' : currentTier === 'GOLD' ? 'warning' : 'success'} className="font-bold">{currentTier} TIER</Badge>
+                  {totalXp < 5000 && (
+                    <span className="text-sm font-bold text-slate-400 italic">{nextTierXp - totalXp} XP to Next Tier</span>
+                  )}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="flex items-center justify-end gap-2 mb-1">
+              <div className="sm:text-right">
+                <div className="flex items-center sm:justify-end gap-2 mb-1">
                   <ZapIcon className="w-6 h-6 text-amber-500 fill-amber-500" />
-                  <span className="text-4xl font-black text-slate-900">2,450</span>
+                  <span className="text-4xl font-black text-slate-900">{totalXp.toLocaleString()}</span>
                 </div>
                 <p className="text-sm font-bold text-slate-400">TOTAL LIFETIME POINTS</p>
               </div>
@@ -168,10 +245,10 @@ export function GamificationPage() {
             
             <div className="space-y-4">
               <div className="flex justify-between text-xs font-black text-slate-400 uppercase tracking-widest">
-                <span>Gold (2,000 XP)</span>
-                <span>Platinum (3,000 XP)</span>
+                <span>{currentTier} ({tierMinXp.toLocaleString()} XP)</span>
+                <span>NEXT ({nextTierXp.toLocaleString()} XP)</span>
               </div>
-              <ProgressBar value={2450 - 2000} max={1000} size="lg" color="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
+              <ProgressBar value={progressValue} max={progressMax} size="lg" color="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
               <div className="flex justify-between items-center bg-slate-100/50 p-4 rounded-2xl border border-slate-100">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -193,38 +270,54 @@ export function GamificationPage() {
               </span>
             </div>
             <div className="space-y-4">
-              {[
-                { title: 'Vocab Master', task: 'Learn 10 new words today', reward: '50 XP', progress: 80, color: 'bg-blue-500' },
-                { title: 'Streak Keeper', task: 'Complete one lesson', reward: '30 XP', progress: 100, color: 'bg-emerald-500' },
-                { title: 'Grammar Guru', task: 'Pass a Grammar quiz with 90%+', reward: '100 XP', progress: 0, color: 'bg-purple-500' },
-              ].map((m, i) => (
-                <div key={i} className="group p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl ${m.color} flex items-center justify-center text-white shadow-lg shadow-${m.color.split('-')[1]}-500/20 group-hover:scale-110 transition-transform`}>
-                        {i === 0 ? <StarIcon className="w-6 h-6" /> : i === 1 ? <FlameIcon className="w-6 h-6" /> : <TargetIcon className="w-6 h-6" />}
+              {missions.length === 0 && (
+                <div className="text-center py-10 text-slate-400 font-bold">No missions available for today.</div>
+              )}
+              {missions.map((m, i) => {
+                const color = missionColors[m.type] || missionColors.GENERAL;
+                const icon = missionIcons[m.type] || missionIcons.GENERAL;
+                const progressPercent = Math.min(100, Math.round((m.progress / m.goal) * 100));
+
+                return (
+                  <div key={m.id} className="group p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110`}>
+                          {icon}
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 leading-tight">{m.title}</h4>
+                          <p className="text-xs font-bold text-slate-400">{m.task}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 leading-tight">{m.title}</h4>
-                        <p className="text-xs font-bold text-slate-400">{m.task}</p>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-blue-600 uppercase mb-1">+{m.rewardXp} XP</p>
+                        {m.rewardClaimed ? (
+                          <Badge variant="success" className="rounded-full px-3 text-[10px]">CLAIMED</Badge>
+                        ) : m.completed ? (
+                          <button 
+                            onClick={() => handleClaim(m.id)}
+                            disabled={claiming === m.id}
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black py-1 px-3 rounded-full transition-colors flex items-center gap-1"
+                          >
+                            {claiming === m.id ? <Loader2Icon className="w-3 h-3 animate-spin" /> : 'CLAIM'}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{progressPercent}% DONE</span>
+                        )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-black text-blue-600 uppercase mb-1">+{m.reward}</p>
-                      {m.progress === 100 ? (
-                        <Badge variant="success" className="rounded-full px-3 text-[10px]">CLAIMED</Badge>
-                      ) : (
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.progress}% DONE</span>
-                      )}
-                    </div>
+                    {!m.completed && (
+                      <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-2">
+                        <div 
+                          className={`h-full ${color} transition-all duration-700`} 
+                          style={{ width: `${progressPercent}%` }}
+                        ></div>
+                      </div>
+                    )}
                   </div>
-                  {m.progress < 100 && (
-                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-2">
-                      <div className={`h-full ${m.color} transition-all duration-700`} style={{ width: `${m.progress}%` }}></div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
         </div>
@@ -239,10 +332,10 @@ export function GamificationPage() {
                 <TrophyIcon className="w-12 h-12 text-white fill-white/20" />
               </div>
               <p className="text-xs font-black text-amber-100 uppercase tracking-[0.2em] mb-1">Current Level</p>
-              <h3 className="text-4xl font-black mb-2">GOLD</h3>
+              <h3 className="text-4xl font-black mb-2">{currentTier}</h3>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-black/20 rounded-full backdrop-blur-sm mt-4">
                 <TrendingUpIcon className="w-4 h-4" />
-                <span className="text-sm font-black">TOP 3% WORLDWIDE</span>
+                <span className="text-sm font-black">KEEP IT UP!</span>
               </div>
             </div>
           </Card>
@@ -301,4 +394,4 @@ export function GamificationPage() {
       </div>
     </DashboardLayout>
   );
-}
+}

@@ -7,7 +7,8 @@ import {
   DollarSignIcon,
   TrophyIcon,
   SettingsIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  FolderIcon
 } from 'lucide-react';
 
 export const adminSidebarItems = [
@@ -17,29 +18,35 @@ export const adminSidebarItems = [
     path: '/admin'
   },
   {
-    icon: <UsersIcon className="w-4 h-4" />,
-    label: 'Users',
-    path: '/admin/users'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Classes',
-    path: '/admin/classes'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Materials',
-    path: '/admin/materials'
+    icon: <FolderIcon className="w-4 h-4" />,
+    label: 'Management',
+    subItems: [
+      {
+        icon: <UsersIcon className="w-4 h-4" />,
+        label: 'Users',
+        path: '/admin/users'
+      },
+      {
+        icon: <BookOpenIcon className="w-4 h-4" />,
+        label: 'Classes',
+        path: '/admin/classes'
+      },
+      {
+        icon: <BookOpenIcon className="w-4 h-4" />,
+        label: 'Materials',
+        path: '/admin/materials'
+      },
+      {
+        icon: <BuildingIcon className="w-4 h-4" />,
+        label: 'Branches',
+        path: '/admin/branches'
+      }
+    ]
   },
   {
     icon: <BookOpenIcon className="w-4 h-4" />,
     label: 'Vocabulary',
     path: '/vocabulary'
-  },
-  {
-    icon: <BuildingIcon className="w-4 h-4" />,
-    label: 'Branches',
-    path: '/admin/branches'
   },
   {
     icon: <DollarSignIcon className="w-4 h-4" />,
@@ -53,8 +60,8 @@ export const adminSidebarItems = [
   },
   {
     icon: <TrophyIcon className="w-4 h-4" />,
-    label: 'Leaderboard',
-    path: '/admin/leaderboard'
+    label: 'Challenge Zone',
+    path: '/admin/gamification'
   },
   {
     icon: <SettingsIcon className="w-4 h-4" />,
@@ -62,3 +69,4 @@ export const adminSidebarItems = [
     path: '/admin/settings'
   }
 ];
+

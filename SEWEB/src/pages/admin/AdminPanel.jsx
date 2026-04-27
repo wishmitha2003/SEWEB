@@ -12,7 +12,12 @@ import {
   TrashIcon,
   EyeIcon,
   CheckCircleIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  StarIcon,
+  FlameIcon,
+  TargetIcon,
+  ZapIcon,
+  MedalIcon
 } from
   'lucide-react';
 import {
@@ -40,6 +45,7 @@ import { getClasses as fetchClassesFromApi, createClass as createClassInApi, del
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
 import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi, uploadBranchLogo } from '../../services/branchService';
 import { getAllPayments, getPendingPayments, approvePayment, rejectPayment } from '../../services/paymentService';
+import missionService from '../../services/missionService';
 
 
 const revenueData = [
@@ -1336,24 +1342,81 @@ export function AdminPanel() {
     );
   };
 
-  const renderLeaderboard = () => (
-    <>
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-slate-900">Gamification Leaderboard</h1>
-        <p className="text-slate-500 mt-1">Top performing students across all branches.</p>
-      </div>
-      <Card>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-slate-900">Top Students</h2>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline">This Month</Button>
-            <Button size="sm" variant="ghost">All Time</Button>
+  const renderGamification = () => {
+    const adminMissions = [
+      { id: 1, title: 'Vocab Master', task: 'Learn 10 new words today', rewardXp: 50, type: 'VOCAB' },
+      { id: 2, title: 'Streak Keeper', task: 'Complete one lesson', rewardXp: 30, type: 'STREAK' },
+      { id: 3, title: 'Grammar Guru', task: 'Pass a Grammar quiz with 90%+', rewardXp: 100, type: 'QUIZ' }
+    ];
+
+    const missionColors = {
+      VOCAB: 'bg-blue-500',
+      STREAK: 'bg-emerald-500',
+      QUIZ: 'bg-purple-500',
+      GENERAL: 'bg-slate-500'
+    };
+
+    const missionIcons = {
+      VOCAB: <StarIcon className="w-6 h-6" />,
+      STREAK: <FlameIcon className="w-6 h-6" />,
+      QUIZ: <TargetIcon className="w-6 h-6" />,
+      GENERAL: <ZapIcon className="w-6 h-6" />
+    };
+
+    return (
+      <>
+        <div className="mb-8">
+          <h1 className="text-2xl font-extrabold text-slate-900">Challenge Zone</h1>
+          <p className="text-slate-500 mt-1">Monitor gamification engagement and top performing students.</p>
+        </div>
+        
+        <div className="grid lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
+            <Card>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-5">
+                <h2 className="text-lg font-bold text-slate-900">Top Students Leaderboard</h2>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">This Month</Button>
+                  <Button size="sm" variant="ghost">All Time</Button>
+                </div>
+              </div>
+              <Table columns={leaderboardColumns} data={leaderboardData} />
+            </Card>
+          </div>
+
+          <div className="lg:col-span-4">
+            <Card>
+              <h2 className="text-lg font-bold text-slate-900 mb-5">Global Daily Missions</h2>
+              <div className="space-y-4">
+                {adminMissions.map((m) => {
+                  const color = missionColors[m.type] || missionColors.GENERAL;
+                  const icon = missionIcons[m.type] || missionIcons.GENERAL;
+
+                  return (
+                    <div key={m.id} className="group p-5 rounded-2xl border border-slate-100 bg-slate-50 transition-all duration-300">
+                      <div className="flex items-center gap-4 mb-3">
+                        <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center text-white shadow-lg`}>
+                          {icon}
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 leading-tight">{m.title}</h4>
+                          <p className="text-xs font-bold text-slate-400">{m.task}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+                        <Badge variant="info" className="text-[10px]">Type: {m.type}</Badge>
+                        <p className="text-xs font-black text-blue-600 uppercase">+{m.rewardXp} XP</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
           </div>
         </div>
-        <Table columns={leaderboardColumns} data={leaderboardData} />
-      </Card>
-    </>
-  );
+      </>
+    );
+  };
 
   const renderSettings = () => (
     <>
@@ -1410,7 +1473,7 @@ export function AdminPanel() {
       case '/admin/branches': return renderBranches();
       case '/admin/revenue': return renderRevenue();
       case '/admin/payments': return renderPayments();
-      case '/admin/leaderboard': return renderLeaderboard();
+      case '/admin/gamification': return renderGamification();
       case '/admin/settings': return renderSettings();
       default: return renderDashboard();
     }
