@@ -8,10 +8,12 @@ import { Button } from '../components/ui/Button';
 import { api } from '../services/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
+import { useToast } from '../components/ui/Toast';
 
 export function ProfilePage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+  const toast = useToast();
 
   const [userData, setUserData] = useState({
     fullName: '',
@@ -125,9 +127,9 @@ export function ProfilePage() {
         profileImage
       });
 
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      setError(err.message || 'Failed to update profile. Please try again.');
+      toast.error(err.message || 'Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -169,7 +171,12 @@ export function ProfilePage() {
             <div className="relative mb-6 mt-4">
               <div className="w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#78bdeb] flex items-center justify-center relative group">
                 {profileImage ? (
-                  <img src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `http://localhost:8082${profileImage}`} alt="Profile" className="w-full h-full object-cover" />
+                  <img 
+                    src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `${profileImage}`} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover" 
+                    onError={() => setProfileImage(null)}
+                  />
                 ) : (
                   <span className="text-6xl font-black text-white">{getInitials(userData.fullName)}</span>
                 )}

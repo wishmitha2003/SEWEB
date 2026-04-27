@@ -9,7 +9,10 @@ import {
   TrophyIcon,
   SettingsIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  EyeIcon,
+  CheckCircleIcon,
+  CreditCardIcon
 } from
   'lucide-react';
 import {
@@ -29,53 +32,15 @@ import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { Modal } from '../../components/ui/Modal';
 import { FormInput } from '../../components/ui/FormInput';
+import { adminSidebarItems } from '../../config/adminSidebarItems';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { getUsers as fetchUsersFromApi, deleteUser as deleteUserFromApi } from '../../services/userService';
 import { getClasses as fetchClassesFromApi, createClass as createClassInApi, deleteClass as deleteClassInApi } from '../../services/classService';
 import { getMaterials as fetchMaterialsFromApi, createMaterial as createMaterialInApi, deleteMaterial as deleteMaterialInApi } from '../../services/materialService';
-import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi } from '../../services/branchService';
-const sidebarItems = [
-  {
-    icon: <LayoutDashboardIcon className="w-4 h-4" />,
-    label: 'Dashboard',
-    path: '/admin'
-  },
-  {
-    icon: <UsersIcon className="w-4 h-4" />,
-    label: 'Users',
-    path: '/admin/users'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Classes',
-    path: '/admin/classes'
-  },
-  {
-    icon: <BookOpenIcon className="w-4 h-4" />,
-    label: 'Materials',
-    path: '/admin/materials'
-  },
-  {
-    icon: <BuildingIcon className="w-4 h-4" />,
-    label: 'Branches',
-    path: '/admin/branches'
-  },
-  {
-    icon: <DollarSignIcon className="w-4 h-4" />,
-    label: 'Revenue',
-    path: '/admin/revenue'
-  },
-  {
-    icon: <TrophyIcon className="w-4 h-4" />,
-    label: 'Leaderboard',
-    path: '/admin/leaderboard'
-  },
-  {
-    icon: <SettingsIcon className="w-4 h-4" />,
-    label: 'Settings',
-    path: '/admin/settings'
-  }];
+import { getBranches as fetchBranchesFromApi, createBranch as createBranchInApi, deleteBranch as deleteBranchInApi, updateBranch as updateBranchInApi, uploadBranchLogo } from '../../services/branchService';
+import { getAllPayments, getPendingPayments, approvePayment, rejectPayment } from '../../services/paymentService';
+
 
 const revenueData = [
   {
@@ -284,10 +249,28 @@ const leaderboardColumns = [
     header: 'Badges'
   }];
 
+// Helper to convert relative slip URL to full URL
+const getFullSlipUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // Convert relative path like /uploads/payments/filename.jpg to full URL using proxy
+  return url.startsWith('/') ? url : `/${url}`;
+};
+
 export function AdminPanel() {
   const { user } = useAuth();
   const location = useLocation();
   const path = location.pathname;
+
+  const [confirmModal, setConfirmModal] = useState({ open: false, message: '', title: '', onConfirm: null });
+
+  function showConfirm(title, message, onConfirm) {
+    setConfirmModal({ open: true, title, message, onConfirm });
+  }
+
+  function closeConfirm() {
+    setConfirmModal({ open: false, message: '', title: '', onConfirm: null });
+  }
 
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -314,10 +297,112 @@ export function AdminPanel() {
     name: '',
     address: '',
     managerName: '',
-    phone: ''
+    phone: '',
+    locationUrl: '',
+    logoUrl: '',
+    lat: '',
+    lng: ''
   });
+  const [branchLogoFile, setBranchLogoFile] = useState(null);
   const [isEditingBranch, setIsEditingBranch] = useState(false);
   const [currentBranchId, setCurrentBranchId] = useState(null);
+
+  // Payment state
+  const [payments, setPayments] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [paymentsError, setPaymentsError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [actionModal, setActionModal] = useState({ open: false, payment: null, action: '', notes: '' });
+  const [processingAction, setProcessingAction] = useState(false);
+  const [paymentsActiveTab, setPaymentsActiveTab] = useState('pending');
+
+  // Payment helper functions
+  const loadPayments = async (status = null) => {
+    setLoadingPayments(true);
+    setPaymentsError(null);
+    try {
+      const res = await getAllPayments(status);
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      // Log first payment object to see all available fields
+      if (arr.length > 0) {
+        console.log('First payment object keys:', Object.keys(arr[0]));
+        console.log('First payment full object:', JSON.stringify(arr[0], null, 2));
+      }
+      setPayments(arr);
+    } catch (err) {
+      setPaymentsError(err?.message || String(err));
+      setPayments([]);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  const loadPendingPayments = async () => {
+    setLoadingPayments(true);
+    setPaymentsError(null);
+    try {
+      const res = await getPendingPayments();
+      const arr = Array.isArray(res) ? res : (res?.data || []);
+      // Log first payment object to see all available fields
+      if (arr.length > 0) {
+        console.log('First pending payment object keys:', Object.keys(arr[0]));
+        console.log('First pending payment full object:', JSON.stringify(arr[0], null, 2));
+      }
+      setPendingPayments(arr);
+    } catch (err) {
+      setPaymentsError(err?.message || String(err));
+      setPendingPayments([]);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  const handleApprovePayment = async () => {
+    if (!actionModal.payment) return;
+    setProcessingAction(true);
+    try {
+      const paymentId = actionModal.payment.id || actionModal.payment._id;
+      await approvePayment(paymentId, actionModal.notes);
+      setPendingPayments(prev => prev.filter(p => (p.id || p._id) !== paymentId));
+      setPayments(prev => prev.map(p => 
+        (p.id || p._id) === paymentId
+          ? { ...p, status: 'APPROVED', approvedAt: new Date().toISOString(), adminNotes: actionModal.notes }
+          : p
+      ));
+      setActionModal({ open: false, payment: null, action: '', notes: '' });
+      alert('Payment approved successfully!');
+    } catch (err) {
+      alert('Failed to approve payment: ' + (err?.message || String(err)));
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRejectPayment = async () => {
+    if (!actionModal.payment) return;
+    setProcessingAction(true);
+    try {
+      const paymentId = actionModal.payment.id || actionModal.payment._id;
+      await rejectPayment(paymentId, actionModal.notes);
+      setPendingPayments(prev => prev.filter(p => (p.id || p._id) !== paymentId));
+      setPayments(prev => prev.map(p => 
+        (p.id || p._id) === paymentId
+          ? { ...p, status: 'REJECTED', rejectedAt: new Date().toISOString(), adminNotes: actionModal.notes }
+          : p
+      ));
+      setActionModal({ open: false, payment: null, action: '', notes: '' });
+      alert('Payment rejected!');
+    } catch (err) {
+      alert('Failed to reject payment: ' + (err?.message || String(err)));
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  function openActionModal(payment, action) {
+    setActionModal({ open: true, payment, action, notes: '' });
+  }
 
   function isDemo(u) {
     if (!u) return false;
@@ -330,14 +415,21 @@ export function AdminPanel() {
 
   async function handleDeleteUser(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    showConfirm(
+      'Delete User',
+      'Are you sure you want to permanently delete this user? This action cannot be undone.',
+      async () => {
+        try {
+          await deleteUserFromApi(id);
+          setUsers(prev => prev.filter(u => u.id !== id));
+        } catch (err) {
+          alert('Failed to delete user: ' + (err?.message || String(err)));
+        }
+      }
+    );
+    return;
 
-    try {
-      await deleteUserFromApi(id);
-      setUsers(prev => prev.filter(u => u.id !== id));
-    } catch (err) {
-      alert('Failed to delete user: ' + (err?.message || String(err)));
-    }
+
   }
 
   const userColumns = [
@@ -410,6 +502,11 @@ export function AdminPanel() {
       )
     },
     {
+      key: 'fee',
+      header: 'Fee',
+      render: (val) => <span className="font-semibold text-blue-600">LKR {val || 0}</span>
+    },
+    {
       key: 'status',
       header: 'Status',
       render: (val) => <Badge variant={val === 'Active' ? 'success' : 'warning'}>{val}</Badge>
@@ -441,7 +538,8 @@ export function AdminPanel() {
     schedule: '',
     branch: '',
     type: 'online',
-    status: 'Active'
+    status: 'Active',
+    fee: 0
   });
 
   async function loadClasses() {
@@ -472,7 +570,8 @@ export function AdminPanel() {
         schedule: '',
         branch: '',
         type: 'online',
-        status: 'Active'
+        status: 'Active',
+        fee: 0
       });
     } catch (err) {
       alert('Failed to create class: ' + (err?.message || String(err)));
@@ -481,13 +580,18 @@ export function AdminPanel() {
 
   async function handleClassDelete(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this class?')) return;
-    try {
-      await deleteClassInApi(id);
-      setClasses(prev => prev.filter(c => c.id !== id));
-    } catch (err) {
-      alert('Failed to delete class: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Class',
+      'Are you sure you want to permanently delete this class? All associated data will be removed.',
+      async () => {
+        try {
+          await deleteClassInApi(id);
+          setClasses(prev => prev.filter(c => c.id !== id));
+        } catch (err) {
+          alert('Failed to delete class: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   async function loadUsers() {
@@ -554,13 +658,18 @@ export function AdminPanel() {
 
   async function handleDeleteMaterial(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this material?')) return;
-    try {
-      await deleteMaterialInApi(id);
-      setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
-    } catch (err) {
-      alert('Failed to delete material: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Material',
+      'Are you sure you want to permanently delete this material? Students will no longer be able to access it.',
+      async () => {
+        try {
+          await deleteMaterialInApi(id);
+          setMaterials(prev => prev.filter(m => m.id !== id && m._id !== id));
+        } catch (err) {
+          alert('Failed to delete material: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   async function loadBranches() {
@@ -581,12 +690,19 @@ export function AdminPanel() {
   async function handleCreateBranch(e) {
     e.preventDefault();
     try {
+      let saved;
       if (isEditingBranch) {
-        const res = await updateBranchInApi(currentBranchId, newBranch);
-        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? res : b));
+        saved = await updateBranchInApi(currentBranchId, newBranch);
+        setBranches(prev => prev.map(b => (b.id === currentBranchId || b._id === currentBranchId) ? saved : b));
       } else {
-        const res = await createBranchInApi(newBranch);
-        setBranches(prev => [...prev, res]);
+        saved = await createBranchInApi(newBranch);
+        setBranches(prev => [...prev, saved]);
+      }
+      // Upload logo separately if a file was selected
+      if (branchLogoFile) {
+        const savedId = saved.id || saved._id;
+        const updated = await uploadBranchLogo(savedId, branchLogoFile);
+        setBranches(prev => prev.map(b => (b.id === savedId || b._id === savedId) ? updated : b));
       }
       setIsBranchModalOpen(false);
       resetBranchForm();
@@ -600,21 +716,31 @@ export function AdminPanel() {
       name: '',
       address: '',
       managerName: '',
-      phone: ''
+      phone: '',
+      locationUrl: '',
+      logoUrl: '',
+      lat: '',
+      lng: ''
     });
+    setBranchLogoFile(null);
     setIsEditingBranch(false);
     setCurrentBranchId(null);
   }
 
   async function handleDeleteBranch(id) {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this branch?')) return;
-    try {
-      await deleteBranchInApi(id);
-      setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
-    } catch (err) {
-      alert('Failed to delete branch: ' + (err?.message || String(err)));
-    }
+    showConfirm(
+      'Delete Branch',
+      'Are you sure you want to permanently delete this branch? This action cannot be reversed.',
+      async () => {
+        try {
+          await deleteBranchInApi(id);
+          setBranches(prev => prev.filter(b => b.id !== id && b._id !== id));
+        } catch (err) {
+          alert('Failed to delete branch: ' + (err?.message || String(err)));
+        }
+      }
+    );
   }
 
   function openEditBranch(branch) {
@@ -622,8 +748,13 @@ export function AdminPanel() {
       name: branch.name,
       address: branch.address,
       managerName: branch.managerName,
-      phone: branch.phone
+      phone: branch.phone,
+      locationUrl: branch.locationUrl || '',
+      logoUrl: branch.logoUrl || '',
+      lat: branch.lat || '',
+      lng: branch.lng || ''
     });
+    setBranchLogoFile(null);
     setIsEditingBranch(true);
     setCurrentBranchId(branch.id || branch._id);
     setIsBranchModalOpen(true);
@@ -635,8 +766,12 @@ export function AdminPanel() {
       loadClasses();
       loadMaterials();
       loadBranches();
+      if (path === '/admin/payments') {
+        loadPayments(statusFilter);
+        loadPendingPayments();
+      }
     }
-  }, [path]);
+  }, [path, statusFilter]);
 
   const renderStats = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -707,7 +842,7 @@ export function AdminPanel() {
             <h2 className="text-lg font-bold text-slate-900">Active Classes</h2>
             <Button size="sm" variant="ghost">View All</Button>
           </div>
-          <Table columns={classAdminColumns.slice(0, 3)} data={classes.slice(0, 5)} />
+          <Table columns={[classAdminColumns[0], classAdminColumns[1], classAdminColumns[6], classAdminColumns[7]]} data={classes.slice(0, 5)} />
         </Card>
       </div>
     </>
@@ -881,11 +1016,30 @@ export function AdminPanel() {
           
           return (
             <Card key={branch.id || branch._id} className="hover:shadow-lg transition-shadow">
-              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4`}>
-                <BuildingIcon className={`w-6 h-6 ${color.text}`} />
+              <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4 overflow-hidden border border-slate-100`}>
+                {branch.logoUrl ? (
+                  <img 
+                    src={branch.logoUrl.startsWith('http') ? branch.logoUrl : `http://localhost:8082${branch.logoUrl}`} 
+                    alt={branch.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <BuildingIcon className={`w-6 h-6 ${color.text}`} />
+                )}
               </div>
               <h3 className="font-bold text-slate-900 text-lg mb-1">{branch.name}</h3>
-              <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              {branch.locationUrl ? (
+                <a 
+                  href={branch.locationUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4 block"
+                >
+                  {branch.address}
+                </a>
+              ) : (
+                <p className="text-sm text-slate-500 mb-4">{branch.address}</p>
+              )}
               <div className="space-y-2 mb-6">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-400">Manager</span>
@@ -895,6 +1049,12 @@ export function AdminPanel() {
                   <span className="text-slate-400">Phone</span>
                   <span className="font-bold text-slate-700">{branch.phone}</span>
                 </div>
+                {(branch.lat || branch.lng) && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Coordinates</span>
+                    <span className="font-bold text-slate-700">{branch.lat || '0'}, {branch.lng || '0'}</span>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditBranch(branch)}>Edit</Button>
@@ -958,6 +1118,223 @@ export function AdminPanel() {
       </div>
     </>
   );
+
+  const renderPayments = () => {
+    const formatDate = (dateString) => {
+      if (!dateString) return '-';
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    const formatAmount = (amount) => {
+      return `LKR ${parseFloat(amount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`;
+    };
+
+    const getStatusBadge = (status) => {
+      const statusMap = {
+        PENDING: { variant: 'warning', label: 'Pending' },
+        APPROVED: { variant: 'success', label: 'Approved' },
+        REJECTED: { variant: 'danger', label: 'Rejected' }
+      };
+      const { variant, label } = statusMap[status] || { variant: 'info', label: status };
+      return <Badge variant={variant}>{label}</Badge>;
+    };
+
+    const getPaymentTypeLabel = (type) => {
+      const typeMap = {
+        CLASS_FEE: 'Class Fee',
+        OTHER: 'Other'
+      };
+      return typeMap[type] || type;
+    };
+
+    const getPaymentMethodLabel = (method) => {
+      const methodMap = {
+        BANK_TRANSFER: 'Bank Transfer',
+        ONLINE: 'Online Payment',
+        CASH: 'Cash'
+      };
+      return methodMap[method] || method;
+    };
+
+    const pendingColumns = [
+      { key: 'studentName', header: 'Student Name', render: (val, row) => row?.user?.fullName || row?.studentName || val || '-' },
+      { key: 'email', header: 'Email', render: (val, row) => row?.user?.email || row?.email || '-' },
+      { key: 'amount', header: 'Amount', className: 'font-semibold', render: (val) => formatAmount(val) },
+      { key: 'paymentType', header: 'Type', render: (val) => getPaymentTypeLabel(val) },
+      { key: 'className', header: 'Class Name', render: (val) => val || '-' },
+      { key: 'paymentMethod', header: 'Method', render: (val) => getPaymentMethodLabel(val) },
+      { 
+        key: 'slipImage', 
+        header: 'Slip Image', 
+        render: (val, row) => {
+          // Check multiple possible field names for slip image (including slipImageUrl from API)
+          const slipUrl = val || row?.slipImageUrl || row?.slipUrl || row?.slip_image || row?.receiptImage || row?.receipt || row?.image || row?.paymentSlip;
+          const fullSlipUrl = getFullSlipUrl(slipUrl);
+          return fullSlipUrl ? (
+            <button
+              onClick={() => window.open(fullSlipUrl, '_blank')}
+              className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-600 text-xs font-semibold hover:bg-blue-200 transition-colors"
+            >
+              View Slip
+            </button>
+          ) : '-';
+        }
+      },
+      {
+        key: 'actions',
+        header: 'Actions',
+        render: (_, row) => (
+          <div className="flex gap-2">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => openActionModal(row, 'approve')}>
+              Approve
+            </Button>
+            <Button size="sm" variant="danger" onClick={() => openActionModal(row, 'reject')}>
+              Reject
+            </Button>
+          </div>
+        )
+      }
+    ];
+
+    const allPaymentsColumns = [
+      { key: 'studentName', header: 'Student Name', render: (val, row) => row?.user?.fullName || row?.studentName || val || '-' },
+      { key: 'email', header: 'Email', render: (val, row) => row?.user?.email || row?.email || '-' },
+      { key: 'amount', header: 'Amount', className: 'font-semibold', render: (val) => formatAmount(val) },
+      { key: 'paymentType', header: 'Type', render: (val) => getPaymentTypeLabel(val) },
+      { key: 'className', header: 'Class Name', render: (val) => val || '-' },
+      { key: 'paymentMethod', header: 'Method', render: (val) => getPaymentMethodLabel(val) },
+      { key: 'status', header: 'Status', render: (val) => getStatusBadge(val) },
+      { key: 'createdAt', header: 'Submitted', render: (val) => formatDate(val) },
+      { 
+        key: 'approvedAt', 
+        header: 'Processed', 
+        render: (val, row) => row.status === 'APPROVED' || row.status === 'REJECTED' ? formatDate(val || row.updatedAt) : '-'
+      },
+      { 
+        key: 'adminNotes', 
+        header: 'Admin Notes', 
+        render: (val) => val || '-'
+      },
+      { 
+        key: 'slipImage', 
+        header: 'Slip', 
+        render: (val, row) => {
+          // Check multiple possible field names for slip image (including slipImageUrl from API)
+          const slipUrl = val || row?.slipImageUrl || row?.slipUrl || row?.slip_image || row?.receiptImage || row?.receipt || row?.image || row?.paymentSlip;
+          const fullSlipUrl = getFullSlipUrl(slipUrl);
+          return fullSlipUrl ? (
+            <button
+              onClick={() => window.open(fullSlipUrl, '_blank')}
+              className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+            >
+              <EyeIcon className="w-4 h-4" />
+            </button>
+          ) : '-';
+        }
+      }
+    ];
+
+    return (
+      <>
+        <div className="mb-8">
+          <h1 className="text-2xl font-extrabold text-slate-900">Payment Management</h1>
+          <p className="text-slate-500 mt-1">Review and process student payment submissions.</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setPaymentsActiveTab('pending')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              paymentsActiveTab === 'pending'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            Pending Payments ({pendingPayments.length})
+          </button>
+          <button
+            onClick={() => setPaymentsActiveTab('all')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              paymentsActiveTab === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            All Payments
+          </button>
+        </div>
+
+        {paymentsError && (
+          <div className="p-4 mb-4 rounded bg-red-50 text-red-700">{paymentsError}</div>
+        )}
+
+        {loadingPayments ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <>
+            {paymentsActiveTab === 'pending' && (
+              <Card>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 mb-1">Pending Payments</h2>
+                    <p className="text-sm text-slate-500">Payments waiting for approval</p>
+                  </div>
+                </div>
+                {pendingPayments.length > 0 ? (
+                  <Table columns={pendingColumns} data={pendingPayments} />
+                ) : (
+                  <div className="text-center py-12">
+                    <CheckCircleIcon className="w-12 h-12 text-emerald-300 mx-auto mb-3" />
+                    <p className="text-slate-500">No pending payments</p>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {paymentsActiveTab === 'all' && (
+              <Card>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 mb-1">All Payments</h2>
+                    <p className="text-sm text-slate-500">Complete payment history</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                    >
+                      <option value="">All Status</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="APPROVED">Approved</option>
+                      <option value="REJECTED">Rejected</option>
+                    </select>
+                  </div>
+                </div>
+                {payments.length > 0 ? (
+                  <Table columns={allPaymentsColumns} data={payments} />
+                ) : (
+                  <div className="text-center py-12">
+                    <CreditCardIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-slate-500">No payments found</p>
+                  </div>
+                )}
+              </Card>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
 
   const renderLeaderboard = () => (
     <>
@@ -1032,6 +1409,7 @@ export function AdminPanel() {
       case '/admin/materials': return renderMaterials();
       case '/admin/branches': return renderBranches();
       case '/admin/revenue': return renderRevenue();
+      case '/admin/payments': return renderPayments();
       case '/admin/leaderboard': return renderLeaderboard();
       case '/admin/settings': return renderSettings();
       default: return renderDashboard();
@@ -1039,8 +1417,131 @@ export function AdminPanel() {
   };
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems}>
+    <DashboardLayout sidebarItems={adminSidebarItems}>
       {getContent()}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.open && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(15, 23, 42, 0.55)',
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.15s ease'
+          }}
+          onClick={closeConfirm}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              padding: '36px 32px 28px',
+              maxWidth: '420px',
+              width: 'calc(100% - 40px)',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.1)',
+              animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+              textAlign: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '800',
+              color: '#0f172a',
+              margin: '0 0 10px',
+              letterSpacing: '-0.3px'
+            }}>
+              {confirmModal.title}
+            </h3>
+
+            {/* Message */}
+            <p style={{
+              fontSize: '14px',
+              color: '#64748b',
+              lineHeight: '1.6',
+              margin: '0 0 28px'
+            }}>
+              {confirmModal.message}
+            </p>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={closeConfirm}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #e2e8f0',
+                  background: '#f8fafc',
+                  color: '#475569',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseOver={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                onMouseOut={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  closeConfirm();
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 4px 12px rgba(220,38,38,0.35)'
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(220,38,38,0.45)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(220,38,38,0.35)'; }}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.95) } to { opacity: 1; transform: translateY(0) scale(1) } }
+          `}</style>
+        </div>
+      )}
 
       <Modal
         isOpen={isClassModalOpen}
@@ -1091,6 +1592,13 @@ export function AdminPanel() {
               <option value="physical">Physical</option>
             </select>
           </div>
+          <FormInput
+            label="Fee"
+            type="number"
+            value={newClass.fee}
+            onChange={(e) => setNewClass({ ...newClass, fee: parseFloat(e.target.value) || 0 })}
+            placeholder="e.g. 5000"
+          />
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsClassModalOpen(false)}>
               Cancel
@@ -1212,6 +1720,82 @@ export function AdminPanel() {
             placeholder="e.g. 0112345678"
             required
           />
+          <FormInput
+            label="Google Maps / Location URL"
+            value={newBranch.locationUrl}
+            onChange={(e) => setNewBranch({ ...newBranch, locationUrl: e.target.value })}
+            placeholder="e.g. https://maps.google.com/..."
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              label="Latitude"
+              type="number"
+              step="any"
+              value={newBranch.lat}
+              onChange={(e) => setNewBranch({ ...newBranch, lat: e.target.value })}
+              placeholder="e.g. 6.9271"
+            />
+            <FormInput
+              label="Longitude"
+              type="number"
+              step="any"
+              value={newBranch.lng}
+              onChange={(e) => setNewBranch({ ...newBranch, lng: e.target.value })}
+              placeholder="e.g. 79.8612"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Branch Logo</label>
+            <div className="flex items-center gap-4 mb-3">
+              {(newBranch.logoUrl || branchLogoFile) ? (
+                <div className="relative group">
+                  <img
+                    src={branchLogoFile ? URL.createObjectURL(branchLogoFile) : (newBranch.logoUrl.startsWith('http') ? newBranch.logoUrl : `http://localhost:8082${newBranch.logoUrl}`)}
+                    alt="Logo preview"
+                    className="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewBranch({ ...newBranch, logoUrl: '' });
+                      setBranchLogoFile(null);
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                    title="Remove Logo"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-400">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  id="branch-logo-input"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setBranchLogoFile(e.target.files?.[0] || null)}
+                />
+                <label
+                  htmlFor="branch-logo-input"
+                  className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 text-sm font-bold rounded-xl cursor-pointer hover:bg-blue-100 transition-all border border-blue-100"
+                >
+                  {branchLogoFile || newBranch.logoUrl ? "Change Logo" : "Upload Logo"}
+                </label>
+                <p className="text-[11px] text-slate-400 mt-1.5">Square JPG, PNG or SVG. Max 2MB.</p>
+              </div>
+            </div>
+          </div>
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsBranchModalOpen(false)}>
               Cancel
@@ -1221,6 +1805,107 @@ export function AdminPanel() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Payment Action Modal */}
+      <Modal
+        isOpen={actionModal.open}
+        onClose={() => setActionModal({ open: false, payment: null, action: '', notes: '' })}
+        title={actionModal.action === 'approve' ? 'Approve Payment' : 'Reject Payment'}
+        size="lg"
+      >
+        <div className="space-y-4">
+          {actionModal.payment && (
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-slate-500">Student:</span>
+                  <span className="font-semibold ml-2">{actionModal.payment.user?.fullName || actionModal.payment.studentName || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Amount:</span>
+                  <span className="font-semibold ml-2">LKR {parseFloat(actionModal.payment.amount || 0).toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Type:</span>
+                  <span className="font-semibold ml-2">{actionModal.payment.paymentType === 'CLASS_FEE' ? 'Class Fee' : 'Other'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Method:</span>
+                  <span className="font-semibold ml-2">{actionModal.payment.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : actionModal.payment.paymentMethod === 'CASH' ? 'Cash' : 'Online'}</span>
+                </div>
+                {actionModal.payment.className && (
+                  <div>
+                    <span className="text-slate-500">Class:</span>
+                    <span className="font-semibold ml-2">{actionModal.payment.className}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Payment Slip Preview */}
+              {(() => {
+                // Check multiple possible field names for slip image (including slipImageUrl from API)
+                const slipUrl = actionModal.payment.slipImage || actionModal.payment.slipImageUrl || actionModal.payment.slipUrl || actionModal.payment.slip_image || actionModal.payment.receiptImage || actionModal.payment.receipt || actionModal.payment.image || actionModal.payment.paymentSlip;
+                const fullSlipUrl = getFullSlipUrl(slipUrl);
+                return fullSlipUrl ? (
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <span className="text-slate-500 text-sm font-medium">Payment Slip:</span>
+                    <div className="mt-2">
+                      <img 
+                        src={fullSlipUrl} 
+                        alt="Payment Slip" 
+                        className="max-w-full h-auto rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(fullSlipUrl, '_blank')}
+                      />
+                      <button
+                        onClick={() => window.open(fullSlipUrl, '_blank')}
+                        className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        View Full Size →
+                      </button>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+          )}
+          
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              value={actionModal.notes}
+              onChange={(e) => setActionModal({ ...actionModal, notes: e.target.value })}
+              placeholder={actionModal.action === 'approve' ? 'Add approval notes...' : 'Reason for rejection...'}
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-colors resize-none"
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="ghost" 
+              type="button" 
+              onClick={() => setActionModal({ open: false, payment: null, action: '', notes: '' })}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              onClick={actionModal.action === 'approve' ? handleApprovePayment : handleRejectPayment}
+              disabled={processingAction}
+              className={actionModal.action === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}
+            >
+              {processingAction 
+                ? 'Processing...' 
+                : actionModal.action === 'approve' 
+                  ? 'Approve Payment' 
+                  : 'Reject Payment'
+              }
+            </Button>
+          </div>
+        </div>
       </Modal>
     </DashboardLayout>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, SettingsIcon, PhoneIcon } from 'lucide-react'
+import { MenuIcon, XIcon, BookOpenIcon, UserIcon, LogOutIcon, PhoneIcon, MapPin } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../context/AuthContext'
 import { useLoading } from '../../context/LoadingContext'
@@ -45,7 +45,6 @@ export function Navbar({ transparent = false }) {
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Resources', path: '/resources' },
-    { label: 'Map', path: '/map' },
     { label: 'Contact', path: '/contact' },
   ]
 
@@ -80,6 +79,8 @@ export function Navbar({ transparent = false }) {
     }
   }
 
+  const [imgError, setImgError] = useState(false)
+  
   const handleLogout = () => {
     setProfileOpen(false)
     logout()
@@ -140,9 +141,14 @@ export function Navbar({ transparent = false }) {
                       : 'hover:bg-white/10'}
                   `}
                 >
-                  <div className={`w-9 h-9 rounded-full ${user?.profileImage ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0 overflow-hidden`}>
-                    {user?.profileImage ? (
-                      <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  <div className={`w-9 h-9 rounded-full ${user?.profileImage && !imgError ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0 overflow-hidden`}>
+                    {user?.profileImage && !imgError ? (
+                      <img 
+                        src={user.profileImage.startsWith('data:') || user.profileImage.startsWith('http') ? user.profileImage : `${user.profileImage}`} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover" 
+                        onError={() => setImgError(true)}
+                      />
                     ) : (
                       <span className="text-xs font-bold text-white">{getInitials(user?.fullName)}</span>
                     )}
@@ -172,15 +178,17 @@ export function Navbar({ transparent = false }) {
                         </div>
                         Dashboard
                       </Link>
-                      <button
+                      <Link
+                        to="/map"
                         onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors w-full group"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group"
                       >
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                          <SettingsIcon className="w-4 h-4 text-slate-500" />
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                          <MapPin className="w-4 h-4 text-indigo-600" />
                         </div>
-                        Settings
-                      </button>
+                        Map
+                      </Link>
+
                     </div>
 
                     <div className="h-px bg-slate-100 mx-4" />
@@ -266,6 +274,13 @@ export function Navbar({ transparent = false }) {
                     className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg mt-1 transition-colors ${showBg ? 'text-slate-600 hover:bg-slate-50' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
                   >
                     <UserIcon className="w-4 h-4" /> Dashboard
+                  </Link>
+                  <Link
+                    to="/map"
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg mt-1 transition-colors ${showBg ? 'text-slate-600 hover:bg-slate-50' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
+                  >
+                    <MapPin className="w-4 h-4" /> Map
                   </Link>
                   <button
                     onClick={() => { setIsOpen(false); handleLogout(); }}
