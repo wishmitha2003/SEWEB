@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
+import { useNavigate } from 'react-router-dom';
 
 export function ShootingGame() {
   const gameContainerRef = useRef(null);
   const gameRef = useRef(null);
   const sceneRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const initializeGame = () => {
@@ -428,11 +430,24 @@ export function ShootingGame() {
   }, []);
 
   return (
-    <div className="w-screen h-screen bg-gray-900 flex flex-col">
-      <div className="absolute top-4 left-4 right-4 z-20">
-        <h1 className="text-3xl font-bold text-white">Shooting Game</h1>
-        <p className="text-sm text-gray-300 mt-1">Click on the target that matches the English word!</p>
+    <div className="w-screen h-screen bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
+      {/* Title, Instructions and Close Button - Left Middle */}
+      <div className="absolute top-24 left-4 z-20 max-w-xs">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h1 className="text-xl font-bold text-white leading-tight">Shooting Game</h1>
+            <p className="text-xs text-gray-300 mt-2">Click the target matching the English word</p>
+          </div>
+          <button
+            onClick={() => navigate('/gamification')}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm whitespace-nowrap transition flex-shrink-0"
+          >
+            ✕ Close
+          </button>
+        </div>
       </div>
+
+      {/* Game Canvas */}
       <div
         ref={gameContainerRef}
         className="flex-1 w-full h-full"
@@ -441,8 +456,10 @@ export function ShootingGame() {
           height: '100vh',
         }}
       ></div>
+
+      {/* Instructions at Bottom */}
       <div className="absolute bottom-4 left-0 right-0 text-center">
-        <p className="text-sm text-gray-400">
+        <p className="text-xs text-gray-400">
           🎯 Select the correct Sinhala translation • ⭐ Each correct answer = 10 points
         </p>
       </div>
