@@ -24,6 +24,7 @@ import { ShootingGame } from '../components/games/ShootingGame';
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 import missionService from '../services/missionService';
 import userService from '../services/userService';
+import { getVocabulariesByAgeSection } from '../services/vocabularyService';
 
 
 
@@ -108,6 +109,12 @@ export function GamificationPage() {
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(null);
   const [activeGame, setActiveGame] = useState(null);
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState(null);
+  const [gameData, setGameData] = useState(null);
+  const [gameLoading, setGameLoading] = useState(false);
+  const [gameError, setGameError] = useState(null);
+
+  const AGE_SECTIONS = ['1-5', '6-10', '11-15', '16-20', '20+'];
 
   useEffect(() => {
     fetchData();
@@ -154,6 +161,78 @@ export function GamificationPage() {
     }
   };
 
+  const handleAgeGroupSelect = async (ageGroup) => {
+    setSelectedAgeGroup(ageGroup);
+    setGameLoading(true);
+    setGameError(null);
+    
+    try {
+      // Fetch vocabularies for the selected age group
+      const vocabularies = await getVocabulariesByAgeSection(ageGroup);
+      
+      if (!vocabularies || vocabularies.length === 0) {
+        setGameError('No words available for this age group');
+        setGameData(null);
+        setGameLoading(false);
+        setSelectedAgeGroup(null);
+        return;
+      }
+
+      // Ensure we have at least 4 words for the game
+      if (vocabularies.length < 4) {
+        setGameError(`Not enough words for this age group (${vocabularies.length} words). Minimum 4 required.`);
+        setGameData(null);
+        setGameLoading(false);
+        setSelectedAgeGroup(null);
+        return;
+      }
+
+      // Transform vocabulary data to game format
+      const transformedData = vocabularies.map((vocab) => ({
+        english: vocab.word,
+        sinhala: vocab.meaning,
+        options: [] // Will be populated with random other meanings
+      }));
+
+      // For each word, add random other words as options
+      const finalGameData = transformedData.map((item, index) => {
+        // Get other vocabularies to use as wrong options
+        const otherVocabs = vocabularies
+          .filter((_, i) => i !== index)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 3);
+
+        return {
+          english: item.english,
+          sinhala: item.sinhala,
+          options: otherVocabs.map(v => v.meaning)
+        };
+      });
+
+      setGameData(finalGameData);
+    } catch (err) {
+      console.error('Error fetching vocabulary data:', err);
+      setGameError('Failed to load words. Please try again.');
+      setGameData(null);
+      setSelectedAgeGroup(null);
+    } finally {
+      setGameLoading(false);
+    }
+  };
+
+  const handleBackToAgeSelection = () => {
+    setSelectedAgeGroup(null);
+    setGameData(null);
+    setGameError(null);
+  };
+
+  const handleCloseGame = () => {
+    setActiveGame(null);
+    setSelectedAgeGroup(null);
+    setGameData(null);
+    setGameError(null);
+  };
+
   if (loading) {
     return (
       <DashboardLayout sidebarItems={studentSidebarItems}>
@@ -190,17 +269,60 @@ export function GamificationPage() {
     <DashboardLayout sidebarItems={studentSidebarItems}>
       {activeGame ? (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
-            <button
-              onClick={() => setActiveGame(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
-            >
-              <XIcon className="w-6 h-6" />
-            </button>
-            <div className="p-4">
-              <ShootingGame />
+          {selectedAgeGroup && gameData ? (
+            // Show the game
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
+              <button
+                onClick={handleCloseGame}
+                className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+              <ShootingGame 
+                gameData={gameData} 
+                ageGroup={selectedAgeGroup}
+                onExit={handleCloseGame}
+              />
             </div>
-          </div>
+          ) : (
+            // Show age group selection
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-8 relative">
+              <button
+                onClick={handleCloseGame}
+                className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+              
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">🎯 Shooting Game</h2>
+                <p className="text-lg text-gray-600 mb-8">Select your age group to get started</p>
+
+                {gameError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-3 rounded-lg mb-8">
+                    {gameError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {AGE_SECTIONS.map((ageGroup) => (
+                    <button
+                      key={ageGroup}
+                      onClick={() => handleAgeGroupSelect(ageGroup)}
+                      disabled={gameLoading}
+                      className={`py-4 px-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 ${
+                        gameLoading
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-gradient-to-br from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg'
+                      }`}
+                    >
+                      {gameLoading ? '⏳' : `${ageGroup}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : null}
 

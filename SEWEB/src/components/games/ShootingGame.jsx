@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { useNavigate } from 'react-router-dom';
 
-export function ShootingGame() {
+export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }) {
   const gameContainerRef = useRef(null);
   const gameRef = useRef(null);
   const sceneRef = useRef(null);
@@ -78,10 +78,16 @@ export function ShootingGame() {
 
         async create() {
           try {
-            // Fetch game data from backend API
-            const response = await fetch('http://localhost:8082/api/games/play/1');
-            const data = await response.json();
-            this.allGameData = Array.isArray(data) ? data : (data.data || []);
+            // Use provided gameData if available, otherwise fetch from API
+            if (gameData && gameData.length > 0) {
+              this.allGameData = gameData;
+              console.log('Using provided game data:', this.allGameData);
+            } else {
+              // Fetch game data from backend API
+              const response = await fetch('http://localhost:8082/api/games/play/1');
+              const data = await response.json();
+              this.allGameData = Array.isArray(data) ? data : (data.data || []);
+            }
           } catch (error) {
             console.warn('Failed to fetch game data from API, using mock data:', error);
             // Mock data for testing
@@ -340,30 +346,28 @@ export function ShootingGame() {
               bullet.destroy();
               bulletGlow.destroy();
 
-              // Remove target with fade effect
-              this.tweens.add({
-                targets: [target.graphics, target.glowGraphic, target.text],
-                alpha: 0,
-                duration: 300,
-                ease: 'Power2.easeOut',
-                onComplete: () => {
-                  if (target.graphics) target.graphics.destroy();
-                  if (target.glowGraphic) target.glowGraphic.destroy();
-                  if (target.text) target.text.destroy();
-                }
+              // Remove all targets with fade effect and start new round
+              const remainingTargets = [...this.targets];
+              this.targets = [];
+
+              remainingTargets.forEach((t) => {
+                this.tweens.add({
+                  targets: [t.graphics, t.glowGraphic, t.text],
+                  alpha: 0,
+                  duration: 300,
+                  ease: 'Power2.easeOut',
+                  onComplete: () => {
+                    if (t.graphics) t.graphics.destroy();
+                    if (t.glowGraphic) t.glowGraphic.destroy();
+                    if (t.text) t.text.destroy();
+                  }
+                });
               });
 
-              const targetIndex = this.targets.indexOf(target);
-              if (targetIndex > -1) {
-                this.targets.splice(targetIndex, 1);
-              }
-
-              // Start new round if all targets destroyed
-              if (this.targets.length === 0) {
-                this.time.delayedCall(800, () => {
-                  this.startRound();
-                });
-              }
+              // Start new round after all targets fade out
+              this.time.delayedCall(500, () => {
+                this.startRound();
+              });
             },
           });
         }
@@ -427,10 +431,27 @@ export function ShootingGame() {
         gameRef.current = null;
       }
     };
-  }, []);
+  }, [gameData, ageGroup, onExit]);
 
   return (
     <div className="w-screen h-screen bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
+      {/* Back Button - Top Right */}
+      {onExit && (
+        <button
+          onClick={onExit}
+          className="absolute top-4 right-4 z-30 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-colors"
+        >
+          ← Back
+        </button>
+      )}
+
+      {/* Age Group Badge - Top Center */}
+      {ageGroup && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 bg-purple-600 text-white px-4 py-2 rounded-full font-bold">
+          Age Group: {ageGroup} years
+        </div>
+      )}
+
       {/* Title and Instructions - Left Middle */}
       <div className="absolute top-24 left-4 z-20 max-w-xs">
         <h1 className="text-xl font-bold text-white leading-tight">Shooting Game</h1>
