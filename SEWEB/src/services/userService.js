@@ -9,4 +9,12 @@ export async function deleteUser(id) {
   return api.del(`/api/users/${id}`);
 }
 
-export default { getUsers, deleteUser };
+export async function getCurrentUser() {
+  return api.get('/api/auth/me');
+}
+
+export async function getLeaderboard() {
+  return api.get('/api/users/leaderboard');
+}
+
+export default { getUsers, deleteUser, getCurrentUser, getLeaderboard };
