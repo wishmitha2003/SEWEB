@@ -31,7 +31,7 @@ export function ClassesPage() {
           ...c,
           title: c.name || c.title,
           students: c.studentCount != null ? c.studentCount : c.students,
-          price: 'LKR 0',
+          price: `LKR ${c.fee || 0}`,
           level: 'Beginner', 
           description: 'No description provided.',
           type: (c.name || '').toLowerCase().includes('online') ? 'online' : 'physical'

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BookOpenIcon, UsersIcon, ClockIcon, TrophyIcon, ZapIcon, BellIcon, TruckIcon,
-  CheckCircleIcon, CircleIcon, CalendarIcon, MapPinIcon, UploadIcon, MessageSquareIcon, FileTextIcon, MoreVerticalIcon
+  CheckCircleIcon, CircleIcon, CalendarIcon, MapPinIcon, UploadIcon, MessageSquareIcon, FileTextIcon, MoreVerticalIcon,
+  StarIcon, FlameIcon, TargetIcon
 } from 'lucide-react';
 import {
   AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -12,10 +13,11 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
+import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
 import { studentSidebarItems } from '../../config/studentSidebarItems.jsx';
 import { getClasses } from '../../services/classService';
-import { useState, useEffect } from 'react';
+import missionService from '../../services/missionService';
 
 const chartData = [
   { week: 'Week 1', hours: 3 },
@@ -45,8 +47,17 @@ export function StudentDashboard() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showMissionsModal, setShowMissionsModal] = useState(false);
+  const [dailyMissions, setDailyMissions] = useState([]);
+  const [missionsLoading, setMissionsLoading] = useState(true);
 
   useEffect(() => {
+    // Force an instant scroll to top, bypassing any CSS smooth scrolling
+    // which could be interrupted by the modal locking the body scroll
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
     async function loadClasses() {
       try {
         const res = await getClasses();
@@ -60,12 +71,87 @@ export function StudentDashboard() {
         setLoading(false);
       }
     }
+    
+    async function loadMissions() {
+      if (sessionStorage.getItem('hasSeenDailyMissions')) {
+        return;
+      }
+      try {
+        setMissionsLoading(true);
+        const missions = await missionService.getDailyMissions();
+        setDailyMissions(missions || []);
+        if (missions && missions.length > 0) {
+          setShowMissionsModal(true);
+        }
+        sessionStorage.setItem('hasSeenDailyMissions', 'true');
+      } catch (err) {
+        console.error('Failed to load daily missions:', err);
+      } finally {
+        setMissionsLoading(false);
+      }
+    }
+    
     loadClasses();
+    loadMissions();
   }, []);
 
 
   return (
     <DashboardLayout sidebarItems={studentSidebarItems}>
+      <Modal isOpen={showMissionsModal} onClose={() => setShowMissionsModal(false)} title="Today's Missions" size="md">
+        <div className="space-y-4">
+          <p className="text-slate-500 mb-4 text-sm">Complete these tasks today to earn XP and level up faster!</p>
+          {missionsLoading ? (
+            <div className="flex justify-center p-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            dailyMissions.map((m) => {
+              const missionColors = { VOCAB: 'bg-blue-500', STREAK: 'bg-emerald-500', QUIZ: 'bg-purple-500', GENERAL: 'bg-slate-500' };
+              const missionIcons = { VOCAB: <StarIcon className="w-6 h-6" />, STREAK: <FlameIcon className="w-6 h-6" />, QUIZ: <TargetIcon className="w-6 h-6" />, GENERAL: <ZapIcon className="w-6 h-6" /> };
+              const color = missionColors[m.type] || missionColors.GENERAL;
+              const icon = missionIcons[m.type] || missionIcons.GENERAL;
+              const progressPercent = Math.min(100, Math.round((m.progress / m.goal) * 100));
+
+              return (
+                <div key={m.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50 flex flex-col hover:bg-white hover:shadow-md transition-all duration-300">
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center text-white shadow-md flex-shrink-0`}>
+                      {icon}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-slate-900 leading-tight">{m.title}</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">{m.task}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-black text-blue-600 uppercase">+{m.rewardXp} XP</p>
+                    </div>
+                  </div>
+                  {!m.completed && (
+                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-2">
+                      <div className={`h-full ${color} transition-all duration-700`} style={{ width: `${progressPercent}%` }}></div>
+                    </div>
+                  )}
+                  <div className="flex justify-end mt-2">
+                    {m.completed && !m.rewardClaimed && (
+                       <Badge variant="success" className="text-[10px] px-2 py-0.5">READY TO CLAIM</Badge>
+                    )}
+                    {m.rewardClaimed && (
+                       <Badge variant="success" className="text-[10px] px-2 py-0.5 opacity-70">CLAIMED</Badge>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <div className="mt-6">
+            <Button className="w-full py-3 font-bold" onClick={() => navigate('/student/gamification')}>
+              Go to Challenge Zone
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-slate-900">
           Welcome back, {user?.fullName?.split(' ')[0] || 'Student'}! 👋
@@ -92,7 +178,7 @@ export function StudentDashboard() {
               <ZapIcon className="w-6 h-6 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900">2,450</p>
+              <p className="text-2xl font-extrabold text-slate-900">{(user?.xp || 0).toLocaleString()}</p>
               <p className="text-sm text-slate-500">XP Points</p>
             </div>
           </div>
@@ -103,7 +189,9 @@ export function StudentDashboard() {
               <TrophyIcon className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900">Gold</p>
+              <p className="text-2xl font-extrabold text-slate-900">
+                {(user?.xp || 0) >= 3000 ? 'Platinum' : (user?.xp || 0) >= 2000 ? 'Gold' : (user?.xp || 0) >= 1000 ? 'Silver' : 'Bronze'}
+              </p>
               <p className="text-sm text-slate-500">Current Level</p>
             </div>
           </div>
