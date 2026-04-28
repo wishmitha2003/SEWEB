@@ -21,7 +21,7 @@ import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Table } from '../components/ui/Table';
 import { ShootingGame } from '../components/games/ShootingGame';
-import { CrosswordPuzzle } from '../components/games/CrosswordPuzzle';
+
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 import missionService from '../services/missionService';
 import userService from '../services/userService';
@@ -279,14 +279,8 @@ export function GamificationPage() {
               >
                 <XIcon className="w-6 h-6" />
               </button>
-              {activeGame === 'shooting' ? (
+              {activeGame === 'shooting' && (
                 <ShootingGame 
-                  gameData={gameData} 
-                  ageGroup={selectedAgeGroup}
-                  onExit={handleCloseGame}
-                />
-              ) : (
-                <CrosswordPuzzle 
                   gameData={gameData} 
                   ageGroup={selectedAgeGroup}
                   onExit={handleCloseGame}
@@ -434,21 +428,7 @@ export function GamificationPage() {
                 </div>
               </div>
 
-              {/* Crossword Puzzle Game Card */}
-              <div className="group p-6 rounded-2xl border border-slate-100 bg-gradient-to-br from-purple-50 to-pink-50 hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer" onClick={() => setActiveGame('puzzle')}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                    <StarIcon className="w-6 h-6" />
-                  </div>
-                  <Badge variant="success" className="text-[10px]">PLAY</Badge>
-                </div>
-                <h4 className="font-extrabold text-slate-900 mb-2">Crossword Puzzle</h4>
-                <p className="text-sm text-slate-600 mb-4 leading-relaxed">Solve a crossword puzzle with horizontal and vertical words! Match clues with vocabulary meanings.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">+50 XP per round</span>
-                  <ChevronRightIcon className="w-5 h-5 text-slate-400 group-hover:text-purple-500 transition-colors" />
-                </div>
-              </div>
+
             </div>
           </Card>
           <Card className="p-8">
