@@ -31,6 +31,8 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
           this.gameHeight = gameHeight;
           this.allGameData = [];
           this.elapsedTime = 0;
+          this.usedWordIndices = []; // Track which words have been shown
+          this.currentGameDataPool = []; // Pool of unused words
         }
 
         preload() {
@@ -125,6 +127,9 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             return;
           }
 
+          // Initialize the game data pool with all available words
+          this.initializeGameDataPool();
+
           // Set dark space background
           this.cameras.main.setBackgroundColor('#0a0a23');
 
@@ -184,11 +189,39 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
           });
         }
 
+        initializeGameDataPool() {
+          // Create indices array for all game data
+          this.currentGameDataPool = Array.from({ length: this.allGameData.length }, (_, i) => i);
+          this.usedWordIndices = [];
+          console.log('Initialized game data pool with', this.currentGameDataPool.length, 'words');
+        }
+
+        getNextUnusedWord() {
+          // If all words have been used, reset the pool
+          if (this.currentGameDataPool.length === 0) {
+            console.log('All words used! Resetting pool...');
+            this.initializeGameDataPool();
+          }
+
+          // Pick a random index from the remaining pool
+          const randomPoolIndex = Math.floor(Math.random() * this.currentGameDataPool.length);
+          const dataIndex = this.currentGameDataPool[randomPoolIndex];
+
+          // Remove this index from the pool
+          this.currentGameDataPool.splice(randomPoolIndex, 1);
+          this.usedWordIndices.push(dataIndex);
+
+          console.log(`Selected word index: ${dataIndex}, Remaining: ${this.currentGameDataPool.length}`);
+          return this.allGameData[dataIndex];
+        }
+
         startRound() {
           // Clear previous targets
           this.targets.forEach((target) => {
             if (target.graphics) target.graphics.destroy();
             if (target.text) target.text.destroy();
+            if (target.bottomShadeGraphic) target.bottomShadeGraphic.destroy();
+            if (target.highlightGraphic) target.highlightGraphic.destroy();
           });
           this.targets = [];
 
@@ -197,8 +230,8 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             return;
           }
 
-          // Select random word from game data
-          const randomData = this.allGameData[Math.floor(Math.random() * this.allGameData.length)];
+          // Select next unused word from the pool
+          const randomData = this.getNextUnusedWord();
           
           // Store data in scene properties
           this.word = randomData.english;
@@ -233,33 +266,39 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
               text: null,
             };
 
-            // Create cat-like target (using circle with glow effect)
-            const targetColor = target.isCorrect ? 0xffc107 : 0xff6b9d;
+            // Create 3D sphere-like target
+            const targetColor = 0xffc107;
             
-            // Outer glow
-            const glow = this.add.circle(target.x, target.y, target.radius + 8, targetColor, 0.3);
-            glow.setDepth(1);
+            // Dark shade at bottom for 3D effect
+            const bottomShade = this.add.circle(target.x, target.y + target.radius * 0.3, target.radius, 0x8b6914, 0.4);
+            bottomShade.setDepth(1.5);
 
-            // Main circle
+            // Main circle (main sphere body)
             target.graphics = this.add.circle(target.x, target.y, target.radius, targetColor);
             target.graphics.setInteractive(
               new Phaser.Geom.Circle(target.radius, target.radius, target.radius),
               Phaser.Geom.Circle.Contains
             );
             target.graphics.setDepth(2);
-            target.glowGraphic = glow;
+
+            // Bright highlight for 3D sphere effect
+            const highlight = this.add.circle(target.x - target.radius * 0.3, target.y - target.radius * 0.3, target.radius * 0.35, 0xffffff, 0.5);
+            highlight.setDepth(2.5);
+
+            // Store all graphics elements
+            target.bottomShadeGraphic = bottomShade;
+            target.highlightGraphic = highlight;
 
             // Create text for target (Sinhala meaning above)
             target.text = this.add.text(target.x, target.y, target.meaning, {
-              fontSize: '13px',
-              fill: '#ffffff',
+              fontSize: '17px',
+              fill: '#000000',
               fontFamily: 'Arial',
               align: 'center',
               origin: [0.5, 0.5],
-              wordWrap: { width: target.radius * 2 - 10 },
-              boundsAlignH: 'center',
-              boundsAlignV: 'middle',
+              wordWrap: { width: target.radius * 2 * 0.9 },
             });
+            target.text.setOrigin(0.5, 0.5);
             target.text.setDepth(3);
 
             this.targets.push(target);
@@ -333,41 +372,109 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
               if (isCorrect) {
                 this.score += 10;
                 this.correctCount += 1;
+
+                // Update display
+                this.scoreText.setText(`Score: ${this.score}`);
+                this.correctText.setText(`Correct: ${this.correctCount}`);
+                this.wrongText.setText(`Wrong: ${this.wrongCount}`);
+
+                // Destroy bullet and glow
+                bullet.destroy();
+                bulletGlow.destroy();
+
+                // Remove all targets with fade effect and start new round
+                const remainingTargets = [...this.targets];
+                this.targets = [];
+
+                remainingTargets.forEach((t) => {
+                  this.tweens.add({
+                    targets: [t.graphics, t.bottomShadeGraphic, t.highlightGraphic, t.text],
+                    alpha: 0,
+                    duration: 300,
+                    ease: 'Power2.easeOut',
+                    onComplete: () => {
+                      if (t.graphics) t.graphics.destroy();
+                      if (t.bottomShadeGraphic) t.bottomShadeGraphic.destroy();
+                      if (t.highlightGraphic) t.highlightGraphic.destroy();
+                      if (t.text) t.text.destroy();
+                    }
+                  });
+                });
+
+                // Start new round after all targets fade out
+                this.time.delayedCall(500, () => {
+                  this.startRound();
+                });
               } else {
+                // Wrong answer - show feedback
                 this.wrongCount += 1;
-              }
+                this.wrongText.setText(`Wrong: ${this.wrongCount}`);
 
-              // Update display
-              this.scoreText.setText(`Score: ${this.score}`);
-              this.correctText.setText(`Correct: ${this.correctCount}`);
-              this.wrongText.setText(`Wrong: ${this.wrongCount}`);
+                // Destroy bullet and glow
+                bullet.destroy();
+                bulletGlow.destroy();
 
-              // Destroy bullet and glow
-              bullet.destroy();
-              bulletGlow.destroy();
-
-              // Remove all targets with fade effect and start new round
-              const remainingTargets = [...this.targets];
-              this.targets = [];
-
-              remainingTargets.forEach((t) => {
+                // Flash the wrong target in red
                 this.tweens.add({
-                  targets: [t.graphics, t.glowGraphic, t.text],
-                  alpha: 0,
+                  targets: target.graphics,
+                  fillColor: 0xff0000,
                   duration: 300,
-                  ease: 'Power2.easeOut',
+                  yoyo: true,
                   onComplete: () => {
-                    if (t.graphics) t.graphics.destroy();
-                    if (t.glowGraphic) t.glowGraphic.destroy();
-                    if (t.text) t.text.destroy();
+                    target.graphics.setFillStyle(0xffc107);
                   }
                 });
-              });
 
-              // Start new round after all targets fade out
-              this.time.delayedCall(500, () => {
-                this.startRound();
-              });
+                // Display "WRONG" text in the middle
+                const wrongMessageText = this.add.text(
+                  this.gameWidth / 2,
+                  this.gameHeight / 2 - 40,
+                  'WRONG',
+                  {
+                    fontSize: '80px',
+                    fill: '#ff0000',
+                    fontFamily: 'Arial Black',
+                    fontStyle: 'bold',
+                    align: 'center',
+                    stroke: '#ffffff',
+                    strokeThickness: 4,
+                  }
+                );
+                wrongMessageText.setOrigin(0.5, 0.5);
+                wrongMessageText.setDepth(20);
+
+                // Display "TRY AGAIN" text below
+                const tryAgainText = this.add.text(
+                  this.gameWidth / 2,
+                  this.gameHeight / 2 + 40,
+                  'TRY AGAIN',
+                  {
+                    fontSize: '48px',
+                    fill: '#ffeb3b',
+                    fontFamily: 'Arial Black',
+                    fontStyle: 'bold',
+                    align: 'center',
+                    stroke: '#ffffff',
+                    strokeThickness: 2,
+                  }
+                );
+                tryAgainText.setOrigin(0.5, 0.5);
+                tryAgainText.setDepth(20);
+
+                // Fade out the feedback messages after 2 seconds
+                this.time.delayedCall(2000, () => {
+                  this.tweens.add({
+                    targets: [wrongMessageText, tryAgainText],
+                    alpha: 0,
+                    duration: 500,
+                    ease: 'Power2.easeOut',
+                    onComplete: () => {
+                      wrongMessageText.destroy();
+                      tryAgainText.destroy();
+                    }
+                  });
+                });
+              }
             },
           });
         }
@@ -388,8 +495,11 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             if (target.graphics) {
               target.graphics.setPosition(target.x, target.y);
             }
-            if (target.glowGraphic) {
-              target.glowGraphic.setPosition(target.x, target.y);
+            if (target.bottomShadeGraphic) {
+              target.bottomShadeGraphic.setPosition(target.x, target.y + target.radius * 0.3);
+            }
+            if (target.highlightGraphic) {
+              target.highlightGraphic.setPosition(target.x - target.radius * 0.3, target.y - target.radius * 0.3);
             }
             if (target.text) {
               target.text.setPosition(target.x, target.y);
@@ -439,7 +549,7 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
       {onExit && (
         <button
           onClick={onExit}
-          className="absolute top-4 right-4 z-30 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-colors"
+          className="absolute top-1 right-4 z-30 bg-red-600 hover:bg-red-700 text-white text-xs py-0.5 px-2 rounded shadow-lg transition-colors"
         >
           ← Back
         </button>
