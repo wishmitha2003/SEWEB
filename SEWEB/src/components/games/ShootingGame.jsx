@@ -341,42 +341,109 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
               if (isCorrect) {
                 this.score += 10;
                 this.correctCount += 1;
+
+                // Update display
+                this.scoreText.setText(`Score: ${this.score}`);
+                this.correctText.setText(`Correct: ${this.correctCount}`);
+                this.wrongText.setText(`Wrong: ${this.wrongCount}`);
+
+                // Destroy bullet and glow
+                bullet.destroy();
+                bulletGlow.destroy();
+
+                // Remove all targets with fade effect and start new round
+                const remainingTargets = [...this.targets];
+                this.targets = [];
+
+                remainingTargets.forEach((t) => {
+                  this.tweens.add({
+                    targets: [t.graphics, t.bottomShadeGraphic, t.highlightGraphic, t.text],
+                    alpha: 0,
+                    duration: 300,
+                    ease: 'Power2.easeOut',
+                    onComplete: () => {
+                      if (t.graphics) t.graphics.destroy();
+                      if (t.bottomShadeGraphic) t.bottomShadeGraphic.destroy();
+                      if (t.highlightGraphic) t.highlightGraphic.destroy();
+                      if (t.text) t.text.destroy();
+                    }
+                  });
+                });
+
+                // Start new round after all targets fade out
+                this.time.delayedCall(500, () => {
+                  this.startRound();
+                });
               } else {
+                // Wrong answer - show feedback
                 this.wrongCount += 1;
-              }
+                this.wrongText.setText(`Wrong: ${this.wrongCount}`);
 
-              // Update display
-              this.scoreText.setText(`Score: ${this.score}`);
-              this.correctText.setText(`Correct: ${this.correctCount}`);
-              this.wrongText.setText(`Wrong: ${this.wrongCount}`);
+                // Destroy bullet and glow
+                bullet.destroy();
+                bulletGlow.destroy();
 
-              // Destroy bullet and glow
-              bullet.destroy();
-              bulletGlow.destroy();
-
-              // Remove all targets with fade effect and start new round
-              const remainingTargets = [...this.targets];
-              this.targets = [];
-
-              remainingTargets.forEach((t) => {
+                // Flash the wrong target in red
                 this.tweens.add({
-                  targets: [t.graphics, t.bottomShadeGraphic, t.highlightGraphic, t.text],
-                  alpha: 0,
+                  targets: target.graphics,
+                  fillColor: 0xff0000,
                   duration: 300,
-                  ease: 'Power2.easeOut',
+                  yoyo: true,
                   onComplete: () => {
-                    if (t.graphics) t.graphics.destroy();
-                    if (t.bottomShadeGraphic) t.bottomShadeGraphic.destroy();
-                    if (t.highlightGraphic) t.highlightGraphic.destroy();
-                    if (t.text) t.text.destroy();
+                    target.graphics.setFillStyle(0xffc107);
                   }
                 });
-              });
 
-              // Start new round after all targets fade out
-              this.time.delayedCall(500, () => {
-                this.startRound();
-              });
+                // Display "WRONG" text in the middle
+                const wrongMessageText = this.add.text(
+                  this.gameWidth / 2,
+                  this.gameHeight / 2 - 40,
+                  'WRONG',
+                  {
+                    fontSize: '80px',
+                    fill: '#ff0000',
+                    fontFamily: 'Arial Black',
+                    fontStyle: 'bold',
+                    align: 'center',
+                    stroke: '#ffffff',
+                    strokeThickness: 4,
+                  }
+                );
+                wrongMessageText.setOrigin(0.5, 0.5);
+                wrongMessageText.setDepth(20);
+
+                // Display "TRY AGAIN" text below
+                const tryAgainText = this.add.text(
+                  this.gameWidth / 2,
+                  this.gameHeight / 2 + 40,
+                  'TRY AGAIN',
+                  {
+                    fontSize: '48px',
+                    fill: '#ffeb3b',
+                    fontFamily: 'Arial Black',
+                    fontStyle: 'bold',
+                    align: 'center',
+                    stroke: '#ffffff',
+                    strokeThickness: 2,
+                  }
+                );
+                tryAgainText.setOrigin(0.5, 0.5);
+                tryAgainText.setDepth(20);
+
+                // Fade out the feedback messages after 2 seconds
+                this.time.delayedCall(2000, () => {
+                  this.tweens.add({
+                    targets: [wrongMessageText, tryAgainText],
+                    alpha: 0,
+                    duration: 500,
+                    ease: 'Power2.easeOut',
+                    onComplete: () => {
+                      wrongMessageText.destroy();
+                      tryAgainText.destroy();
+                    }
+                  });
+                });
+              }
             },
           });
         }
