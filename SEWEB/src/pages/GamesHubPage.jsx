@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { ShootingGame } from '../components/games/ShootingGame';
-import { PuzzleGame } from '../components/games/PuzzleGame';
+
 import { studentSidebarItems } from '../config/studentSidebarItems';
 import { getVocabulariesByAgeSection } from '../services/vocabularyService';
-import { Gamepad2Icon, PuzzleIcon, ArrowLeftIcon } from 'lucide-react';
+import { Gamepad2Icon, ArrowLeftIcon } from 'lucide-react';
 
 const AGE_SECTIONS = ['1-5', '6-10', '11-15', '16-20', '20+'];
 
 export function GamesHubPage() {
-  const [selectedGame, setSelectedGame] = useState(null); // 'shooting' or 'puzzle'
+  const [selectedGame, setSelectedGame] = useState(null); // 'shooting'
   const [selectedAgeGroup, setSelectedAgeGroup] = useState(null);
   const [gameData, setGameData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -109,16 +109,7 @@ export function GamesHubPage() {
           />
         </div>
       );
-    } else if (selectedGame === 'puzzle') {
-      return (
-        <div className="w-full">
-          <PuzzleGame 
-            gameData={gameData} 
-            ageGroup={selectedAgeGroup}
-            onExit={handleGameExit}
-          />
-        </div>
-      );
+    }
     }
   }
 
@@ -137,7 +128,7 @@ export function GamesHubPage() {
 
           <div className="text-center py-12">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              {selectedGame === 'shooting' ? '🎯 Shooting Game' : '🧩 Puzzle Game'}
+              {'🎯 Shooting Game'}
             </h1>
             <p className="text-lg text-gray-600 mb-12">Select your age group to get started</p>
 
@@ -187,18 +178,7 @@ export function GamesHubPage() {
               <div className="text-sm font-semibold">Click to play →</div>
             </div>
 
-            {/* Puzzle Game Card */}
-            <div
-              onClick={() => handleGameSelect('puzzle')}
-              className="p-8 bg-gradient-to-br from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white rounded-2xl cursor-pointer transition-all transform hover:scale-105 shadow-lg"
-            >
-              <div className="text-6xl mb-4">🧩</div>
-              <h2 className="text-3xl font-bold mb-3">Puzzle Game</h2>
-              <p className="text-sm opacity-90 mb-4">
-                Fill in the blanks with the correct letters. A fun way to practice spelling and word recognition!
-              </p>
-              <div className="text-sm font-semibold">Click to play →</div>
-            </div>
+
           </div>
 
           {/* How it works section */}
@@ -229,32 +209,11 @@ export function GamesHubPage() {
                 </ol>
               </div>
 
-              {/* Puzzle Game Instructions */}
-              <div className="p-6 bg-purple-50 rounded-lg border-2 border-purple-200">
-                <h4 className="text-xl font-bold text-purple-600 mb-4">🧩 Puzzle Game</h4>
-                <ol className="text-gray-700 space-y-3">
-                  <li className="flex gap-3">
-                    <span className="font-bold text-purple-600 flex-shrink-0">1.</span>
-                    <span>Select your age group</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="font-bold text-purple-600 flex-shrink-0">2.</span>
-                    <span>See empty puzzle boxes and a meaning</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="font-bold text-purple-600 flex-shrink-0">3.</span>
-                    <span>Click boxes and select letters to fill them</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="font-bold text-purple-600 flex-shrink-0">4.</span>
-                    <span>Complete the word and earn points</span>
-                  </li>
-                </ol>
-              </div>
+
             </div>
           </div>
         </div>
       </div>
     </DashboardLayout>
   );
-}
+// ...existing code...
