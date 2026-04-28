@@ -451,7 +451,7 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
       {onExit && (
         <button
           onClick={onExit}
-          className="absolute top-4 right-4 z-30 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-colors"
+          className="absolute top-1 right-4 z-30 bg-red-600 hover:bg-red-700 text-white text-xs py-0.5 px-2 rounded shadow-lg transition-colors"
         >
           ← Back
         </button>
