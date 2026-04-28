@@ -251,15 +251,14 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
 
             // Create text for target (Sinhala meaning above)
             target.text = this.add.text(target.x, target.y, target.meaning, {
-              fontSize: '13px',
-              fill: '#ffffff',
+              fontSize: '17px',
+              fill: '#000000',
               fontFamily: 'Arial',
               align: 'center',
               origin: [0.5, 0.5],
-              wordWrap: { width: target.radius * 2 - 10 },
-              boundsAlignH: 'center',
-              boundsAlignV: 'middle',
+              wordWrap: { width: target.radius * 2 * 0.9 },
             });
+            target.text.setOrigin(0.5, 0.5);
             target.text.setDepth(3);
 
             this.targets.push(target);
