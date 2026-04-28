@@ -31,6 +31,8 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
           this.gameHeight = gameHeight;
           this.allGameData = [];
           this.elapsedTime = 0;
+          this.usedWordIndices = []; // Track which words have been shown
+          this.currentGameDataPool = []; // Pool of unused words
         }
 
         preload() {
@@ -125,6 +127,9 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             return;
           }
 
+          // Initialize the game data pool with all available words
+          this.initializeGameDataPool();
+
           // Set dark space background
           this.cameras.main.setBackgroundColor('#0a0a23');
 
@@ -184,6 +189,32 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
           });
         }
 
+        initializeGameDataPool() {
+          // Create indices array for all game data
+          this.currentGameDataPool = Array.from({ length: this.allGameData.length }, (_, i) => i);
+          this.usedWordIndices = [];
+          console.log('Initialized game data pool with', this.currentGameDataPool.length, 'words');
+        }
+
+        getNextUnusedWord() {
+          // If all words have been used, reset the pool
+          if (this.currentGameDataPool.length === 0) {
+            console.log('All words used! Resetting pool...');
+            this.initializeGameDataPool();
+          }
+
+          // Pick a random index from the remaining pool
+          const randomPoolIndex = Math.floor(Math.random() * this.currentGameDataPool.length);
+          const dataIndex = this.currentGameDataPool[randomPoolIndex];
+
+          // Remove this index from the pool
+          this.currentGameDataPool.splice(randomPoolIndex, 1);
+          this.usedWordIndices.push(dataIndex);
+
+          console.log(`Selected word index: ${dataIndex}, Remaining: ${this.currentGameDataPool.length}`);
+          return this.allGameData[dataIndex];
+        }
+
         startRound() {
           // Clear previous targets
           this.targets.forEach((target) => {
@@ -199,8 +230,8 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             return;
           }
 
-          // Select random word from game data
-          const randomData = this.allGameData[Math.floor(Math.random() * this.allGameData.length)];
+          // Select next unused word from the pool
+          const randomData = this.getNextUnusedWord();
           
           // Store data in scene properties
           this.word = randomData.english;
