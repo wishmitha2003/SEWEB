@@ -189,6 +189,8 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
           this.targets.forEach((target) => {
             if (target.graphics) target.graphics.destroy();
             if (target.text) target.text.destroy();
+            if (target.bottomShadeGraphic) target.bottomShadeGraphic.destroy();
+            if (target.highlightGraphic) target.highlightGraphic.destroy();
           });
           this.targets = [];
 
@@ -233,21 +235,28 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
               text: null,
             };
 
-            // Create cat-like target (using circle with glow effect)
+            // Create 3D sphere-like target
             const targetColor = 0xffc107;
             
-            // Outer glow
-            const glow = this.add.circle(target.x, target.y, target.radius + 8, targetColor, 0.3);
-            glow.setDepth(1);
+            // Dark shade at bottom for 3D effect
+            const bottomShade = this.add.circle(target.x, target.y + target.radius * 0.3, target.radius, 0x8b6914, 0.4);
+            bottomShade.setDepth(1.5);
 
-            // Main circle
+            // Main circle (main sphere body)
             target.graphics = this.add.circle(target.x, target.y, target.radius, targetColor);
             target.graphics.setInteractive(
               new Phaser.Geom.Circle(target.radius, target.radius, target.radius),
               Phaser.Geom.Circle.Contains
             );
             target.graphics.setDepth(2);
-            target.glowGraphic = glow;
+
+            // Bright highlight for 3D sphere effect
+            const highlight = this.add.circle(target.x - target.radius * 0.3, target.y - target.radius * 0.3, target.radius * 0.35, 0xffffff, 0.5);
+            highlight.setDepth(2.5);
+
+            // Store all graphics elements
+            target.bottomShadeGraphic = bottomShade;
+            target.highlightGraphic = highlight;
 
             // Create text for target (Sinhala meaning above)
             target.text = this.add.text(target.x, target.y, target.meaning, {
@@ -351,13 +360,14 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
 
               remainingTargets.forEach((t) => {
                 this.tweens.add({
-                  targets: [t.graphics, t.glowGraphic, t.text],
+                  targets: [t.graphics, t.bottomShadeGraphic, t.highlightGraphic, t.text],
                   alpha: 0,
                   duration: 300,
                   ease: 'Power2.easeOut',
                   onComplete: () => {
                     if (t.graphics) t.graphics.destroy();
-                    if (t.glowGraphic) t.glowGraphic.destroy();
+                    if (t.bottomShadeGraphic) t.bottomShadeGraphic.destroy();
+                    if (t.highlightGraphic) t.highlightGraphic.destroy();
                     if (t.text) t.text.destroy();
                   }
                 });
@@ -387,8 +397,11 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             if (target.graphics) {
               target.graphics.setPosition(target.x, target.y);
             }
-            if (target.glowGraphic) {
-              target.glowGraphic.setPosition(target.x, target.y);
+            if (target.bottomShadeGraphic) {
+              target.bottomShadeGraphic.setPosition(target.x, target.y + target.radius * 0.3);
+            }
+            if (target.highlightGraphic) {
+              target.highlightGraphic.setPosition(target.x - target.radius * 0.3, target.y - target.radius * 0.3);
             }
             if (target.text) {
               target.text.setPosition(target.x, target.y);
