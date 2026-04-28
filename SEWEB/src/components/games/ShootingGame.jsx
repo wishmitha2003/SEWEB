@@ -234,7 +234,7 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
             };
 
             // Create cat-like target (using circle with glow effect)
-            const targetColor = target.isCorrect ? 0xffc107 : 0xff6b9d;
+            const targetColor = 0xffc107;
             
             // Outer glow
             const glow = this.add.circle(target.x, target.y, target.radius + 8, targetColor, 0.3);
