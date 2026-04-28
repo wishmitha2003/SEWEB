@@ -21,6 +21,7 @@ import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Table } from '../components/ui/Table';
 import { ShootingGame } from '../components/games/ShootingGame';
+import { CrosswordPuzzle } from '../components/games/CrosswordPuzzle';
 
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 import missionService from '../services/missionService';
@@ -179,38 +180,46 @@ export function GamificationPage() {
         return;
       }
 
-      // Ensure we have at least 4 words for the game
-      if (vocabularies.length < 4) {
-        setGameError(`Not enough words for this age group (${vocabularies.length} words). Minimum 4 required.`);
+      // Different minimum word requirements for different games
+      const minWords = activeGame === 'crossword' ? 5 : 4;
+
+      // Ensure we have enough words for the game
+      if (vocabularies.length < minWords) {
+        setGameError(`Not enough words for this age group (${vocabularies.length} words). Minimum ${minWords} required.`);
         setGameData(null);
         setGameLoading(false);
         setSelectedAgeGroup(null);
         return;
       }
 
-      // Transform vocabulary data to game format
-      const transformedData = vocabularies.map((vocab) => ({
-        english: vocab.word,
-        sinhala: vocab.meaning,
-        options: [] // Will be populated with random other meanings
-      }));
+      // For crossword game, pass raw vocabularies
+      if (activeGame === 'crossword') {
+        setGameData(vocabularies);
+      } else {
+        // Transform vocabulary data to game format for shooting game
+        const transformedData = vocabularies.map((vocab) => ({
+          english: vocab.word,
+          sinhala: vocab.meaning,
+          options: [] // Will be populated with random other meanings
+        }));
 
-      // For each word, add random other words as options
-      const finalGameData = transformedData.map((item, index) => {
-        // Get other vocabularies to use as wrong options
-        const otherVocabs = vocabularies
-          .filter((_, i) => i !== index)
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 3);
+        // For each word, add random other words as options
+        const finalGameData = transformedData.map((item, index) => {
+          // Get other vocabularies to use as wrong options
+          const otherVocabs = vocabularies
+            .filter((_, i) => i !== index)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3);
 
-        return {
-          english: item.english,
-          sinhala: item.sinhala,
-          options: otherVocabs.map(v => v.meaning)
-        };
-      });
+          return {
+            english: item.english,
+            sinhala: item.sinhala,
+            options: otherVocabs.map(v => v.meaning)
+          };
+        });
 
-      setGameData(finalGameData);
+        setGameData(finalGameData);
+      }
     } catch (err) {
       console.error('Error fetching vocabulary data:', err);
       setGameError('Failed to load words. Please try again.');
@@ -286,6 +295,13 @@ export function GamificationPage() {
                   onExit={handleCloseGame}
                 />
               )}
+              {activeGame === 'crossword' && (
+                <CrosswordPuzzle 
+                  vocabularies={gameData} 
+                  ageGroup={selectedAgeGroup}
+                  onExit={handleCloseGame}
+                />
+              )}
             </div>
           ) : (
             // Show age group selection
@@ -298,7 +314,7 @@ export function GamificationPage() {
               </button>
               
               <div className="text-center">
-                <h2 className="text-4xl font-bold text-gray-800 mb-2">🎯 Shooting Game</h2>
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">{activeGame === 'shooting' ? '🎯 Shooting Game' : activeGame === 'matching' ? '🎴 Matching Game' : '🧩 Crossword Puzzle'}</h2>
                 <p className="text-lg text-gray-600 mb-8">Select your age group to get started</p>
 
                 {gameError && (
@@ -428,7 +444,21 @@ export function GamificationPage() {
                 </div>
               </div>
 
-
+              {/* Crossword Puzzle Card */}
+              <div className="group p-6 rounded-2xl border border-slate-100 bg-gradient-to-br from-purple-50 to-indigo-50 hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer" onClick={() => setActiveGame('crossword')}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                    <span className="text-2xl">🧩</span>
+                  </div>
+                  <Badge variant="success" className="text-[10px]">PLAY</Badge>
+                </div>
+                <h4 className="font-extrabold text-slate-900 mb-2">Crossword Puzzle</h4>
+                <p className="text-sm text-slate-600 mb-4 leading-relaxed">Solve crossword puzzles using vocabulary words from your age group. Use clues to find the right words!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">+50 XP per round</span>
+                  <ChevronRightIcon className="w-5 h-5 text-slate-400 group-hover:text-purple-500 transition-colors" />
+                </div>
+              </div>
             </div>
           </Card>
           <Card className="p-8">
