@@ -144,7 +144,7 @@ export function Navbar({ transparent = false }) {
                   <div className={`w-9 h-9 rounded-full ${user?.profileImage && !imgError ? '' : `bg-gradient-to-br ${getRoleColor(user?.role)}`} flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/80 flex-shrink-0 overflow-hidden`}>
                     {user?.profileImage && !imgError ? (
                       <img 
-                        src={user.profileImage.startsWith('data:') || user.profileImage.startsWith('http') ? user.profileImage : `${user.profileImage}`} 
+                        src={user.profileImage.startsWith('data:') || user.profileImage.startsWith('http') ? user.profileImage : `https://ezyenglishweb.onrender.com${user.profileImage}`} 
                         alt="Profile" 
                         className="w-full h-full object-cover" 
                         onError={() => setImgError(true)}

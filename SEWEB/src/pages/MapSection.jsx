@@ -170,7 +170,7 @@ export function MapSection() {
               <div className="flex items-center gap-3 mb-4">
                 {activeBranch.logoUrl ? (
                    <img 
-                    src={`http://localhost:8082${activeBranch.logoUrl}`} 
+                    src={`https://ezyenglishweb.onrender.com${activeBranch.logoUrl}`} 
                     alt={activeBranch.name} 
                     className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
                    />
