@@ -299,173 +299,171 @@ export function CrosswordPuzzle({ vocabularies = [], ageGroup = null, onExit = n
   }
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6 flex flex-col relative">
-      <div className="flex-1 flex flex-col w-full">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-white">Crossword Puzzle Challenge</h1>
-          <button
-            onClick={handleExit}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            Exit
-          </button>
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col relative overflow-hidden">
+      {/* Header */}
+      <div className="flex justify-between items-center px-6 py-3 bg-black/30 backdrop-blur-sm">
+        <h1 className="text-3xl font-bold text-white">Crossword Puzzle Challenge</h1>
+        <button
+          onClick={handleExit}
+          className="px-4 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 font-semibold text-base"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          Exit
+        </button>
+      </div>
+
+      {gameCompleted && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-12 max-w-2xl border-4 border-green-500 shadow-2xl">
+            <h2 className="text-5xl font-bold text-green-600 mb-8 text-center">Results</h2>
+            <div className="grid grid-cols-3 gap-8 mb-12">
+              <div className="text-center">
+                <p className="text-gray-600 text-lg mb-3">Score</p>
+                <p className="text-6xl font-bold text-blue-600">{score}%</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-600 text-lg mb-3">Correct</p>
+                <p className="text-6xl font-bold text-green-600">{correctCount}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-600 text-lg mb-3">Wrong</p>
+                <p className="text-6xl font-bold text-red-600">{wrongCount}</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={handleReset}
+                className="flex-1 px-6 py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2 font-bold text-xl"
+              >
+                <RotateCcwIcon className="w-6 h-6" />
+                Try Again
+              </button>
+              <button
+                onClick={handleExit}
+                className="flex-1 px-6 py-4 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold text-xl"
+              >
+                <CheckIcon className="w-6 h-6" />
+                Finish
+              </button>
+            </div>
+          </div>
         </div>
+      )}
 
-        {gameCompleted && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-md border-4 border-green-500">
-              <h2 className="text-3xl font-bold text-green-600 mb-6 text-center">Results</h2>
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="text-center">
-                  <p className="text-gray-600 text-sm mb-2">Score</p>
-                  <p className="text-4xl font-bold text-blue-600">{score}%</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-gray-600 text-sm mb-2">Correct</p>
-                  <p className="text-4xl font-bold text-green-600">{correctCount}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-gray-600 text-sm mb-2">Wrong</p>
-                  <p className="text-4xl font-bold text-red-600">{wrongCount}</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <button
-                  onClick={handleReset}
-                  className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2 font-bold"
-                >
-                  <RotateCcwIcon className="w-5 h-5" />
-                  Try Again
-                </button>
-                <button
-                  onClick={handleExit}
-                  className="flex-1 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold"
-                >
-                  <CheckIcon className="w-5 h-5" />
-                  Finish
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 overflow-hidden">
-          {/* Grid */}
-          <div className="lg:col-span-1 flex flex-col">
-            <div className="bg-white p-4 rounded-lg shadow-lg flex-1 overflow-auto">
-              <h2 className="text-xl font-bold mb-3 text-gray-800">Puzzle</h2>
-                <div className="inline-block bg-gray-100 p-2 rounded">
-                <div className="grid gap-0" style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 32px)` }}>
-                  {puzzle.grid.map((row, r) =>
-                    row.map((cell, c) => {
-                      // Find if this cell is a word start
-                      let wordNum = null;
-                      if (cell) {
-                        const wordsStartingHere = puzzle.words.filter(
-                          w => w.positions[0].row === r && w.positions[0].col === c
-                        );
-                        if (wordsStartingHere.length > 0) {
-                          wordNum = wordsStartingHere[0].clueNum;
-                        }
-                      }
-
-                      return (
-                        <div
-                          key={`${r}-${c}`}
-                          onClick={() => handleCellClick(r, c)}
-                          className={`relative w-8 h-8 border border-gray-400 text-xs font-bold cursor-pointer transition-all ${
-                            cell
-                              ? `bg-white ${
-                                  selectedCell?.row === r && selectedCell?.col === c
-                                    ? 'ring-4 ring-blue-500 bg-blue-100'
-                                    : 'hover:bg-gray-50'
-                                }`
-                              : 'bg-black'
-                          }`}
-                        >
-                          {wordNum && (
-                            <span className="absolute top-0.5 left-0.5 text-[10px] font-bold text-blue-600 pointer-events-none">
-                              {wordNum}
-                            </span>
-                          )}
-                          <div className="flex items-center justify-center w-full h-full">
-                            {cell && userAnswers[`${r}-${c}`] ? userAnswers[`${r}-${c}`] : ''}
-                          </div>
-                        </div>
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden p-4 gap-4">
+        {/* Left Side - Crossword Grid */}
+        <div className="flex flex-col flex-1 min-w-0">
+          <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-2xl flex-1 flex flex-col justify-center items-center overflow-hidden">
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <div className="grid gap-0" style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 40px)` }}>
+                {puzzle.grid.map((row, r) =>
+                  row.map((cell, c) => {
+                    // Find if this cell is a word start
+                    let wordNum = null;
+                    if (cell) {
+                      const wordsStartingHere = puzzle.words.filter(
+                        w => w.positions[0].row === r && w.positions[0].col === c
                       );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+                      if (wordsStartingHere.length > 0) {
+                        wordNum = wordsStartingHere[0].clueNum;
+                      }
+                    }
 
-          {/* Clues and Alphabet */}
-          <div className="lg:col-span-3 space-y-4 flex flex-col overflow-hidden">
-            {/* Clues */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden">
-              {/* Across */}
-              <div className="bg-white p-4 rounded-lg shadow-lg overflow-auto">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">Across →</h3>
-                <div className="space-y-2">
-                  {puzzle.across.map((word) => (
-                    <div key={`across-${word.clueNum}`} className="text-sm">
-                      <p className="font-bold text-blue-600">{word.clueNum}. ({word.length})</p>
-                      <p className="text-gray-700">{word.meaning}</p>
-                      {word.example && <p className="text-gray-500 italic text-xs mt-1">E.g., {word.example}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Down */}
-              <div className="bg-white p-4 rounded-lg shadow-lg overflow-auto">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">Down ↓</h3>
-                <div className="space-y-2">
-                  {puzzle.down.map((word) => (
-                    <div key={`down-${word.clueNum}`} className="text-sm">
-                      <p className="font-bold text-green-600">{word.clueNum}. ({word.length})</p>
-                      <p className="text-gray-700">{word.meaning}</p>
-                      {word.example && <p className="text-gray-500 italic text-xs mt-1">E.g., {word.example}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Alphabet and Controls */}
-            <div className="bg-white p-4 rounded-lg shadow-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3">Letters</h3>
-              <div className="grid grid-cols-13 gap-2 mb-3">
-                {ALPHABET.map((letter) => (
-                  <button
-                    key={letter}
-                    onClick={() => handleLetterClick(letter)}
-                    className="w-8 h-8 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-all text-sm"
-                  >
-                    {letter}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleDeleteLetter}
-                  className="flex-1 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                >
-                  Delete
-                </button>
-                {!gameCompleted && (
-                  <button
-                    onClick={handleCheckAnswers}
-                    className="flex-1 px-3 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 flex items-center justify-center gap-2 text-sm"
-                  >
-                    <CheckIcon className="w-4 h-4" />
-                    Check
-                  </button>
+                    return (
+                      <div
+                        key={`${r}-${c}`}
+                        onClick={() => handleCellClick(r, c)}
+                        className={`relative w-10 h-10 border-2 border-gray-400 text-xs font-bold cursor-pointer transition-all ${
+                          cell
+                            ? `bg-white ${
+                                selectedCell?.row === r && selectedCell?.col === c
+                                  ? 'ring-4 ring-yellow-400 bg-yellow-100 shadow-lg'
+                                  : 'hover:bg-gray-50'
+                              }`
+                            : 'bg-black'
+                        }`}
+                      >
+                        {wordNum && (
+                          <span className="absolute top-1 left-1 text-xs font-bold text-blue-600 pointer-events-none">
+                            {wordNum}
+                          </span>
+                        )}
+                        <div className="flex items-center justify-center w-full h-full pt-1">
+                          {cell && userAnswers[`${r}-${c}`] ? userAnswers[`${r}-${c}`] : ''}
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Clues and Controls */}
+        <div className="flex flex-col w-80 gap-3 overflow-hidden">
+          {/* Clues Container */}
+          <div className="flex-1 grid grid-cols-2 gap-3 overflow-hidden">
+            {/* Across */}
+            <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg overflow-hidden flex flex-col">
+              <h3 className="text-base font-bold text-blue-600 mb-2">Across →</h3>
+              <div className="space-y-2 text-xs overflow-hidden flex-1">
+                {puzzle.across.map((word) => (
+                  <div key={`across-${word.clueNum}`} className="text-xs">
+                    <p className="font-bold text-blue-600">{word.clueNum}. ({word.length})</p>
+                    <p className="text-gray-700 line-clamp-2">{word.meaning}</p>
+                    {word.example && <p className="text-gray-500 italic text-[10px] mt-0.5 line-clamp-1">E.g., {word.example}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Down */}
+            <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg overflow-hidden flex flex-col">
+              <h3 className="text-base font-bold text-green-600 mb-2">Down ↓</h3>
+              <div className="space-y-2 text-xs overflow-hidden flex-1">
+                {puzzle.down.map((word) => (
+                  <div key={`down-${word.clueNum}`} className="text-xs">
+                    <p className="font-bold text-green-600">{word.clueNum}. ({word.length})</p>
+                    <p className="text-gray-700 line-clamp-2">{word.meaning}</p>
+                    {word.example && <p className="text-gray-500 italic text-[10px] mt-0.5 line-clamp-1">E.g., {word.example}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Alphabet and Controls */}
+          <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg">
+            <h3 className="text-base font-bold text-gray-800 mb-2">Letters</h3>
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {ALPHABET.map((letter) => (
+                <button
+                  key={letter}
+                  onClick={() => handleLetterClick(letter)}
+                  className="w-full h-8 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-all text-xs"
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleDeleteLetter}
+                className="flex-1 px-2 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-semibold text-xs"
+              >
+                Delete
+              </button>
+              {!gameCompleted && (
+                <button
+                  onClick={handleCheckAnswers}
+                  className="flex-1 px-2 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 flex items-center justify-center gap-1 text-xs"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                  Check
+                </button>
+              )}
             </div>
           </div>
         </div>
