@@ -302,7 +302,7 @@ export function CrosswordPuzzle({ vocabularies = [], ageGroup = null, onExit = n
     <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col relative overflow-hidden">
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-3 bg-black/30 backdrop-blur-sm">
-        <h1 className="text-3xl font-bold text-white">Crossword Puzzle Challenge</h1>
+        <h1 className="text-3xl font-bold text-white">Puzzle Master</h1>
         <button
           onClick={handleExit}
           className="px-4 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 font-semibold text-base"
