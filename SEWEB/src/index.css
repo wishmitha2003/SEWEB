@@ -1317,6 +1317,94 @@ h6 {
 
 .lp-demo-pass {
   font-size: 0.7rem;
+
+/* ===== CROSSWORD PUZZLE STYLING ===== */
+
+/* Crossword Grid Cell */
+.crossword-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #9ca3af;
+  font-weight: bold;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.crossword-cell:hover:not(.black-cell) {
+  background-color: #f3f4f6;
+}
+
+.crossword-cell.selected {
+  background-color: #bfdbfe;
+  ring: 4px;
+  ring-color: #3b82f6;
+}
+
+.crossword-cell.black-cell {
+  background-color: #000;
+  border-color: #000;
+  cursor: default;
+}
+
+/* Alphabet Letter Button */
+.alphabet-btn {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.alphabet-btn:hover {
+  transform: scale(1.1);
+}
+
+.alphabet-btn:active {
+  transform: scale(0.95);
+}
+
+/* Crossword Container */
+.crossword-container {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Clues Section */
+.clues-section {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.clues-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.clues-section::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.clues-section::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.clues-section::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
   color: rgba(150, 190, 255, 0.5);
   font-family: monospace;
 }
