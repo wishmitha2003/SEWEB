@@ -86,7 +86,7 @@ export function ShootingGame({ gameData = null, ageGroup = null, onExit = null }
               console.log('Using provided game data:', this.allGameData);
             } else {
               // Fetch game data from backend API
-              const response = await fetch('http://localhost:8082/api/games/play/1');
+              const response = await fetch('https://ezyenglishweb.onrender.com/api/games/play/1');
               const data = await response.json();
               this.allGameData = Array.isArray(data) ? data : (data.data || []);
             }

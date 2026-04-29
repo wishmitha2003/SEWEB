@@ -172,7 +172,7 @@ export function ProfilePage() {
               <div className="w-40 h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#78bdeb] flex items-center justify-center relative group">
                 {profileImage ? (
                   <img 
-                    src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `${profileImage}`} 
+                    src={profileImage.startsWith('data:') || profileImage.startsWith('http') ? profileImage : `https://ezyenglishweb.onrender.com${profileImage}`} 
                     alt="Profile" 
                     className="w-full h-full object-cover" 
                     onError={() => setProfileImage(null)}

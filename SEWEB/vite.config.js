@@ -7,12 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8082',
+        target: 'https://ezyenglishweb.onrender.com',
         changeOrigin: true,
         secure: false,
       },
       '/uploads': {
-        target: 'http://localhost:8082',
+        target: 'https://ezyenglishweb.onrender.com',
         changeOrigin: true,
         secure: false,
       }
