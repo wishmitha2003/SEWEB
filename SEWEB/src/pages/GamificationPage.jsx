@@ -12,16 +12,21 @@ import {
   SwordsIcon,
   ChevronRightIcon,
   MedalIcon,
-  Loader2Icon
+  Loader2Icon,
+  XIcon,
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Table } from '../components/ui/Table';
+import { ShootingGame } from '../components/games/ShootingGame';
+import { CrosswordPuzzle } from '../components/games/CrosswordPuzzle';
+
 import { studentSidebarItems } from '../config/studentSidebarItems.jsx';
 import missionService from '../services/missionService';
 import userService from '../services/userService';
+import { getVocabulariesByAgeSection } from '../services/vocabularyService';
 
 
 
@@ -105,6 +110,13 @@ export function GamificationPage() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(null);
+  const [activeGame, setActiveGame] = useState(null);
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState(null);
+  const [gameData, setGameData] = useState(null);
+  const [gameLoading, setGameLoading] = useState(false);
+  const [gameError, setGameError] = useState(null);
+
+  const AGE_SECTIONS = ['1-5', '6-10', '11-15', '16-20', '20+'];
 
   useEffect(() => {
     fetchData();
@@ -151,6 +163,86 @@ export function GamificationPage() {
     }
   };
 
+  const handleAgeGroupSelect = async (ageGroup) => {
+    setSelectedAgeGroup(ageGroup);
+    setGameLoading(true);
+    setGameError(null);
+    
+    try {
+      // Fetch vocabularies for the selected age group
+      const vocabularies = await getVocabulariesByAgeSection(ageGroup);
+      
+      if (!vocabularies || vocabularies.length === 0) {
+        setGameError('No words available for this age group');
+        setGameData(null);
+        setGameLoading(false);
+        setSelectedAgeGroup(null);
+        return;
+      }
+
+      // Different minimum word requirements for different games
+      const minWords = activeGame === 'crossword' ? 5 : 4;
+
+      // Ensure we have enough words for the game
+      if (vocabularies.length < minWords) {
+        setGameError(`Not enough words for this age group (${vocabularies.length} words). Minimum ${minWords} required.`);
+        setGameData(null);
+        setGameLoading(false);
+        setSelectedAgeGroup(null);
+        return;
+      }
+
+      // For crossword game, pass raw vocabularies
+      if (activeGame === 'crossword') {
+        setGameData(vocabularies);
+      } else {
+        // Transform vocabulary data to game format for shooting game
+        const transformedData = vocabularies.map((vocab) => ({
+          english: vocab.word,
+          sinhala: vocab.meaning,
+          options: [] // Will be populated with random other meanings
+        }));
+
+        // For each word, add random other words as options
+        const finalGameData = transformedData.map((item, index) => {
+          // Get other vocabularies to use as wrong options
+          const otherVocabs = vocabularies
+            .filter((_, i) => i !== index)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3);
+
+          return {
+            english: item.english,
+            sinhala: item.sinhala,
+            options: otherVocabs.map(v => v.meaning)
+          };
+        });
+
+        setGameData(finalGameData);
+      }
+    } catch (err) {
+      console.error('Error fetching vocabulary data:', err);
+      setGameError('Failed to load words. Please try again.');
+      setGameData(null);
+      setSelectedAgeGroup(null);
+    } finally {
+      setGameLoading(false);
+    }
+  };
+
+  const handleBackToAgeSelection = () => {
+    setSelectedAgeGroup(null);
+    setGameData(null);
+    setGameError(null);
+  };
+
+  const handleCloseGame = () => {
+    setActiveGame(null);
+    setSelectedAgeGroup(null);
+    setGameData(null);
+    setGameError(null);
+  };
+
   if (loading) {
     return (
       <DashboardLayout sidebarItems={studentSidebarItems}>
@@ -185,6 +277,74 @@ export function GamificationPage() {
 
   return (
     <DashboardLayout sidebarItems={studentSidebarItems}>
+      {activeGame ? (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          {selectedAgeGroup && gameData ? (
+            // Show the game
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
+              <button
+                onClick={handleCloseGame}
+                className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+              {activeGame === 'shooting' && (
+                <ShootingGame 
+                  gameData={gameData} 
+                  ageGroup={selectedAgeGroup}
+                  onExit={handleCloseGame}
+                />
+              )}
+              {activeGame === 'crossword' && (
+                <CrosswordPuzzle 
+                  vocabularies={gameData} 
+                  ageGroup={selectedAgeGroup}
+                  onExit={handleCloseGame}
+                />
+              )}
+            </div>
+          ) : (
+            // Show age group selection
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-8 relative">
+              <button
+                onClick={handleCloseGame}
+                className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+              
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">{activeGame === 'shooting' ? '🎯 Shooting Game' : activeGame === 'matching' ? '🎴 Matching Game' : '🧩 Crossword Puzzle'}</h2>
+                <p className="text-lg text-gray-600 mb-8">Select your age group to get started</p>
+
+                {gameError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-3 rounded-lg mb-8">
+                    {gameError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {AGE_SECTIONS.map((ageGroup) => (
+                    <button
+                      key={ageGroup}
+                      onClick={() => handleAgeGroupSelect(ageGroup)}
+                      disabled={gameLoading}
+                      className={`py-4 px-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 ${
+                        gameLoading
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-gradient-to-br from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg'
+                      }`}
+                    >
+                      {gameLoading ? '⏳' : `${ageGroup}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
       <div className="relative overflow-hidden mb-8 p-8 rounded-3xl bg-slate-900 text-white shadow-2xl">
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-600 opacity-20 blur-[100px] rounded-full"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-purple-600 opacity-20 blur-[80px] rounded-full"></div>
@@ -261,7 +421,46 @@ export function GamificationPage() {
             </div>
           </Card>
 
-          {/* Daily Missions */}
+          {/* Play Games Section */}
+          <Card className="p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-slate-900">Available Games</h2>
+              <Badge className="bg-blue-100 text-blue-600 font-bold">NEW</Badge>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {/* Shooting Game Card */}
+              <div className="group p-6 rounded-2xl border border-slate-100 bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-lg hover:border-blue-300 transition-all duration-300 cursor-pointer" onClick={() => setActiveGame('shooting')}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                    <TargetIcon className="w-6 h-6" />
+                  </div>
+                  <Badge variant="success" className="text-[10px]">PLAY</Badge>
+                </div>
+                <h4 className="font-extrabold text-slate-900 mb-2">Shooting Game</h4>
+                <p className="text-sm text-slate-600 mb-4 leading-relaxed">Test your English vocabulary by shooting targets with correct translations. Earn points and improve your language skills!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">+50 XP per round</span>
+                  <ChevronRightIcon className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                </div>
+              </div>
+
+              {/* Crossword Puzzle Card */}
+              <div className="group p-6 rounded-2xl border border-slate-100 bg-gradient-to-br from-purple-50 to-indigo-50 hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer" onClick={() => setActiveGame('crossword')}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                    <span className="text-2xl">🧩</span>
+                  </div>
+                  <Badge variant="success" className="text-[10px]">PLAY</Badge>
+                </div>
+                <h4 className="font-extrabold text-slate-900 mb-2">Crossword Puzzle</h4>
+                <p className="text-sm text-slate-600 mb-4 leading-relaxed">Solve crossword puzzles using vocabulary words from your age group. Use clues to find the right words!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">+50 XP per round</span>
+                  <ChevronRightIcon className="w-5 h-5 text-slate-400 group-hover:text-purple-500 transition-colors" />
+                </div>
+              </div>
+            </div>
+          </Card>
           <Card className="p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-black text-slate-900">Daily Missions</h2>
@@ -365,7 +564,9 @@ export function GamificationPage() {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-xl">
+            <button 
+              onClick={() => setActiveGame('shooting')}
+              className="w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-xl">
               <SwordsIcon className="w-5 h-5" /> START ENGLISH BATTLE
             </button>
           </Card>

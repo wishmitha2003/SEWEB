@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8082/api/auth';
+const API_BASE = 'https://ezyenglishweb.onrender.com/api/auth';
 
 async function request(path, body) {
   try {

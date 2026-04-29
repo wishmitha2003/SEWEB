@@ -259,8 +259,9 @@ const leaderboardColumns = [
 const getFullSlipUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  // Convert relative path like /uploads/payments/filename.jpg to full URL using proxy
-  return url.startsWith('/') ? url : `/${url}`;
+  // Convert relative path like /uploads/payments/filename.jpg to full URL using Render backend
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `https://ezyenglishweb.onrender.com${cleanUrl}`;
 };
 
 export function AdminPanel() {
@@ -936,7 +937,7 @@ export function AdminPanel() {
                           {row.fileUrls.map((url, idx) => (
                             <a 
                               key={idx}
-                              href={`http://localhost:8082${url}`} 
+                              href={`https://ezyenglishweb.onrender.com${url}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors border border-blue-100"
@@ -1025,7 +1026,7 @@ export function AdminPanel() {
               <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mb-4 overflow-hidden border border-slate-100`}>
                 {branch.logoUrl ? (
                   <img 
-                    src={branch.logoUrl.startsWith('http') ? branch.logoUrl : `http://localhost:8082${branch.logoUrl}`} 
+                    src={branch.logoUrl.startsWith('http') ? branch.logoUrl : `https://ezyenglishweb.onrender.com${branch.logoUrl}`} 
                     alt={branch.name} 
                     className="w-full h-full object-cover"
                   />
@@ -1813,7 +1814,7 @@ export function AdminPanel() {
               {(newBranch.logoUrl || branchLogoFile) ? (
                 <div className="relative group">
                   <img
-                    src={branchLogoFile ? URL.createObjectURL(branchLogoFile) : (newBranch.logoUrl.startsWith('http') ? newBranch.logoUrl : `http://localhost:8082${newBranch.logoUrl}`)}
+                    src={branchLogoFile ? URL.createObjectURL(branchLogoFile) : (newBranch.logoUrl.startsWith('http') ? newBranch.logoUrl : `https://ezyenglishweb.onrender.com${newBranch.logoUrl}`)}
                     alt="Logo preview"
                     className="w-20 h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
                   />

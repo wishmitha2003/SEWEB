@@ -1,6 +1,6 @@
 import { api } from './apiClient';
 
-const BASE_URL = 'http://localhost:8082';
+const BASE_URL = 'https://ezyenglishweb.onrender.com';
 
 /**
  * Upload pronunciation recording
