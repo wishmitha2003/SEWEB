@@ -2,11 +2,11 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://ezyenglish-backend.onrender.com/api/$1"
+            "destination": " https://ezyenglishweb.onrender.com/api/$1"
         },
         {
             "source": "/uploads/(.*)",
-            "destination": "https://ezyenglish-backend.onrender.com/uploads/$1"
+            "destination": " https://ezyenglishweb.onrender.com/uploads/$1"
         },
         {
             "source": "/(.*)",
