@@ -305,20 +305,27 @@ export function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center max-w-7xl mx-auto">
             {/* Image Side */}
-            <div className="relative group max-w-lg mx-auto lg:ml-auto lg:mr-0">
+            <div className="relative group max-w-xl mx-auto lg:ml-auto lg:mr-0">
+              <div className="absolute -inset-1 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-[3.1rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
               <div className="absolute -inset-6 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-              <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
+              <div className="relative aspect-[3/4] sm:aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl bg-slate-900">
                 <img 
                   src="/ceo.jpg" 
                   alt="Minuka Mihisara" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800";
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-90" />
                 
                 {/* Floating Info Box on Image */}
-                <div className="absolute bottom-8 left-8 right-8 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 animate-slide-up">
-                  <h4 className="text-xl font-black text-white">Minuka Mihisara</h4>
-                  <p className="text-blue-400 text-xs font-black uppercase tracking-[0.2em] mt-1">Founder & CEO</p>
+                <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl transform transition-transform duration-500 group-hover:translate-y-[-5px]">
+                  <h4 className="text-xl sm:text-2xl font-black text-white tracking-tight">Minuka Mihisara</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="h-px w-4 bg-blue-500" />
+                    <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em]">Founder & CEO</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -344,7 +351,7 @@ export function LandingPage() {
 
               <div className="pt-6 flex items-center gap-10">
                 <div className="flex flex-col">
-                  <span className="text-4xl font-signature text-blue-400 mb-1">M. Mihisara</span>
+                  <span className="text-5xl font-signature text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 mb-1">M. Mihisara</span>
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Official Signature</span>
                 </div>
                 <div className="h-16 w-px bg-slate-800" />
