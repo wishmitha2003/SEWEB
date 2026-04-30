@@ -314,7 +314,7 @@ export function GamificationPage() {
               </button>
               
               <div className="text-center">
-                <h2 className="text-4xl font-bold text-gray-800 mb-2">{activeGame === 'shooting' ? '🎯 Shooting Game' : activeGame === 'matching' ? '🎴 Matching Game' : '🧩 Crossword Puzzle'}</h2>
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">{activeGame === 'shooting' ? '🎯 Shooting Game' : activeGame === 'matching' ? '🎴 Matching Game' : '🧩 Puzzle Master'}</h2>
                 <p className="text-lg text-gray-600 mb-8">Select your age group to get started</p>
 
                 {gameError && (
@@ -444,7 +444,7 @@ export function GamificationPage() {
                 </div>
               </div>
 
-              {/* Crossword Puzzle Card */}
+              {/* Puzzle Master Card */}
               <div className="group p-6 rounded-2xl border border-slate-100 bg-gradient-to-br from-purple-50 to-indigo-50 hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer" onClick={() => setActiveGame('crossword')}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-2xl bg-purple-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
@@ -452,7 +452,7 @@ export function GamificationPage() {
                   </div>
                   <Badge variant="success" className="text-[10px]">PLAY</Badge>
                 </div>
-                <h4 className="font-extrabold text-slate-900 mb-2">Crossword Puzzle</h4>
+                <h4 className="font-extrabold text-slate-900 mb-2">Puzzle Master</h4>
                 <p className="text-sm text-slate-600 mb-4 leading-relaxed">Solve crossword puzzles using vocabulary words from your age group. Use clues to find the right words!</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">+50 XP per round</span>
