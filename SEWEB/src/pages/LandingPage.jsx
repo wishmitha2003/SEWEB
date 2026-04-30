@@ -297,66 +297,85 @@ export function LandingPage() {
       </section>
 
       {/* Founder's Section */}
-      <section className="py-20 lg:py-28 relative overflow-hidden bg-[#020617]">
-        {/* Background Accents */}
-        <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-blue-600/5 blur-[150px] rounded-full" />
-        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-indigo-600/5 blur-[150px] rounded-full" />
+      <section className="py-24 lg:py-32 relative overflow-hidden bg-[#020617]">
+        {/* Background Accents with Purple to match the new image */}
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-600/10 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-pulse decoration-delay-2000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.03)_0%,transparent_70%)]" />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center max-w-7xl mx-auto">
-            {/* Image Side */}
-            <div className="relative group max-w-xl mx-auto lg:ml-auto lg:mr-0">
-              <div className="absolute -inset-1 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-[3.1rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <div className="absolute -inset-6 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-              <div className="relative aspect-[3/4] sm:aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl bg-slate-900">
+            {/* Image Side - Refined for a more premium look */}
+            <div className="relative group max-w-md mx-auto lg:ml-auto lg:mr-0">
+              {/* Outer Glows */}
+              <div className="absolute -inset-1 bg-gradient-to-tr from-blue-600 via-purple-500 to-indigo-600 rounded-[3.5rem] blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+              <div className="absolute -inset-8 bg-gradient-to-tr from-purple-600/20 to-blue-600/20 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+              
+              <div className="relative aspect-[2/3] sm:aspect-[3/4.5] rounded-[3.2rem] overflow-hidden border border-white/20 shadow-2xl bg-slate-900 ring-1 ring-white/10">
                 <img 
-                  src="/ceo.jpg" 
+                  src={`/ceo.jpg?v=${new Date().getTime()}`} 
                   alt="Minuka Mihisara" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                   onError={(e) => {
-                    e.target.src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800";
+                    console.error("CEO image failed to load, trying fallback");
+                    e.target.src = "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800";
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-90" />
+                
+                {/* Overlay Gradients */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-transparent to-blue-500/10 mix-blend-overlay" />
                 
                 {/* Floating Info Box on Image */}
-                <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl transform transition-transform duration-500 group-hover:translate-y-[-5px]">
-                  <h4 className="text-xl sm:text-2xl font-black text-white tracking-tight">Minuka Mihisara</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="h-px w-4 bg-blue-500" />
-                    <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em]">Founder & CEO</p>
+                <div className="absolute bottom-8 left-8 right-8 p-6 rounded-[2rem] bg-white/5 backdrop-blur-3xl border border-white/20 shadow-2xl transform transition-all duration-500 group-hover:translate-y-[-8px] group-hover:bg-white/10">
+                  <h4 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">Minuka Mihisara</h4>
+                  <div className="flex items-center gap-3">
+                    <div className="h-[2px] w-6 bg-gradient-to-r from-blue-500 to-purple-500" />
+                    <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-xs font-black uppercase tracking-[0.3em]">Founder & CEO</p>
                   </div>
                 </div>
               </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 animate-pulse" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-purple-600 to-blue-600 rounded-full blur-3xl opacity-20 group-hover:opacity-40 animate-pulse decoration-delay-2000" />
             </div>
 
             {/* Content Side */}
-            <div className="space-y-10">
-              <div className="space-y-3">
-                <h2 className="text-xs font-black text-blue-500 uppercase tracking-[0.5em]">Meet Our Founder</h2>
-                <h3 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
+            <div className="space-y-12">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-black uppercase tracking-widest">
+                  <StarIcon className="w-3 h-3" />
+                  <span>Leadership</span>
+                </div>
+                <h3 className="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
                   Visionary Behind <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-400">Ezy English</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-300 to-indigo-400">
+                    Ezy English
+                  </span>
                 </h3>
               </div>
 
-              <div className="space-y-6 text-slate-400 text-lg sm:text-xl leading-relaxed font-medium">
-                <p>
-                  "Ezy English was born from a simple yet powerful mission: to make premium English education accessible to every Sri Lankan student."
-                </p>
-                <p>
-                  <span className="text-white">Minuka Mihisara</span> has pioneered a new era of learning that combines gamified experiences with university-grade curriculum, leading Sri Lanka's digital education shift.
+              <div className="space-y-8">
+                <div className="relative">
+                  <span className="absolute -left-6 top-0 text-6xl text-blue-500/20 font-serif">"</span>
+                  <p className="text-slate-300 text-xl sm:text-2xl leading-relaxed font-medium italic">
+                    Ezy English was born from a simple yet powerful mission: to make premium English education accessible to every Sri Lankan student.
+                  </p>
+                </div>
+                <p className="text-slate-400 text-lg leading-relaxed">
+                  <span className="text-white font-bold">Minuka Mihisara</span> has pioneered a new era of learning that combines gamified experiences with university-grade curriculum, leading Sri Lanka's digital education shift.
                 </p>
               </div>
 
-              <div className="pt-6 flex items-center gap-10">
+              <div className="pt-8 flex flex-wrap items-center gap-10">
                 <div className="flex flex-col">
-                  <span className="text-5xl font-signature text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 mb-1">M. Mihisara</span>
+                  <span className="text-6xl font-signature text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-1">M. Mihisara</span>
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Official Signature</span>
                 </div>
-                <div className="h-16 w-px bg-slate-800" />
+                <div className="hidden sm:block h-16 w-px bg-slate-800" />
                 <div className="flex flex-col">
-                  <span className="text-3xl font-black text-white">5K+</span>
+                  <span className="text-4xl font-black text-white">5,000+</span>
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Students</span>
                 </div>
               </div>
