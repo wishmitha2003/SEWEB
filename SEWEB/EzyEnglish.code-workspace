@@ -13,6 +13,7 @@
 			"javax",
 			"org",
 			"com"
-		]
+		],
+		"java.compile.nullAnalysis.mode": "disabled"
 	}
 }
