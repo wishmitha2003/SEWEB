@@ -309,15 +309,15 @@ export function LandingPage() {
               <div className="absolute -inset-6 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
               <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Mr. Wishmitha Devinda" 
+                  src="/ceo.jpg" 
+                  alt="Minuka Mihisara" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80" />
                 
                 {/* Floating Info Box on Image */}
                 <div className="absolute bottom-8 left-8 right-8 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 animate-slide-up">
-                  <h4 className="text-xl font-black text-white">Mr. Wishmitha Devinda</h4>
+                  <h4 className="text-xl font-black text-white">Minuka Mihisara</h4>
                   <p className="text-blue-400 text-xs font-black uppercase tracking-[0.2em] mt-1">Founder & CEO</p>
                 </div>
               </div>
@@ -338,13 +338,13 @@ export function LandingPage() {
                   "Ezy English was born from a simple yet powerful mission: to make premium English education accessible to every Sri Lankan student."
                 </p>
                 <p>
-                  <span className="text-white">Mr. Wishmitha Devinda</span> has pioneered a new era of learning that combines gamified experiences with university-grade curriculum, leading Sri Lanka's digital education shift.
+                  <span className="text-white">Minuka Mihisara</span> has pioneered a new era of learning that combines gamified experiences with university-grade curriculum, leading Sri Lanka's digital education shift.
                 </p>
               </div>
 
               <div className="pt-6 flex items-center gap-10">
                 <div className="flex flex-col">
-                  <span className="text-4xl font-signature text-blue-400 mb-1">W. Devinda</span>
+                  <span className="text-4xl font-signature text-blue-400 mb-1">M. Mihisara</span>
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Official Signature</span>
                 </div>
                 <div className="h-16 w-px bg-slate-800" />

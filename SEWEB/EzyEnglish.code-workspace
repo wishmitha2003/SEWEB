@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../SEBACK"
+		}
+	],
+	"settings": {
+		"java.project.importOrder": [
+			"java",
+			"javax",
+			"org",
+			"com"
+		]
+	}
+}

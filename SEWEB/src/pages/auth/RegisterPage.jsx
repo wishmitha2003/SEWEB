@@ -22,7 +22,7 @@ export function RegisterPage() {
   const navigate = useNavigate();
 
   const GOOGLE_ACCOUNTS = [
-    { username: 'wishmitha', fullName: 'Wishmitha Devinda', email: 'wishmitha@gmail.com', role: 'student', phone: '+94 77 999 8888' },
+    { username: 'minuka', fullName: 'Minuka Mihisara', email: 'minuka@gmail.com', role: 'student', phone: '+94 77 999 8888' },
     { username: 'student',   fullName: 'Kasun Perera',      email: 'kasun@ezy.com',        role: 'student' },
   ];
 
